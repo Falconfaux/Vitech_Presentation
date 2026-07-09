@@ -1,0 +1,420 @@
+{
+ "1": [
+  "slide001_img01.jpg"
+ ],
+ "3": [
+  "slide003_img01.jpg"
+ ],
+ "4": [
+  "slide004_img01.png"
+ ],
+ "5": [
+  "slide005_img02.png"
+ ],
+ "6": [
+  "slide006_img02.png"
+ ],
+ "7": [
+  "slide007_img02.jpg"
+ ],
+ "8": [
+  "slide008_img02.jpg"
+ ],
+ "9": [
+  "slide009_img02.jpg"
+ ],
+ "10": [
+  "slide010_img01.jpg",
+  "slide010_img02.jpg",
+  "slide010_img03.jpg",
+  "slide010_img05.jpg"
+ ],
+ "11": [
+  "slide011_img02.jpg",
+  "slide011_img03.jpg",
+  "slide011_img04.jpg"
+ ],
+ "12": [
+  "slide012_img02.jpg",
+  "slide012_img03.jpg"
+ ],
+ "13": [
+  "slide013_img02.jpg",
+  "slide013_img03.jpg",
+  "slide013_img04.jpg"
+ ],
+ "16": [
+  "slide016_img01.jpg"
+ ],
+ "17": [
+  "slide017_img02.jpg",
+  "slide017_img03.jpg"
+ ],
+ "24": [
+  "slide024_img01.jpg",
+  "slide024_img02.jpg"
+ ],
+ "25": [
+  "slide025_img02.jpg",
+  "slide025_img03.jpg"
+ ],
+ "27": [
+  "slide027_img02.jpg",
+  "slide027_img03.jpg",
+  "slide027_img04.jpg"
+ ],
+ "28": [
+  "slide028_img01.jpg",
+  "slide028_img03.jpg"
+ ],
+ "29": [
+  "slide029_img01.jpg",
+  "slide029_img02.jpg"
+ ],
+ "31": [
+  "slide031_img02.jpg"
+ ],
+ "32": [
+  "slide032_img01.png",
+  "slide032_img02.png"
+ ],
+ "33": [
+  "slide033_img02.jpg",
+  "slide033_img03.jpg",
+  "slide033_img04.jpg"
+ ],
+ "34": [
+  "slide034_img01.png"
+ ],
+ "35": [
+  "slide035_img01.jpg",
+  "slide035_img02.jpg"
+ ],
+ "36": [
+  "slide036_img02.jpg"
+ ],
+ "37": [
+  "slide037_img01.jpg"
+ ],
+ "38": [
+  "slide038_img01.png"
+ ],
+ "39": [
+  "slide039_img01.png"
+ ],
+ "40": [
+  "slide040_img01.png",
+  "slide040_img02.png"
+ ],
+ "41": [
+  "slide041_img02.png"
+ ],
+ "42": [
+  "slide042_img01.png"
+ ],
+ "43": [
+  "slide043_img01.jpg",
+  "slide043_img03.jpg",
+  "slide043_img04.jpg",
+  "slide043_img05.jpg"
+ ],
+ "44": [
+  "slide044_img02.jpg"
+ ],
+ "46": [
+  "slide046_img02.jpg",
+  "slide046_img03.jpg"
+ ],
+ "47": [
+  "slide047_img01.jpg"
+ ],
+ "48": [
+  "slide048_img02.jpg",
+  "slide048_img03.jpg"
+ ],
+ "49": [
+  "slide049_img02.jpg",
+  "slide049_img03.jpg"
+ ],
+ "50": [
+  "slide050_img02.jpg",
+  "slide050_img03.jpg"
+ ],
+ "51": [
+  "slide051_img01.png",
+  "slide051_img02.png",
+  "slide051_img03.png",
+  "slide051_img04.jpg"
+ ],
+ "52": [
+  "slide052_img02.jpg",
+  "slide052_img03.jpg"
+ ],
+ "53": [
+  "slide053_img02.jpg"
+ ],
+ "54": [
+  "slide054_img02.jpg",
+  "slide054_img03.jpg"
+ ],
+ "55": [
+  "slide055_img02.jpg"
+ ],
+ "56": [
+  "slide056_img02.jpg"
+ ],
+ "57": [
+  "slide057_img02.jpg"
+ ],
+ "58": [
+  "slide058_img02.png",
+  "slide058_img03.png",
+  "slide058_img04.png"
+ ],
+ "59": [
+  "slide059_img02.jpg",
+  "slide059_img03.jpg"
+ ],
+ "60": [
+  "slide060_img01.jpg",
+  "slide060_img02.jpg"
+ ],
+ "61": [
+  "slide061_img01.jpg",
+  "slide061_img02.jpg"
+ ],
+ "62": [
+  "slide062_img02.jpg",
+  "slide062_img03.jpg"
+ ],
+ "63": [
+  "slide063_img02.jpg",
+  "slide063_img03.jpg",
+  "slide063_img04.jpg",
+  "slide063_img05.jpg"
+ ],
+ "65": [
+  "slide065_img01.png"
+ ],
+ "66": [
+  "slide066_img02.jpg"
+ ],
+ "67": [
+  "slide067_img02.jpg",
+  "slide067_img03.jpg"
+ ],
+ "68": [
+  "slide068_img02.jpg"
+ ],
+ "69": [
+  "slide069_img01.jpg",
+  "slide069_img02.jpg"
+ ],
+ "70": [
+  "slide070_img01.png",
+  "slide070_img02.png"
+ ],
+ "71": [
+  "slide071_img01.jpg",
+  "slide071_img02.jpg"
+ ],
+ "72": [
+  "slide072_img01.jpg"
+ ],
+ "73": [
+  "slide073_img01.jpg",
+  "slide073_img02.jpg"
+ ],
+ "74": [
+  "slide074_img01.png",
+  "slide074_img02.png",
+  "slide074_img03.png"
+ ],
+ "75": [
+  "slide075_img02.jpg"
+ ],
+ "76": [
+  "slide076_img02.png",
+  "slide076_img03.png",
+  "slide076_img04.png",
+  "slide076_img05.png"
+ ],
+ "77": [
+  "slide077_img02.jpg",
+  "slide077_img03.jpg"
+ ],
+ "78": [
+  "slide078_img02.png",
+  "slide078_img03.jpg"
+ ],
+ "79": [
+  "slide079_img02.png"
+ ],
+ "80": [
+  "slide080_img02.png",
+  "slide080_img03.png"
+ ],
+ "81": [
+  "slide081_img02.jpg",
+  "slide081_img03.jpg",
+  "slide081_img04.jpg"
+ ],
+ "82": [
+  "slide082_img02.jpg",
+  "slide082_img03.jpg"
+ ],
+ "84": [
+  "slide084_img02.jpg"
+ ],
+ "85": [
+  "slide085_img01.jpg",
+  "slide085_img02.jpg"
+ ],
+ "86": [
+  "slide086_img02.jpg"
+ ],
+ "87": [
+  "slide087_img01.png",
+  "slide087_img02.jpg"
+ ],
+ "88": [
+  "slide088_img01.jpg",
+  "slide088_img02.jpg",
+  "slide088_img03.jpg"
+ ],
+ "89": [
+  "slide089_img02.jpg"
+ ],
+ "90": [
+  "slide090_img01.png",
+  "slide090_img02.png"
+ ],
+ "91": [
+  "slide091_img01.jpg"
+ ],
+ "92": [
+  "slide092_img02.jpg",
+  "slide092_img03.jpg"
+ ],
+ "93": [
+  "slide093_img01.png",
+  "slide093_img02.jpg"
+ ],
+ "94": [
+  "slide094_img02.jpg"
+ ],
+ "95": [
+  "slide095_img02.jpg"
+ ],
+ "96": [
+  "slide096_img02.jpg"
+ ],
+ "99": [
+  "slide099_img01.jpg",
+  "slide099_img02.jpg",
+  "slide099_img03.jpg"
+ ],
+ "100": [
+  "slide100_img02.jpg"
+ ],
+ "101": [
+  "slide101_img02.jpg",
+  "slide101_img03.jpg"
+ ],
+ "102": [
+  "slide102_img02.jpg"
+ ],
+ "112": [
+  "slide112_img02.jpg",
+  "slide112_img03.jpg",
+  "slide112_img04.jpg",
+  "slide112_img05.jpg",
+  "slide112_img06.jpg"
+ ],
+ "114": [
+  "slide114_img02.jpg"
+ ],
+ "116": [
+  "slide116_img02.png",
+  "slide116_img03.png"
+ ],
+ "117": [
+  "slide117_img02.png",
+  "slide117_img03.png"
+ ],
+ "118": [
+  "slide118_img02.png",
+  "slide118_img03.png"
+ ],
+ "119": [
+  "slide119_img02.png",
+  "slide119_img03.png"
+ ],
+ "120": [
+  "slide120_img02.png"
+ ],
+ "121": [
+  "slide121_img02.jpg"
+ ],
+ "122": [
+  "slide122_img02.png",
+  "slide122_img03.png"
+ ],
+ "123": [
+  "slide123_img02.png",
+  "slide123_img03.png"
+ ],
+ "125": [
+  "slide125_img02.png",
+  "slide125_img03.png"
+ ],
+ "126": [
+  "slide126_img02.png",
+  "slide126_img03.png"
+ ],
+ "127": [
+  "slide127_img02.png",
+  "slide127_img03.png",
+  "slide127_img04.png"
+ ],
+ "128": [
+  "slide128_img02.png",
+  "slide128_img03.png"
+ ],
+ "129": [
+  "slide129_img02.png",
+  "slide129_img03.png"
+ ],
+ "130": [
+  "slide130_img02.png"
+ ],
+ "131": [
+  "slide131_img02.png",
+  "slide131_img03.png",
+  "slide131_img04.png"
+ ],
+ "132": [
+  "slide132_img02.png"
+ ],
+ "133": [
+  "slide133_img02.png"
+ ],
+ "134": [
+  "slide134_img02.png",
+  "slide134_img03.jpg"
+ ],
+ "136": [
+  "slide136_img01.jpg",
+  "slide136_img02.jpg",
+  "slide136_img04.jpg",
+  "slide136_img05.jpg"
+ ],
+ "137": [
+  "slide137_img01.png"
+ ],
+ "138": [
+  "slide138_img02.jpg",
+  "slide138_img03.jpg",
+  "slide138_img04.jpg"
+ ]
+}

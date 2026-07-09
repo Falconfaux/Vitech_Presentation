@@ -1,0 +1,10 @@
+{
+  "name": "vitech-presentation",
+  "private": true,
+  "scripts": {
+    "check:overflow": "node scripts/check_overflow.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.47.0"
+  }
+}
