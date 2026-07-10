@@ -908,7 +908,8 @@ data_table("Workshop & Facilities", "Machinery", "Workshop Facilities — Weld O
         [["In-House Capability", ""],
          ["Blasting & Painting", "5.5 mtr X 40 mtr"],
          ["Pickling & Passivation Methods", "Paste cleaning & spraying"]],
-      ])
+      ],
+      columns=2, dense=True)
 
 data_table("Workshop & Facilities", "Machinery", "Workshop Facilities — Machining & Auxiliary Equipment",
       [
@@ -1424,7 +1425,7 @@ data_table("Packing, Dispatch & Ongoing Jobs", "Ongoing Jobs — Oil & Gas", "On
         [["Dehydrator", ""], ["Material", "SA 516 GR70N (epoxy lining)"], ["Size", "Ø 3658mm × 18288mm TS-TS"], ["Total qty / weight", "4 Nos. / 46.82 MT"]],
         [["Degasser", ""], ["Material", "SA 516 GR70N (epoxy lining)"], ["Size", "Ø 2114mm × 9876mm TL-TL"], ["Total qty / weight", "4 Nos. / 10.95 MT"]],
       ],
-      sub="ONGC, Uran")
+      sub="ONGC, Uran", columns=2, dense=True)
 
 data_table("Packing, Dispatch & Ongoing Jobs", "Ongoing Jobs — Lithium", "Ongoing Jobs — ZLD Duct Pipes & Vent Condenser",
       [
@@ -1435,7 +1436,7 @@ data_table("Packing, Dispatch & Ongoing Jobs", "Ongoing Jobs — Lithium", "Ongo
          ["Size", "Ø 2951mm × 3252mm overall length"],
          ["Total qty", "1 No."]],
       ],
-      sub="Thacker Pass P-30090 LNC Project")
+      sub="Thacker Pass P-30090 LNC Project", columns=2, dense=True)
 
 # ---- 112. Exhibitions & Shop Approvals ---------------------------------------
 gallery("Exhibitions & Approvals", "Industry Presence · Shop Approvals", "Vitech at Exhibitions & Shop Approvals", [112, 114],

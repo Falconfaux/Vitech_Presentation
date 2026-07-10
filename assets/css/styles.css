@@ -133,10 +133,10 @@ h1, h2, h3, p, ul, ol { margin: 0; }
 /* reveal-on-active content animation */
 .reveal {
   opacity: 0;
-  transform: translateY(22px);
+  transform: translateY(22px) scale(.985);
   transition: opacity .8s var(--ease-soft), transform .8s var(--ease-soft);
 }
-.slide.active .reveal { opacity: 1; transform: translateY(0); }
+.slide.active .reveal { opacity: 1; transform: translateY(0) scale(1); }
 .reveal-d1 { transition-delay: .08s; }
 .reveal-d2 { transition-delay: .18s; }
 .reveal-d3 { transition-delay: .28s; }
@@ -401,38 +401,37 @@ h1, h2, h3, p, ul, ol { margin: 0; }
 /* Template: visual (org chart / layout / location map — image forward)   */
 /* ---------------------------------------------------------------------- */
 
-.tpl-visual .slide-inner { justify-content: flex-start; padding-top: clamp(1.5rem, 4vh, 3rem); }
+.tpl-visual .slide-inner { justify-content: flex-start; padding-top: calc(var(--fit,1) * clamp(1.5rem, 4vh, 3rem)); }
 .tpl-visual .visual-frame {
-  margin-top: 1.6rem; border-radius: 16px; overflow: hidden;
+  margin-top: calc(var(--fit,1) * 1.6rem); border-radius: 16px; overflow: hidden;
   border: 1px solid var(--azure-border);
   background: rgba(255,255,255,.03);
   flex: 1 1 0; min-height: 0; max-height: none; display: flex; align-items: center; justify-content: center;
 }
-.tpl-visual .visual-frame img { max-height: 100%; width: auto; object-fit: contain; margin: 0 auto; }
-.tpl-visual .visual-row { display: flex; gap: 1.2rem; margin-top: 1.6rem; flex-wrap: wrap; flex: 1 1 0; min-height: 0; }
+.tpl-visual .visual-frame img { width: 100%; height: 100%; object-fit: cover; margin: 0 auto; }
+.tpl-visual .visual-row { display: flex; gap: 1.2rem; margin-top: calc(var(--fit,1) * 1.6rem); flex-wrap: wrap; flex: 1 1 0; min-height: 0; }
 .tpl-visual .visual-row .visual-frame { flex: 1 1 320px; height: auto; max-height: none; }
 .tpl-visual .visual-row .visual-frame img {
-  max-height: none; width: 100%; height: 100%; object-fit: contain;
+  max-height: none; width: 100%; height: 100%; object-fit: cover;
 }
-.tpl-visual .visual-row .visual-frame:not(:first-child) img { object-fit: cover; }
 .tpl-visual .visual-caption { text-align: center; font-size: .8rem; color: var(--steel-light); margin-top: .5rem; flex: none; }
 
-.tpl-visual.has-stats .visual-frame { max-height: 54vh; }
-.tpl-visual.has-stats .visual-frame img { max-height: 54vh; }
+.tpl-visual.has-stats .visual-frame { max-height: calc(var(--fit,1) * 54vh); }
+.tpl-visual.has-stats .visual-frame img { max-height: calc(var(--fit,1) * 54vh); }
 .tpl-visual.has-stats .visual-row {
   display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
-  gap: .5rem; height: 54vh; flex: none;
+  gap: .5rem; height: calc(var(--fit,1) * 54vh); flex: none;
 }
 .tpl-visual.has-stats .visual-row .visual-frame { max-height: none; height: 100%; flex: none; }
 .tpl-visual.has-stats .visual-row .visual-frame img {
   max-height: none; width: 100%; height: 100%; object-fit: cover;
 }
 .tpl-visual.has-stats .stat-row {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: .6rem .9rem; margin-top: 1.6rem; flex: none;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: .6rem .9rem; margin-top: calc(var(--fit,1) * 1.6rem); flex: none;
 }
 .tpl-visual.has-stats .stat-row .stat-tile { min-width: 0; }
-.tpl-visual.has-stats .stat-row .stat-tile .num { font-size: 1.1rem; }
-.tpl-visual.has-stats .stat-row .stat-tile .lbl { font-size: .62rem; }
+.tpl-visual.has-stats .stat-row .stat-tile .num { font-size: calc(var(--fit,1) * 1.1rem); }
+.tpl-visual.has-stats .stat-row .stat-tile .lbl { font-size: calc(var(--fit,1) * .62rem); }
 
 /* ---------------------------------------------------------------------- */
 /* Template: org chart (modern tree, replaces the flattened table image)  */
@@ -593,7 +592,7 @@ h1, h2, h3, p, ul, ol { margin: 0; }
   margin-top: 1.8rem;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  grid-template-rows: repeat(2, 1fr);
+  grid-auto-rows: 1fr;
   gap: 1rem;
   flex: 1 1 auto;
   min-height: 0;
@@ -644,7 +643,7 @@ h1, h2, h3, p, ul, ol { margin: 0; }
 
 .tpl-table .table-wrap {
   margin-top: calc(var(--fit,1) * 1.6rem); margin-bottom: calc(var(--fit,1) * 1.2rem); overflow-x: auto; border-radius: 14px;
-  border: 1px solid var(--azure-border);
+  border: 1px solid var(--azure-border); flex-shrink: 0;
 }
 table.spec-table { width: 100%; border-collapse: collapse; font-size: calc(var(--fit,1) * 1rem); }
 table.spec-table th {
@@ -687,7 +686,7 @@ table.spec-table tr:nth-child(even) td { background: rgba(255,255,255,.02); }
   display: grid; gap: 6px; border-radius: 18px; overflow: hidden;
   height: 100%; max-height: none; background: rgba(255,255,255,.03);
 }
-.tpl-spec .spec-media-grid.n1 { grid-template-columns: 1fr; }
+.tpl-spec .spec-media-grid.n1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
 .tpl-spec .spec-media-grid.n2 { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
 .tpl-spec .spec-media-grid.n2.row2 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr; }
 .tpl-spec .spec-media-grid.n3 { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr 1fr; }
@@ -719,7 +718,7 @@ table.spec-table tr:nth-child(even) td { background: rgba(255,255,255,.02); }
   grid-area: content; height: auto; width: 100%; justify-content: flex-start;
 }
 .tpl-spec.layout-stack .spec-hero {
-  grid-area: hero; position: relative; min-height: 180px;
+  grid-area: hero; position: relative; min-height: calc(var(--fit,1) * 320px);
   border-radius: 18px; overflow: hidden; border: 1px solid var(--azure-border);
   background: rgba(255,255,255,.03);
 }
@@ -805,10 +804,12 @@ table.spec-table tr:nth-child(even) td { background: rgba(255,255,255,.02); }
   .tpl-visual .visual-row { flex-direction: column; }
   .spec-row { grid-template-columns: 1fr; }
   .tpl-spec.layout-stack .spec-grid {
-    grid-template-columns: 1fr; grid-template-areas: "hero" "content" "band";
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(calc(var(--fit,1) * 200px), .8fr) auto minmax(calc(var(--fit,1) * 200px), 1fr);
+    grid-template-areas: "hero" "content" "band";
   }
   .tpl-spec.layout-stack .spec-content { width: 100%; }
-  .tpl-spec.layout-stack .spec-hero { min-height: 140px; }
+  .tpl-spec.layout-stack .spec-hero { min-height: calc(var(--fit,1) * 180px); }
 }
 
 /* Loading fade-in for whole app */
