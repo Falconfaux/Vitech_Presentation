@@ -49,6 +49,17 @@ empty_img_tags = sum(len(re.findall(r'<img[^>]*(?:data-src|src)=""', body)) for 
 if empty_img_tags:
     errors.append(f"{empty_img_tags} <img> tag(s) inside a slide with an empty src/data-src")
 
+# duplicate photo on one slide — count main images only (each media-frame
+# intentionally repeats its src once as the blurred backdrop copy).
+_dupe_errors_before = len(errors)
+for _, sid, _, body in slides:
+    mains = re.findall(r'<img class="media-full" data-src="([^"]+)"', body)
+    dupes = sorted({s for s in mains if mains.count(s) > 1})
+    if dupes:
+        errors.append(f"Slide {sid} shows the same photo more than once: {dupes}")
+if len(errors) == _dupe_errors_before:
+    print("[OK] no slide shows the same photo more than once")
+
 # 3. Section jump-menu count parity -------------------------------------------
 section_cards = re.findall(r'<div class="t">([^<]+)</div><div class="c">(\d+) slide', html)
 section_counts_actual = {}

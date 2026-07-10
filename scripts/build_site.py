@@ -102,22 +102,37 @@ def resolve_stack(files, layout=None):
     avg_aspect = sum(img_aspect(f) for f in files) / n
     return avg_aspect >= (1.3 if n == 1 else 1.0)
 
+def media_frame(src, extra_cls=""):
+    """Uncropped media frame: the full photo (object-fit: contain) layered
+    over a blurred, darkened cover copy of itself, so an aspect-ratio
+    mismatch never crops the photo or leaves the frame looking empty."""
+    return ('<div class="media-frame{1}">'
+            '<img class="media-blur" data-src="{0}" alt="" aria-hidden="true" loading="lazy">'
+            '<img class="media-full" data-src="{0}" alt="" loading="lazy">'
+            '</div>').format(src, (" " + extra_cls) if extra_cls else "")
+
 def media_grid(files, stack, media_layout=None):
     n = len(files)
     cls = "n" + str(min(n, 4)) if n else "n1"
-    if n >= 2 and (stack or media_layout == "row"):
+    # Frames sit side by side (columns) whenever there are several photos:
+    # in the stack band the strip is wide, and in the classic split the
+    # photos are portrait-leaning (that's why split was chosen), so tall
+    # narrow cells fit them whole without shrinking.
+    if n >= 2:
         cls += " row" + str(min(n, 4))
-    imgs = "".join('<img data-src="{0}" alt="" loading="lazy">'.format(f) for f in files)
-    return '<div class="spec-media-grid {0}">{1}</div>'.format(cls, imgs)
+    frames = "".join(media_frame(f) for f in files)
+    return '<div class="spec-media-grid {0}">{1}</div>'.format(cls, frames)
 
 def hero_img(files):
-    """A single accent image that fills the gap the 'stack' layout otherwise
-    leaves blank beside the compact content card. Sized/cropped to whatever
-    width the gap ends up being, so it always reads as a deliberate crop
-    rather than a stray thumbnail."""
+    """A single accent image that fills the strip the 'stack' layout otherwise
+    leaves blank beside the compact content card, shown whole against a
+    blurred fill rather than cropped."""
     if not files:
         return ""
-    return '<div class="spec-hero reveal reveal-d2"><img data-src="{0}" alt="" loading="lazy"></div>'.format(files[0])
+    return ('<div class="spec-hero media-frame reveal reveal-d2">'
+            '<img class="media-blur" data-src="{0}" alt="" aria-hidden="true" loading="lazy">'
+            '<img class="media-full" data-src="{0}" alt="" loading="lazy">'
+            '</div>').format(files[0])
 
 def cover(section, title_html, locations, contact_lines, bg_img, tagline=None, stats=None):
     id = next_id()
@@ -232,13 +247,11 @@ def visual(section, eyebrow, title, sub, slide_no, images_count=1, row=False, ca
     else:
         files = IMGS(slide_no)[:images_count] if images_count else IMGS(slide_no)
     if row and len(files) > 1:
-        frames = "".join(
-            '<div class="visual-frame"><img data-src="{0}" alt="" loading="lazy"></div>'.format(f) for f in files
-        )
+        frames = "".join(media_frame(f, "visual-frame") for f in files)
         media = '<div class="visual-row reveal reveal-d2">{0}</div>'.format(frames)
     else:
         f = files[0] if files else ""
-        media = '<div class="visual-frame reveal reveal-d2"><img data-src="{0}" alt="" loading="lazy"></div>'.format(f)
+        media = media_frame(f, "visual-frame reveal reveal-d2")
     cap = '<p class="visual-caption reveal reveal-d3">{0}</p>'.format(esc(captions)) if captions else ""
     stats_html = ""
     has_stats_cls = ""
@@ -325,7 +338,7 @@ def site_plan(section, eyebrow, title, img_src, legend, stat=None):
         <div class="eyebrow reveal">{eyebrow}</div>
         <h2 class="slide-title reveal reveal-d1">{title}</h2>
         <div class="site-plan reveal reveal-d2">
-          <div class="site-plan-map"><img data-src="{img}" alt="" loading="lazy"><p class="site-plan-hint">Click to enlarge</p></div>
+          <div class="site-plan-map media-frame"><img class="media-blur" data-src="{img}" alt="" aria-hidden="true" loading="lazy"><img class="media-full" data-src="{img}" alt="" loading="lazy"><p class="site-plan-hint">Click to enlarge</p></div>
           <div class="site-plan-legend">{legend}</div>
         </div>
         {stat}
@@ -523,15 +536,45 @@ def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, ex
         trows = "".join("<tr>" + "".join("<td>{0}</td>".format(nb(c)) for c in row) + "</tr>" for row in table[1:])
         table_html = ('<div class="table-wrap spec-extra-table reveal reveal-d3">'
                        '<table class="spec-table">{0}<tbody>{1}</tbody></table></div>').format(thead, trows)
+    # Single-photo slides become a full-bleed showcase: the photo owns the
+    # whole slide (uncropped, over a blurred fill) and the spec card floats
+    # over its lower portion as a bottom strip — so the one photo is shown
+    # once, as large as possible, instead of duplicated into hero + band.
+    if len(files) == 1 and layout != "split":
+        body = '''
+    <section class="slide tpl-spec layout-showcase" id="s{id}" data-section="{section}">
+      <div class="showcase-canvas" aria-hidden="true">
+        <img class="media-blur" data-src="{f}" alt="">
+        <img class="media-full" data-src="{f}" alt="">
+      </div>
+      <div class="slide-inner">
+        <div class="showcase-panel reveal reveal-d1">
+          <div class="eyebrow">{eyebrow}</div>
+          <div class="showcase-head">
+            <h2 class="slide-title">{title}</h2>
+            {client}
+          </div>
+          {extra}
+          <div class="spec-list reveal reveal-d2">{rows}</div>
+          {milestone}
+          {table}
+        </div>
+      </div>
+    </section>'''.format(id=id, section=esc(section), f=files[0], eyebrow=esc(eyebrow),
+                          title=title, client=client_html, extra=extra_html,
+                          rows=rows, milestone=milestone_html, table=table_html)
+        add(id, section, "spec", body)
+        return
     # The stack layout puts a compact content card beside a full-width image
     # band, which otherwise leaves the strip next to the card empty. Peel one
-    # image off into a "hero" that fills exactly that strip; if it's the only
-    # photo available, reuse it in the band too rather than leave a gap.
+    # image off into a "hero" that fills exactly that strip. Single-image
+    # slides never reach here (they take the showcase branch above), so the
+    # band always has at least one photo of its own.
     hero_html = ""
     band_files = files
     if stack:
         hero_html = hero_img(files)
-        band_files = files[1:] if len(files) > 1 else files[:1]
+        band_files = files[1:]
     body = '''
     <section class="slide {tpl_cls}" id="s{id}" data-section="{section}">
       <div class="slide-inner">
@@ -571,7 +614,7 @@ def gallery(section, eyebrow, title, slide_no, caption=None, sub=None):
             files.extend(IMGS(sn))
     else:
         files = IMGS(slide_no)
-    imgs = "".join('<img data-src="{0}" alt="" loading="lazy">'.format(f) for f in files)
+    imgs = "".join(media_frame(f) for f in files)
     cap = '<p class="gallery-caption reveal reveal-d3">{0}</p>'.format(nb(caption)) if caption else ""
     cols = gallery_cols(len(files))
     body = '''
