@@ -54,7 +54,7 @@ def lazybg(slide_no, n=1):
             'style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.08);z-index:0;">'
             '<div class="slide-scrim"></div>').format(src)
 
-def media_grid(slide_no, count=None, lightbox=True):
+def media_grid(slide_no, count=None, lightbox=True, layout=None):
     if isinstance(slide_no, (list, tuple)):
         per_source = [IMGS(sn) for sn in slide_no]
         if count:
@@ -73,6 +73,8 @@ def media_grid(slide_no, count=None, lightbox=True):
             files = files[:count]
     n = len(files)
     cls = "n" + str(min(n, 4)) if n else "n1"
+    if layout == "row" and n == 2:
+        cls += " row2"
     imgs = "".join('<img data-src="{0}" alt="" loading="lazy">'.format(f) for f in files)
     return '<div class="spec-media-grid {0}">{1}</div>'.format(cls, imgs)
 
@@ -264,10 +266,13 @@ def org_chart(section, eyebrow, title, exec_chain, dept_columns, gm, footnote=No
 
 def site_plan(section, eyebrow, title, img_src, legend, stat=None):
     id = next_id()
-    legend_html = "".join(
-        '<div class="legend-item"><div class="legend-num">{0}</div><div class="legend-txt">{1}</div></div>'.format(esc(num), nb(txt))
-        for num, txt in legend
-    )
+    parts = []
+    for num, txt in legend:
+        if num == "group":
+            parts.append('<div class="legend-group-header">{0}</div>'.format(esc(txt)))
+        else:
+            parts.append('<div class="legend-item"><div class="legend-num">{0}</div><div class="legend-txt">{1}</div></div>'.format(esc(num), nb(txt)))
+    legend_html = "".join(parts)
     stat_html = ""
     if stat:
         v, l = stat
@@ -279,7 +284,7 @@ def site_plan(section, eyebrow, title, img_src, legend, stat=None):
         <div class="eyebrow reveal">{eyebrow}</div>
         <h2 class="slide-title reveal reveal-d1">{title}</h2>
         <div class="site-plan reveal reveal-d2">
-          <div class="site-plan-map"><img data-src="{img}" alt="" loading="lazy"></div>
+          <div class="site-plan-map"><img data-src="{img}" alt="" loading="lazy"><p class="site-plan-hint">Click to enlarge</p></div>
           <div class="site-plan-legend">{legend}</div>
         </div>
         {stat}
@@ -420,14 +425,22 @@ def location_map(section, eyebrow, title, note=None, svg=None, distances=None):
                           svg=svg or _LOCATION_MAP_SVG, dist=dist_html)
     add(id, section, "locationmap", body)
 
-def data_table(section, eyebrow, title, tables, note=None, sub=None, columns=1, dense=False):
+def data_table(section, eyebrow, title, tables, note=None, sub=None, columns=1, dense=False, headers=None):
     id = next_id()
+    if headers is None:
+        headers = [True] * len(tables)
     blocks = []
-    for t in tables:
+    for t, has_header in zip(tables, headers):
+        if has_header:
+            thead = "<thead><tr>" + "".join("<th>{0}</th>".format(nb(c)) for c in t[0]) + "</tr></thead>"
+            body_rows = t[1:]
+        else:
+            thead = ""
+            body_rows = t
         rows = "".join(
-            "<tr>" + "".join("<td>{0}</td>".format(nb(c)) for c in row) + "</tr>" for row in t
+            "<tr>" + "".join("<td>{0}</td>".format(nb(c)) for c in row) + "</tr>" for row in body_rows
         )
-        blocks.append('<div class="table-wrap reveal reveal-d2"><table class="spec-table"><tbody>{0}</tbody></table></div>'.format(rows))
+        blocks.append('<div class="table-wrap reveal reveal-d2"><table class="spec-table">{0}<tbody>{1}</tbody></table></div>'.format(thead, rows))
     note_html = '<p class="table-note reveal reveal-d3">{0}</p>'.format(nb(note)) if note else ""
     tables_html = "".join(blocks)
     if columns and columns > 1:
@@ -447,7 +460,7 @@ def data_table(section, eyebrow, title, tables, note=None, sub=None, columns=1, 
                           tables=tables_html, note=note_html)
     add(id, section, "table", body)
 
-def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, extra=None, table=None, milestone=None):
+def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, extra=None, table=None, milestone=None, media_layout=None):
     id = next_id()
     rows = "".join(
         '<div class="spec-row"><div class="k">{0}</div><div class="v">{1}</div></div>'.format(esc(k), nb(v))
@@ -462,9 +475,10 @@ def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, ex
         milestone_html = '<div class="spec-milestone reveal reveal-d3">{0}</div>'.format(nb(milestone))
     table_html = ""
     if table:
-        trows = "".join("<tr>" + "".join("<td>{0}</td>".format(nb(c)) for c in row) + "</tr>" for row in table)
+        thead = "<thead><tr>" + "".join("<th>{0}</th>".format(nb(c)) for c in table[0]) + "</tr></thead>"
+        trows = "".join("<tr>" + "".join("<td>{0}</td>".format(nb(c)) for c in row) + "</tr>" for row in table[1:])
         table_html = ('<div class="table-wrap spec-extra-table reveal reveal-d3">'
-                       '<table class="spec-table"><tbody>{0}</tbody></table></div>').format(trows)
+                       '<table class="spec-table">{0}<tbody>{1}</tbody></table></div>').format(thead, trows)
     body = '''
     <section class="slide tpl-spec" id="s{id}" data-section="{section}">
       <div class="slide-inner">
@@ -482,7 +496,7 @@ def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, ex
         {table}
       </div>
     </section>'''.format(id=id, section=esc(section), eyebrow=esc(eyebrow), title=title,
-                          media=media_grid(slide_no, images_count), client=client_html, extra=extra_html, rows=rows,
+                          media=media_grid(slide_no, images_count, layout=media_layout), client=client_html, extra=extra_html, rows=rows,
                           milestone=milestone_html, table=table_html)
     add(id, section, "spec", body)
 
@@ -713,8 +727,9 @@ visual("Company Overview", "Facilities", "Company Layout & Plot Overview", None,
 
 # ---- 9. Company Layout (annotated site plan + legend) --------------------
 site_plan("Company Overview", "Facilities · Vitech Heavy Equipments Pvt. Ltd, Shahapur", "Company Layout",
-    "assets/images/slides/slide009_img02_crop.jpg",
+    "assets/images/slides/slide009_img02_final.jpg",
     legend=[
+        ("group", "Operations & Workshops"),
         ("1", "Main Gate"),
         ("2", "Admin Building"),
         ("3", "Workshop — Bay 1, 2, 3"),
@@ -723,14 +738,17 @@ site_plan("Company Overview", "Facilities · Vitech Heavy Equipments Pvt. Ltd, S
         ("6", "Workshop — Bay 5"),
         ("7", "Blasting & Painting Booth"),
         ("8", "Picking Passivation Bay"),
+        ("group", "Sustainability & Grounds"),
         ("9", "Vegetable Garden (600 sq.mtr)"),
         ("10", "A–D — Fruit Orchard"),
+        ("15", "A–B — Rain Water Harvesting"),
+        ("16", "Worker Room with Recycling Plant"),
+        ("group", "Animals"),
         ("11", "Japanese Koi Fish Tank"),
         ("12", "Dogs Kennel"),
         ("13", "Farm Animals (Turtle, Hen, Geese)"),
         ("14", "Cow Shed"),
-        ("15", "A–B — Rain Water Harvesting"),
-        ("16", "Worker Room with Recycling Plant"),
+        ("group", "Safety"),
         ("17", "Emergency Evacuation Area"),
     ],
     stat=("104,000", "Total Plot Area (sq. mtr.)"))
@@ -768,7 +786,8 @@ data_table("Workshop & Facilities", "Group Capability", "Workshop Overview — G
          ["Shifts", "3 / day, 6 days a week"], ["Capability", "Max job size: 5.5 × 55 mtr (single pc.) · Max diameter: 6 × 15 mtr length · 125 mm thk."]],
       ],
       note="All indications in red on the original plant plan denote provisions under construction (target completion 31 Dec 2026). We can also manufacture larger jobs in sections and reassemble in a single piece close to the port.",
-      columns=2, dense=True)
+      columns=2, dense=True,
+      headers=[True, False, False, True, False])
 
 # ---- 16-17. Location Map --------------------------------------------------
 location_map("Workshop & Facilities", "Location", "Location Map — Vitech Heavy Equipments Pvt. Ltd. (V.H.E.P.L.)",
@@ -848,7 +867,7 @@ divider("Automation & Welding", "Automation<br><span>Systems</span>",
 # ---- 24-29. Automated welding / overlay / pipe systems --------------------
 spec("Automation & Welding", "Automated Welding", "Tube-to-Tube Sheet Welding on Automated Welding Head", "",
      [("Process", "Titanium Gr.1 tube to Titanium Gr.2 tubesheet — GTAW welding in process")],
-     24)
+     24, media_layout="row")
 
 spec("Automation & Welding", "Weld Overlay", "Weld Overlay Capability", "",
      [("Overlay A", "SA 516 Gr. 70 + SA 240 Gr. 317L overlay"),
@@ -877,10 +896,93 @@ spec("Automation & Welding", "Automated Machines", "Welding on Automated Machine
       ("Automated GMAW system (Canadian make)", "Specialised for GMAW & FCAW in 1G, 2G & 3G positions, carbon steel & stainless steel")],
      29)
 
+# ---- 82. Lithium ----------------------------------------------------------
+spec("Oil, Gas, Lithium & Aerospace", "Lithium", "Tanks and Vessels", "Lithium Nevada Thacker Pass Project (USA)",
+     [("Material", "Duplex SST 2205 / SA240 Gr 316L"),
+      ("Total qty / weight", "15 Nos. / 30 MT")],
+     82)
+
+# ---- 83. Divider: Oil & Petrochemical --------------------------------------
+divider("Oil, Gas, Lithium & Aerospace", "Oil &<br><span>Petrochemical</span>",
+        "Heavy towers, reflux drums and static mixers delivered for Reliance, HPCL, Cairn Energy and more.",
+        bg_img=84, index_label="IV")
+
+spec("Oil, Gas, Lithium & Aerospace", "Oil & Petrochemical", "Tube Bundle for Heat Exchanger", "Reliance Industries, Nagothane",
+     [("Tubesheet", "SA965-F304/304L TP304/304L"),
+      ("Tube material", "SA213 TP304/304L"),
+      ("Size", "Ø 1350/1917mm × 10258mm overall length"),
+      ("Qty / Weight", "4 / 105 MT")],
+     84)
+
+spec("Oil, Gas, Lithium & Aerospace", "Oil & Petrochemical", "Ethane Tower Heat Pump Compressor Reflux Drum", "Reliance Industries, Nagothane",
+     [("Material", "SA 240 Gr. 304/304L dual certified"),
+      ("Size", "Ø 4000mm ID × 13,809mm L × 52mm thk"),
+      ("Total qty / weight", "1 No. / 97 MT")],
+     85)
+
+spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Demethanizer Prestripper No.2 — New SS Tower", "Reliance Industries — Nagothane Refinery",
+     [("Material", "SA 240 Gr. 304/304L dual certified"),
+      ("Size", "Ø 1600/2500mm ID × 46,000mm L"),
+      ("Total qty / weight", "1 No. / 82.5 MT")],
+     86)
+
+spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Produced Water Skids", "Cairn Energy, Rajasthan, India",
+     [("Material", "Carbon Steel / Duplex"),
+      ("Qty", "22 Nos."),
+      ("Scope", "Procurement + fabrication of piping spools + structure + assembly + E&I procurement & installation + heat tracing + insulation + FAT")],
+     87)
+
+spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Produced Water Skids — Fabrication Progress", "Cairn Energy, Rajasthan, India",
+     [("Material", "Carbon Steel / Duplex"),
+      ("Qty", "22 Nos."),
+      ("Scope", "Procurement + fabrication of piping spools + structure + assembly + E&I procurement & installation + heat tracing + insulation + FAT")],
+     88)
+
+spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Static Mixer (ASME U Stamp — EIL)", "HPCL Visakhapatnam (EIL)",
+     [("Material", "Carbon steel body (SA 106 Gr.B) with SS 316 steam tracing tubes"),
+      ("Thickness", "Sch. 160"),
+      ("Total qty", "1 No.")],
+     89)
+
+spec("Oil, Gas, Lithium & Aerospace", "Oil & Petrochemical", "Inlet & Outlet Distributors", "L&T, India",
+     [("Material", "Inconel 601 (UNS06601)"),
+      ("Size", "Ø 2.1 mtr × 2.08 mtr L"),
+      ("Qty / Weight", "10 sets / 2 tons")],
+     90)
+
+spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Storage Tank — Insulation + Sacrificial Anode + Internal Glass Flake Lining", "Cairn Energy, India",
+     [("Material", "SA 516 Gr.70 NACE"),
+      ("Size", "Ø 5.55 mtr × 9.5 mtr length"),
+      ("Qty / Weight", "2 Nos. / 28 tons")],
+     91)
+
+spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas / Petrochemical", "Static Mixers (ASME U Stamp) with Grayloc Connectors", "NRL Expansion Project, Sulzer Chemtech India Pvt Ltd",
+     [("Mixer A", "SA 182 F347 & SA 182 F321 — Ø 466.7 & 482.7mm OD × 4000mm lg. × 50mm thk — 8 tons, 1 No."),
+      ("Mixer B", "SA 183 F321 — Ø 457.2mm OD × 4000mm lg. × 50mm thk — 7 tons, 1 No.")],
+     92)
+
+spec("Oil, Gas, Lithium & Aerospace", "Aerospace", "Exhaust Collector — U Stamp", "Pratt & Whitney, Canada",
+     [("Material", "SS 321"),
+      ("Size", "Ø 1.176 mtr × 32mm thk × 1 mtr L"),
+      ("Qty / Weight", "1 No. / 5 tons")],
+     93)
+
+spec("Oil, Gas, Lithium & Aerospace", "Paper & Pulp", "Evaporator — Effect 7", "APL, India",
+     [("Material", "SA 240 Gr. 304 & SA 516 Gr. 70; tubesheets SA 240 Gr. 304L; tubes SA 249 TP 304L"),
+      ("Size", "Ø 3.7/4.4 mtr × 20.2 mtr L"),
+      ("Tubes", "50.8mm OD × 1.2mm min. thk × 11.5 mtr L — qty 2,199 Nos."),
+      ("Qty / Weight", "1 No. / 100 tons")],
+     94)
+
+spec("Oil, Gas, Lithium & Aerospace", "Paper & Pulp · Flue Gas Desulphurisation", "Titanium Clad Ducts", "NTPC Ltd (GE Power) — Sipat & Simhadri, India",
+     [("Duct set A", "IS2062 + Ti Gr.1 (7+2mm) — Ø 9.8 mtr — 50 tons each, 2 Nos."),
+      ("Duct set B", "IS2062 + Ti Gr.1 (7+2mm) — Ø 8.45 mtr — 40 tons, 1 No.")],
+     95)
+
 # ---- 30. Divider: Food Processing -----------------------------------------
 divider("Food Processing & Oleo Chemical", "Food<br><span>Processing</span>",
         "Spiral heat exchangers, evaporators and reactors engineered for the world's leading food & agri-processing clients.",
-        bg_img=31, index_label="IV")
+        bg_img=31, index_label="V")
 
 spec("Food Processing & Oleo Chemical", "Food Processing", "Spiral Heat Exchangers", "",
      [("Material", "SS 304L with high & low pressure steam coils, under PED"),
@@ -966,7 +1068,7 @@ spec("Food Processing & Oleo Chemical", "Food Processing", "Hydrogenation Reacto
 # ---- 45. Divider: Fertilizer ------------------------------------------
 divider("Fertilizer", "Fertilizer",
         "Prill towers, converters and heat exchangers for the world's largest fertilizer producers — including a 305 MT Prill Tower for Chambal Fertilizer & Chemicals Ltd.",
-        bg_img=51, index_label="V")
+        bg_img=51, index_label="VI")
 
 spec("Fertilizer", "Coromandel International Ltd", "Acid Cooler", "",
      [("Material", "Shell side SA 240 Type 304L; channel side SA 516 Gr 70"),
@@ -1053,7 +1155,7 @@ spec("Fertilizer", "Sulphuric Acid Plant", "ZECOR Z — Piping Spools & Pipe Fit
 # ---- 64. Divider: Water & Desalination ------------------------------------
 divider("Water & Desalination", "Water &<br><span>Desalination</span>",
         "Evaporators, ZLD systems and heat exchangers for desalination and zero-liquid-discharge plants worldwide.",
-        bg_img=65, index_label="VI")
+        bg_img=65, index_label="VII")
 
 spec("Water & Desalination", "Water & Desalination", "Evaporator (2×3000 T/D, 5 Effects)", "Baten Suralaya Power Station, Indonesia",
      [("Material", "SS 316L with Titanium Gr.2 tubes; Duplex UNS S32205 with Titanium Gr.2 tubes"),
@@ -1162,89 +1264,6 @@ spec("Water & Desalination", "Water Treatment", "Cartridge Filter", "Saudi Aramc
       ("Size", "Ø 1460mm ID × 1750mm TS-TS"),
       ("Total qty / weight", "12 Nos. / 3.8 MT each")],
      81)
-
-# ---- 82. Lithium ----------------------------------------------------------
-spec("Oil, Gas, Lithium & Aerospace", "Lithium", "Tanks and Vessels", "Lithium Nevada Thacker Pass Project (USA)",
-     [("Material", "Duplex SST 2205 / SA240 Gr 316L"),
-      ("Total qty / weight", "15 Nos. / 30 MT")],
-     82)
-
-# ---- 83. Divider: Oil & Petrochemical --------------------------------------
-divider("Oil, Gas, Lithium & Aerospace", "Oil &<br><span>Petrochemical</span>",
-        "Heavy towers, reflux drums and static mixers delivered for Reliance, HPCL, Cairn Energy and more.",
-        bg_img=84, index_label="VII")
-
-spec("Oil, Gas, Lithium & Aerospace", "Oil & Petrochemical", "Tube Bundle for Heat Exchanger", "Reliance Industries, Nagothane",
-     [("Tubesheet", "SA965-F304/304L TP304/304L"),
-      ("Tube material", "SA213 TP304/304L"),
-      ("Size", "Ø 1350/1917mm × 10258mm overall length"),
-      ("Qty / Weight", "4 / 105 MT")],
-     84)
-
-spec("Oil, Gas, Lithium & Aerospace", "Oil & Petrochemical", "Ethane Tower Heat Pump Compressor Reflux Drum", "Reliance Industries, Nagothane",
-     [("Material", "SA 240 Gr. 304/304L dual certified"),
-      ("Size", "Ø 4000mm ID × 13,809mm L × 52mm thk"),
-      ("Total qty / weight", "1 No. / 97 MT")],
-     85)
-
-spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Demethanizer Prestripper No.2 — New SS Tower", "Reliance Industries — Nagothane Refinery",
-     [("Material", "SA 240 Gr. 304/304L dual certified"),
-      ("Size", "Ø 1600/2500mm ID × 46,000mm L"),
-      ("Total qty / weight", "1 No. / 82.5 MT")],
-     86)
-
-spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Produced Water Skids", "Cairn Energy, Rajasthan, India",
-     [("Material", "Carbon Steel / Duplex"),
-      ("Qty", "22 Nos."),
-      ("Scope", "Procurement + fabrication of piping spools + structure + assembly + E&I procurement & installation + heat tracing + insulation + FAT")],
-     87)
-
-spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Produced Water Skids — Fabrication Progress", "Cairn Energy, Rajasthan, India",
-     [("Material", "Carbon Steel / Duplex"),
-      ("Qty", "22 Nos."),
-      ("Scope", "Procurement + fabrication of piping spools + structure + assembly + E&I procurement & installation + heat tracing + insulation + FAT")],
-     88)
-
-spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Static Mixer (ASME U Stamp — EIL)", "HPCL Visakhapatnam (EIL)",
-     [("Material", "Carbon steel body (SA 106 Gr.B) with SS 316 steam tracing tubes"),
-      ("Thickness", "Sch. 160"),
-      ("Total qty", "1 No.")],
-     89)
-
-spec("Oil, Gas, Lithium & Aerospace", "Oil & Petrochemical", "Inlet & Outlet Distributors", "L&T, India",
-     [("Material", "Inconel 601 (UNS06601)"),
-      ("Size", "Ø 2.1 mtr × 2.08 mtr L"),
-      ("Qty / Weight", "10 sets / 2 tons")],
-     90)
-
-spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Storage Tank — Insulation + Sacrificial Anode + Internal Glass Flake Lining", "Cairn Energy, India",
-     [("Material", "SA 516 Gr.70 NACE"),
-      ("Size", "Ø 5.55 mtr × 9.5 mtr length"),
-      ("Qty / Weight", "2 Nos. / 28 tons")],
-     91)
-
-spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas / Petrochemical", "Static Mixers (ASME U Stamp) with Grayloc Connectors", "NRL Expansion Project, Sulzer Chemtech India Pvt Ltd",
-     [("Mixer A", "SA 182 F347 & SA 182 F321 — Ø 466.7 & 482.7mm OD × 4000mm lg. × 50mm thk — 8 tons, 1 No."),
-      ("Mixer B", "SA 183 F321 — Ø 457.2mm OD × 4000mm lg. × 50mm thk — 7 tons, 1 No.")],
-     92)
-
-spec("Oil, Gas, Lithium & Aerospace", "Aerospace", "Exhaust Collector — U Stamp", "Pratt & Whitney, Canada",
-     [("Material", "SS 321"),
-      ("Size", "Ø 1.176 mtr × 32mm thk × 1 mtr L"),
-      ("Qty / Weight", "1 No. / 5 tons")],
-     93)
-
-spec("Oil, Gas, Lithium & Aerospace", "Paper & Pulp", "Evaporator — Effect 7", "APL, India",
-     [("Material", "SA 240 Gr. 304 & SA 516 Gr. 70; tubesheets SA 240 Gr. 304L; tubes SA 249 TP 304L"),
-      ("Size", "Ø 3.7/4.4 mtr × 20.2 mtr L"),
-      ("Tubes", "50.8mm OD × 1.2mm min. thk × 11.5 mtr L — qty 2,199 Nos."),
-      ("Qty / Weight", "1 No. / 100 tons")],
-     94)
-
-spec("Oil, Gas, Lithium & Aerospace", "Paper & Pulp · Flue Gas Desulphurisation", "Titanium Clad Ducts", "NTPC Ltd (GE Power) — Sipat & Simhadri, India",
-     [("Duct set A", "IS2062 + Ti Gr.1 (7+2mm) — Ø 9.8 mtr — 50 tons each, 2 Nos."),
-      ("Duct set B", "IS2062 + Ti Gr.1 (7+2mm) — Ø 8.45 mtr — 40 tons, 1 No.")],
-     95)
 
 # ---- 96. Electrical & Instrumentation ---------------------------------------
 prose("Electrical & Instrumentation", "In-House Team", "Electrical & Instrumentation Capability",
