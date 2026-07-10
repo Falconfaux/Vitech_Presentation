@@ -417,11 +417,11 @@ h1, h2, h3, p, ul, ol { margin: 0; }
 .tpl-visual .visual-row .visual-frame:not(:first-child) img { object-fit: cover; }
 .tpl-visual .visual-caption { text-align: center; font-size: .8rem; color: var(--steel-light); margin-top: .5rem; flex: none; }
 
-.tpl-visual.has-stats .visual-frame { max-height: 42vh; }
-.tpl-visual.has-stats .visual-frame img { max-height: 42vh; }
+.tpl-visual.has-stats .visual-frame { max-height: 54vh; }
+.tpl-visual.has-stats .visual-frame img { max-height: 54vh; }
 .tpl-visual.has-stats .visual-row {
-  display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, 1fr);
-  gap: .5rem; height: 42vh; flex: none;
+  display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
+  gap: .5rem; height: 54vh; flex: none;
 }
 .tpl-visual.has-stats .visual-row .visual-frame { max-height: none; height: 100%; flex: none; }
 .tpl-visual.has-stats .visual-row .visual-frame img {
@@ -593,7 +593,10 @@ h1, h2, h3, p, ul, ol { margin: 0; }
   margin-top: 1.8rem;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(2, 1fr);
   gap: 1rem;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 .industry-tile {
   background: rgba(255,255,255,.045);
@@ -608,8 +611,9 @@ h1, h2, h3, p, ul, ol { margin: 0; }
 .industry-tile span { font-size: .82rem; font-weight: 600; color: #eef1f8; line-height: 1.3; display: block; }
 
 .industry-tile.has-photo {
-  position: relative; overflow: hidden; padding: 0; min-height: 26vh;
+  position: relative; overflow: hidden; padding: 0; height: 100%; min-height: 0;
   display: flex; align-items: flex-end;
+  background: var(--azure-deep);
 }
 .industry-tile.has-photo .industry-tile-bg {
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
@@ -619,9 +623,10 @@ h1, h2, h3, p, ul, ol { margin: 0; }
 .industry-tile.has-photo .industry-tile-scrim {
   position: absolute; inset: 0; z-index: 1;
   background: linear-gradient(180deg,
-    rgba(var(--azure-deep-rgb), .2) 0%,
-    rgba(var(--azure-deep-rgb), .55) 55%,
-    rgba(var(--azure-deep-rgb), .94) 100%);
+    rgba(var(--azure-deep-rgb), .05) 0%,
+    rgba(var(--azure-deep-rgb), .1) 45%,
+    rgba(var(--azure-deep-rgb), .85) 82%,
+    rgba(var(--azure-deep-rgb), .97) 100%);
 }
 .industry-tile.has-photo svg {
   position: absolute; top: .65rem; right: .65rem; z-index: 2; margin: 0;
@@ -698,19 +703,33 @@ table.spec-table tr:nth-child(even) td { background: rgba(255,255,255,.02); }
 
 .tpl-spec .spec-content { height: 100%; display: flex; flex-direction: column; justify-content: center; }
 
-/* layout-stack: compact content card top-right, big full-width image band below.
-   Chosen automatically at build time for landscape/square-leaning image sets;
-   portrait-heavy sets (tall vessels/towers) keep the classic split above. */
+/* layout-stack: compact content card top-right, a hero image filling the strip
+   beside it, and a big full-width image band below. Chosen automatically at
+   build time for landscape/square-leaning image sets; portrait-heavy sets
+   (tall vessels/towers) keep the classic split above. The hero exists so the
+   gap next to the content card is never left blank. */
 .tpl-spec.layout-stack .spec-grid {
-  display: flex; flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) min(58%, 620px);
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas: "hero content" "band band";
   gap: clamp(1rem, 2.4vw, 1.8rem);
 }
 .tpl-spec.layout-stack .spec-content {
-  height: auto; flex: 0 0 auto; align-self: flex-end;
-  width: min(58%, 620px); justify-content: flex-start;
+  grid-area: content; height: auto; width: 100%; justify-content: flex-start;
 }
+.tpl-spec.layout-stack .spec-hero {
+  grid-area: hero; position: relative; min-height: 180px;
+  border-radius: 18px; overflow: hidden; border: 1px solid var(--azure-border);
+  background: rgba(255,255,255,.03);
+}
+.tpl-spec.layout-stack .spec-hero img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  cursor: zoom-in; transition: transform .5s var(--ease-soft);
+}
+.tpl-spec.layout-stack .spec-hero img:hover { transform: scale(1.04); }
 .tpl-spec.layout-stack .spec-media {
-  flex: 1 1 auto; width: 100%; min-height: 0;
+  grid-area: band; width: 100%; min-height: 0;
 }
 .tpl-spec.layout-stack .spec-media-grid { height: 100%; }
 
@@ -736,7 +755,7 @@ table.spec-table tr:nth-child(even) td { background: rgba(255,255,255,.02); }
 .tpl-gallery .slide-inner { justify-content: flex-start; padding-top: clamp(1.5rem, 4vh, 3rem); }
 .tpl-gallery .gallery-grid {
   margin-top: 1.6rem;
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   grid-auto-rows: 1fr; gap: 1rem;
   flex: 1 1 0; min-height: 0;
 }
@@ -785,7 +804,11 @@ table.spec-table tr:nth-child(even) td { background: rgba(255,255,255,.02); }
   .brand-mark span { display: none; }
   .tpl-visual .visual-row { flex-direction: column; }
   .spec-row { grid-template-columns: 1fr; }
-  .tpl-spec.layout-stack .spec-content { align-self: stretch; width: 100%; }
+  .tpl-spec.layout-stack .spec-grid {
+    grid-template-columns: 1fr; grid-template-areas: "hero" "content" "band";
+  }
+  .tpl-spec.layout-stack .spec-content { width: 100%; }
+  .tpl-spec.layout-stack .spec-hero { min-height: 140px; }
 }
 
 /* Loading fade-in for whole app */

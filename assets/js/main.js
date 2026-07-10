@@ -118,7 +118,7 @@
     lightbox.classList.remove("open");
     lightboxImg.src = "";
   }
-  document.querySelectorAll(".spec-media-grid img, .gallery-grid img, .visual-frame img, .site-plan-map img").forEach(function (img) {
+  document.querySelectorAll(".spec-media-grid img, .spec-hero img, .gallery-grid img, .visual-frame img, .site-plan-map img").forEach(function (img) {
     img.addEventListener("click", function () {
       openLightbox(img.getAttribute("data-src") || img.src);
     });

@@ -110,6 +110,15 @@ def media_grid(files, stack, media_layout=None):
     imgs = "".join('<img data-src="{0}" alt="" loading="lazy">'.format(f) for f in files)
     return '<div class="spec-media-grid {0}">{1}</div>'.format(cls, imgs)
 
+def hero_img(files):
+    """A single accent image that fills the gap the 'stack' layout otherwise
+    leaves blank beside the compact content card. Sized/cropped to whatever
+    width the gap ends up being, so it always reads as a deliberate crop
+    rather than a stray thumbnail."""
+    if not files:
+        return ""
+    return '<div class="spec-hero reveal reveal-d2"><img data-src="{0}" alt="" loading="lazy"></div>'.format(files[0])
+
 def cover(section, title_html, locations, contact_lines, bg_img, tagline=None, stats=None):
     id = next_id()
     loc_html = "".join(
@@ -514,11 +523,21 @@ def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, ex
         trows = "".join("<tr>" + "".join("<td>{0}</td>".format(nb(c)) for c in row) + "</tr>" for row in table[1:])
         table_html = ('<div class="table-wrap spec-extra-table reveal reveal-d3">'
                        '<table class="spec-table">{0}<tbody>{1}</tbody></table></div>').format(thead, trows)
+    # The stack layout puts a compact content card beside a full-width image
+    # band, which otherwise leaves the strip next to the card empty. Peel one
+    # image off into a "hero" that fills exactly that strip; if it's the only
+    # photo available, reuse it in the band too rather than leave a gap.
+    hero_html = ""
+    band_files = files
+    if stack:
+        hero_html = hero_img(files)
+        band_files = files[1:] if len(files) > 1 else files[:1]
     body = '''
     <section class="slide {tpl_cls}" id="s{id}" data-section="{section}">
       <div class="slide-inner">
         <div class="eyebrow reveal">{eyebrow}</div>
         <div class="spec-grid">
+          {hero}
           <div class="spec-media reveal reveal-d2">{media}</div>
           <div class="spec-content">
             <h2 class="slide-title reveal reveal-d1">{title}</h2>
@@ -530,10 +549,19 @@ def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, ex
         </div>
         {table}
       </div>
-    </section>'''.format(id=id, tpl_cls=tpl_cls, section=esc(section), eyebrow=esc(eyebrow), title=title,
-                          media=media_grid(files, stack, media_layout), client=client_html, extra=extra_html, rows=rows,
+    </section>'''.format(id=id, tpl_cls=tpl_cls, section=esc(section), eyebrow=esc(eyebrow), title=title, hero=hero_html,
+                          media=media_grid(band_files, stack, media_layout), client=client_html, extra=extra_html, rows=rows,
                           milestone=milestone_html, table=table_html)
     add(id, section, "spec", body)
+
+def gallery_cols(n):
+    """Pick a column count (3 or 4) that leaves the fewest empty cells in the
+    last row, so galleries never end with a stray blank tile."""
+    if n <= 4:
+        return max(n, 1)
+    def empty_cells(c):
+        return (c - n % c) % c
+    return min((4, 3), key=lambda c: (empty_cells(c), -c))
 
 def gallery(section, eyebrow, title, slide_no, caption=None, sub=None):
     id = next_id()
@@ -545,18 +573,19 @@ def gallery(section, eyebrow, title, slide_no, caption=None, sub=None):
         files = IMGS(slide_no)
     imgs = "".join('<img data-src="{0}" alt="" loading="lazy">'.format(f) for f in files)
     cap = '<p class="gallery-caption reveal reveal-d3">{0}</p>'.format(nb(caption)) if caption else ""
+    cols = gallery_cols(len(files))
     body = '''
     <section class="slide tpl-gallery" id="s{id}" data-section="{section}">
       <div class="slide-inner">
         <div class="eyebrow reveal">{eyebrow}</div>
         <h2 class="slide-title reveal reveal-d1">{title}</h2>
         {sub}
-        <div class="gallery-grid reveal reveal-d2">{imgs}</div>
+        <div class="gallery-grid reveal reveal-d2" style="grid-template-columns: repeat({cols}, 1fr)">{imgs}</div>
         {cap}
       </div>
     </section>'''.format(id=id, section=esc(section), eyebrow=esc(eyebrow), title=title,
                           sub='<p class="slide-sub reveal reveal-d1">{0}</p>'.format(nb(sub)) if sub else "",
-                          imgs=imgs, cap=cap)
+                          imgs=imgs, cap=cap, cols=cols)
     add(id, section, "gallery", body)
 
 def closer(section, title_html, contact_lines, bg_img):
@@ -682,7 +711,7 @@ _industry_photos = {
   "Water & Desalination": "assets/images/slides/slide068_img02.jpg",
   "Chemical": "assets/images/slides/slide036_img02.jpg",
   "Edible Oil & Food": "assets/images/slides/slide031_img02.jpg",
-  "Power": "assets/images/slides/slide095_img02.jpg",
+  "Power": "assets/images/slides/slide004_img01_power_crop.png",
   "Zero Liquid Discharge": "assets/images/slides/slide072_img01.jpg",
   "Lithium": "assets/images/slides/slide082_img02.jpg",
 }
