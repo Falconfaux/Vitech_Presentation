@@ -5,7 +5,8 @@ Reads structured slide content (transcribed from the converted .pptx) and
 renders a single static index.html. Re-run with `python3 scripts/build_site.py`
 whenever slide content changes.
 """
-import json, os, html
+import json, os, html, functools
+from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 with open(os.path.join(ROOT, "scripts", "image_manifest.json")) as f:
@@ -54,7 +55,7 @@ def lazybg(slide_no, n=1):
             'style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.08);z-index:0;">'
             '<div class="slide-scrim"></div>').format(src)
 
-def media_grid(slide_no, count=None, lightbox=True, layout=None):
+def media_files(slide_no, count=None):
     if isinstance(slide_no, (list, tuple)):
         per_source = [IMGS(sn) for sn in slide_no]
         if count:
@@ -71,10 +72,41 @@ def media_grid(slide_no, count=None, lightbox=True, layout=None):
         files = IMGS(slide_no)
         if count:
             files = files[:count]
+    return files
+
+@functools.lru_cache(maxsize=None)
+def img_aspect(path):
+    # width / height; landscape > 1, portrait < 1. Falls back to a landscape
+    # guess (matches the vast majority of photos in this deck) if unreadable.
+    try:
+        with Image.open(os.path.join(ROOT, path)) as im:
+            w, h = im.size
+        return w / h
+    except Exception:
+        return 1.5
+
+def resolve_stack(files, layout=None):
+    """Decide whether a spec slide's media should use the full-width 'stack'
+    treatment (compact content top-right, big image band below) or the
+    classic 50/50 split (media column left, content right). Driven by the
+    images' real aspect ratio: landscape/square sets read far better as a
+    wide band; portrait-heavy sets (tall vessels/towers) still suit the
+    classic tall column."""
+    if layout == "split":
+        return False
+    if layout == "stack":
+        return True
+    n = len(files)
+    if n == 0:
+        return False
+    avg_aspect = sum(img_aspect(f) for f in files) / n
+    return avg_aspect >= (1.3 if n == 1 else 1.0)
+
+def media_grid(files, stack, media_layout=None):
     n = len(files)
     cls = "n" + str(min(n, 4)) if n else "n1"
-    if layout == "row" and n == 2:
-        cls += " row2"
+    if n >= 2 and (stack or media_layout == "row"):
+        cls += " row" + str(min(n, 4))
     imgs = "".join('<img data-src="{0}" alt="" loading="lazy">'.format(f) for f in files)
     return '<div class="spec-media-grid {0}">{1}</div>'.format(cls, imgs)
 
@@ -460,8 +492,11 @@ def data_table(section, eyebrow, title, tables, note=None, sub=None, columns=1, 
                           tables=tables_html, note=note_html)
     add(id, section, "table", body)
 
-def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, extra=None, table=None, milestone=None, media_layout=None):
+def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, extra=None, table=None, milestone=None, media_layout=None, layout=None):
     id = next_id()
+    files = media_files(slide_no, images_count)
+    stack = resolve_stack(files, layout)
+    tpl_cls = "tpl-spec layout-stack" if stack else "tpl-spec"
     rows = "".join(
         '<div class="spec-row"><div class="k">{0}</div><div class="v">{1}</div></div>'.format(esc(k), nb(v))
         for k, v in specs
@@ -480,11 +515,11 @@ def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, ex
         table_html = ('<div class="table-wrap spec-extra-table reveal reveal-d3">'
                        '<table class="spec-table">{0}<tbody>{1}</tbody></table></div>').format(thead, trows)
     body = '''
-    <section class="slide tpl-spec" id="s{id}" data-section="{section}">
+    <section class="slide {tpl_cls}" id="s{id}" data-section="{section}">
       <div class="slide-inner">
         <div class="eyebrow reveal">{eyebrow}</div>
         <div class="spec-grid">
-          <div class="reveal reveal-d2">{media}</div>
+          <div class="spec-media reveal reveal-d2">{media}</div>
           <div class="spec-content">
             <h2 class="slide-title reveal reveal-d1">{title}</h2>
             {client}
@@ -495,8 +530,8 @@ def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, ex
         </div>
         {table}
       </div>
-    </section>'''.format(id=id, section=esc(section), eyebrow=esc(eyebrow), title=title,
-                          media=media_grid(slide_no, images_count, layout=media_layout), client=client_html, extra=extra_html, rows=rows,
+    </section>'''.format(id=id, tpl_cls=tpl_cls, section=esc(section), eyebrow=esc(eyebrow), title=title,
+                          media=media_grid(files, stack, media_layout), client=client_html, extra=extra_html, rows=rows,
                           milestone=milestone_html, table=table_html)
     add(id, section, "spec", body)
 

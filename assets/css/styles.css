@@ -686,15 +686,33 @@ table.spec-table tr:nth-child(even) td { background: rgba(255,255,255,.02); }
 .tpl-spec .spec-media-grid.n2 { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
 .tpl-spec .spec-media-grid.n2.row2 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr; }
 .tpl-spec .spec-media-grid.n3 { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr 1fr; }
+.tpl-spec .spec-media-grid.n3.row3 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr; }
 .tpl-spec .spec-media-grid.n4 { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr 1fr 1fr; }
+.tpl-spec .spec-media-grid.n4.row4 { grid-template-columns: 1fr 1fr 1fr 1fr; grid-template-rows: 1fr; }
 .tpl-spec .spec-media-grid img, .tpl-spec .spec-media-grid .ph {
   width: 100%; height: 100%; min-height: 0; max-height: none;
-  object-fit: contain; padding: 8px; cursor: zoom-in;
+  object-fit: cover; cursor: zoom-in;
   transition: transform .5s var(--ease-soft);
 }
 .tpl-spec .spec-media-grid img:hover { transform: scale(1.04); }
 
 .tpl-spec .spec-content { height: 100%; display: flex; flex-direction: column; justify-content: center; }
+
+/* layout-stack: compact content card top-right, big full-width image band below.
+   Chosen automatically at build time for landscape/square-leaning image sets;
+   portrait-heavy sets (tall vessels/towers) keep the classic split above. */
+.tpl-spec.layout-stack .spec-grid {
+  display: flex; flex-direction: column;
+  gap: clamp(1rem, 2.4vw, 1.8rem);
+}
+.tpl-spec.layout-stack .spec-content {
+  height: auto; flex: 0 0 auto; align-self: flex-end;
+  width: min(58%, 620px); justify-content: flex-start;
+}
+.tpl-spec.layout-stack .spec-media {
+  flex: 1 1 auto; width: 100%; min-height: 0;
+}
+.tpl-spec.layout-stack .spec-media-grid { height: 100%; }
 
 .spec-list { display: grid; gap: calc(var(--fit,1) * .65rem); margin-top: calc(var(--fit,1) * 1.2rem); }
 .spec-row { display: grid; grid-template-columns: 130px 1fr; gap: calc(var(--fit,1) * .8rem); font-size: calc(var(--fit,1) * .92rem); padding: calc(var(--fit,1) * .55rem) 0; border-top: 1px solid rgba(255,255,255,.08); }
@@ -723,10 +741,9 @@ table.spec-table tr:nth-child(even) td { background: rgba(255,255,255,.02); }
   flex: 1 1 0; min-height: 0;
 }
 .tpl-gallery .gallery-grid img {
-  width: 100%; height: 100%; max-height: none; object-fit: contain; background: rgba(255,255,255,.04);
+  width: 100%; height: 100%; max-height: none; object-fit: cover; background: rgba(255,255,255,.04);
   border-radius: 12px; border: 1px solid rgba(var(--azure-bright-rgb),.25); cursor: zoom-in;
   transition: transform .35s var(--ease-soft), border-color .35s;
-  padding: .5rem;
 }
 .tpl-gallery .gallery-grid img:hover { transform: translateY(-4px); border-color: var(--azure-bright); }
 .tpl-gallery .gallery-caption { text-align: center; font-size: .8rem; color: var(--steel-light); margin-top: 1rem; }
@@ -768,6 +785,7 @@ table.spec-table tr:nth-child(even) td { background: rgba(255,255,255,.02); }
   .brand-mark span { display: none; }
   .tpl-visual .visual-row { flex-direction: column; }
   .spec-row { grid-template-columns: 1fr; }
+  .tpl-spec.layout-stack .spec-content { align-self: stretch; width: 100%; }
 }
 
 /* Loading fade-in for whole app */
