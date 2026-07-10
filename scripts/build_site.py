@@ -653,9 +653,9 @@ prose("Company Overview", "Design & Engineering", "Engineering Capability",
       side_title="Mechanical design standards",
       side_items=["ASME Sec. I", "ASME Sec. VIII Div. 1", "ASME Sec. VIII Div. 2", "API 650", "API 660", "PD 5500", "AD 2000"],
       chips=[{"t": t, "on": True} for t in ["PV Elite", "AutoCAD", "Nozzle PRO"]] +
-            [{"t": t} for t in ["ANSYS Mechanical", "STAAD Pro", "PDMS", "TEKLA", "HTRI (Thermal Design)"]],
+            [{"t": t} for t in ["ANSYS Mechanical", "STAAD Pro"]],
       stats=[
-        {"value": "8", "label": "Design Software Platforms"},
+        {"value": "5", "label": "Design Software Platforms"},
         {"value": "7", "label": "Design Codes & Standards"},
       ],
       center=True, bg_img=13)
