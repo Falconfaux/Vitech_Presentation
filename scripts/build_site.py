@@ -124,6 +124,39 @@ def arrange_showcase(items):
         return ordered, " mosaic3"
     return items, ""
 
+def _fill_weight(a):
+    # clamp a cell's fr weight so one extreme photo can't crush its neighbours
+    return max(0.45, min(2.4, a))
+
+def fill_style(files, arr_cls=""):
+    """Inline grid-template-columns for a photo-fill canvas: column widths
+    proportional to each photo's real aspect ratio, so cover-fit photos crop
+    minimally (cells in a row share height, so width ∝ aspect makes each cell
+    match its photo's shape). mosaic3 weighs the full-height portrait column
+    against the stacked landscape pair; grid3 weighs its two top columns."""
+    aspects = [img_aspect(f) for f in files]
+    if "mosaic3" in arr_cls:
+        cols = [_fill_weight(aspects[0]), _fill_weight(max(aspects[1], aspects[2]) / 2)]
+    elif "grid3" in arr_cls:
+        cols = [_fill_weight(aspects[0]), _fill_weight(aspects[1])]
+    elif len(files) in (2, 3):
+        cols = [_fill_weight(a) for a in aspects]
+    else:
+        return ""
+    return ' style="grid-template-columns:{0}"'.format(
+        " ".join("{0:.2f}fr".format(c) for c in cols))
+
+def _panel_clear_cells(n, arr_cls):
+    """Indices (display order) of showcase cells that touch the slide's lower
+    edge and must reserve clearance for the bottom panel strip."""
+    if "grid3" in arr_cls:
+        return {2}
+    if "mosaic3" in arr_cls:
+        return {0, 2}
+    if n == 4:
+        return {2, 3}
+    return set(range(n))
+
 def media_frame(src, extra_cls=""):
     """Uncropped media frame: the full photo (object-fit: contain) layered
     over a blurred, darkened cover copy of itself, so an aspect-ratio
@@ -198,7 +231,8 @@ def divider(section, title_html, sub, bg_img=None, index_label=""):
         <div class="divider-rule reveal reveal-d2"></div>
         <p class="divider-sub reveal reveal-d3">{sub}</p>
       </div>
-    </section>'''.format(id=id, section=esc(section), bg=lazybg(bg_img) if bg_img else "",
+    </section>'''.format(id=id, section=esc(section),
+                          bg=(lazybg(*bg_img) if isinstance(bg_img, tuple) else lazybg(bg_img)) if bg_img else "",
                           idx=esc(index_label), title=title_html, sub=nb(sub) if sub else "")
     add(id, section, "divider", body)
 
@@ -357,9 +391,9 @@ def org_chart(section, eyebrow, title, exec_chain, left_columns, gm, gm_peer, gm
     add(id, section, "orgchart", body)
 
 def site_plan(section, eyebrow, title, img_src, legend, stat=None):
-    """Full-bleed site plan: the CAD drawing owns the whole slide (uncropped
-    over a blurred fill), the title overlays the top scrim and the legend
-    floats as a glass panel docked to the right edge."""
+    """Full-bleed site plan: the CAD drawing owns the whole slide (uncropped,
+    on a flat deep-blue field), the title overlays the top scrim and the
+    legend floats as a glass panel docked to the right edge."""
     id = next_id()
     parts = []
     for num, txt in legend:
@@ -375,7 +409,6 @@ def site_plan(section, eyebrow, title, img_src, legend, stat=None):
     body = '''
     <section class="slide tpl-siteplan" id="s{id}" data-section="{section}">
       <div class="siteplan-canvas site-plan-map">
-        <img class="media-blur" data-src="{img}" alt="" aria-hidden="true" loading="lazy">
         <img class="media-full" data-src="{img}" alt="" loading="lazy">
         <p class="site-plan-hint">Click to enlarge</p>
       </div>
@@ -611,7 +644,7 @@ def data_table(section, eyebrow, title, tables, note=None, sub=None, columns=1, 
                           tables=tables_html, note=note_html)
     add(id, section, "table", body)
 
-def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, extra=None, table=None, milestone=None, media_layout=None, layout=None, files=None):
+def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, extra=None, table=None, milestone=None, media_layout=None, layout=None, files=None, fill=False):
     id = next_id()
     if files is None:
         files = media_files(slide_no, images_count)
@@ -643,24 +676,36 @@ def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, ex
     # uncropped over its own blurred fill.
     if files and layout != "split" and (len(files) == 1 or layout == "showcase"):
         shown = files[:4]
+        style = ""
         if len(shown) == 1:
-            canvas = ('<img class="media-blur" data-src="{f}" alt="">'
-                      '<img class="media-full" data-src="{f}" alt="">').format(f=shown[0])
+            blur = "" if fill else '<img class="media-blur" data-src="{f}" alt="">'.format(f=shown[0])
+            canvas = blur + '<img class="media-full" data-src="{f}" alt="">'.format(f=shown[0])
             n_cls = ""
         else:
             cell_items, arr_cls = arrange_showcase([(f, "") for f in shown])
-            canvas = "".join(
-                '<div class="showcase-cell">'
-                '<img class="media-blur" data-src="{f}" alt="">'
-                '<img class="media-full" data-src="{f}" alt="">'
-                '</div>'.format(f=f) for f, _ in cell_items)
+            if fill:
+                clear = _panel_clear_cells(len(shown), arr_cls) if not table else set()
+                canvas = "".join(
+                    '<div class="showcase-cell{pc}">'
+                    '<img class="media-full" data-src="{f}" alt="">'
+                    '</div>'.format(f=f, pc=" panel-clear" if i in clear else "")
+                    for i, (f, _) in enumerate(cell_items))
+                style = fill_style([f for f, _ in cell_items], arr_cls)
+            else:
+                canvas = "".join(
+                    '<div class="showcase-cell">'
+                    '<img class="media-blur" data-src="{f}" alt="">'
+                    '<img class="media-full" data-src="{f}" alt="">'
+                    '</div>'.format(f=f) for f, _ in cell_items)
             n_cls = " n{0}{1}".format(len(shown), arr_cls)
         # a spec table is too tall for the bottom strip — dock the panel on the
         # right edge instead so it never covers the photos
         side_cls = " panel-side" if table else ""
+        if fill:
+            side_cls += " photo-fill"
         body = '''
     <section class="slide tpl-spec layout-showcase{side_cls}" id="s{id}" data-section="{section}">
-      <div class="showcase-canvas{n_cls}" aria-hidden="true">
+      <div class="showcase-canvas{n_cls}"{style} aria-hidden="true">
         {canvas}
       </div>
       <div class="slide-inner">
@@ -676,7 +721,7 @@ def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, ex
           {table}
         </div>
       </div>
-    </section>'''.format(id=id, section=esc(section), canvas=canvas, n_cls=n_cls, side_cls=side_cls,
+    </section>'''.format(id=id, section=esc(section), canvas=canvas, n_cls=n_cls, side_cls=side_cls, style=style,
                           eyebrow=esc(eyebrow), title=title, client=client_html, extra=extra_html,
                           rows=rows, milestone=milestone_html, table=table_html)
         add(id, section, "spec", body)
@@ -713,25 +758,29 @@ def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, ex
                           milestone=milestone_html, table=table_html)
     add(id, section, "spec", body)
 
-def photo_showcase(section, eyebrow, title, items, sub=None):
+def photo_showcase(section, eyebrow, title, items, sub=None, fill=False):
     """Full-bleed photo slide: 2–4 full-height cells, each photo shown whole
     over its own blurred fill (same recipe as the spec showcase), with the
     title overlaid on a top scrim and an optional caption chip pinned to the
-    bottom of each cell. items: list of (img_src, caption-or-None)."""
+    bottom of each cell. items: list of (img_src, caption-or-None).
+    fill=True drops the blurred backdrop: photos fill their aspect-weighted
+    cells edge-to-edge (object-fit: cover, minimal crop)."""
     id = next_id()
     cell_items, arr_cls = arrange_showcase(list(items))
+    blur_tpl = '' if fill else '<img class="media-blur" data-src="{f}" alt="" aria-hidden="true">'
     cells = "".join(
-        '<div class="showcase-cell">'
-        '<img class="media-blur" data-src="{f}" alt="" aria-hidden="true">'
-        '<img class="media-full" data-src="{f}" alt="">'
-        '{cap}</div>'.format(
+        ('<div class="showcase-cell">' + blur_tpl +
+         '<img class="media-full" data-src="{f}" alt="">'
+         '{cap}</div>').format(
             f=src,
             cap='<div class="showcase-cap">{0}</div>'.format(nb(cap)) if cap else "")
         for src, cap in cell_items)
     sub_html = '<p class="slide-sub">{0}</p>'.format(nb(sub)) if sub else ""
+    fill_cls = " photo-fill" if fill else ""
+    style = fill_style([src for src, _ in cell_items], arr_cls) if fill else ""
     body = '''
-    <section class="slide tpl-spec layout-showcase showcase-photos" id="s{id}" data-section="{section}">
-      <div class="showcase-canvas n{n}{arr_cls}">
+    <section class="slide tpl-spec layout-showcase showcase-photos{fill_cls}" id="s{id}" data-section="{section}">
+      <div class="showcase-canvas n{n}{arr_cls}"{style}>
         {cells}
       </div>
       <div class="slide-inner">
@@ -742,7 +791,7 @@ def photo_showcase(section, eyebrow, title, items, sub=None):
         </div>
       </div>
     </section>'''.format(id=id, section=esc(section), n=min(len(items), 4), arr_cls=arr_cls, cells=cells,
-                          eyebrow=esc(eyebrow), title=title, sub=sub_html)
+                          fill_cls=fill_cls, style=style, eyebrow=esc(eyebrow), title=title, sub=sub_html)
     add(id, section, "spec", body)
 
 def gallery_cols(n):
@@ -905,7 +954,7 @@ _tiles = "".join(
 )
 _industries_id = next_id()
 _industries_body = '''
-    <section class="slide tpl-visual" id="s{id}" data-section="Company Overview">
+    <section class="slide tpl-visual industry-slide" id="s{id}" data-section="Company Overview">
       <div class="slide-inner">
         <div class="eyebrow reveal">Markets We Serve</div>
         <h2 class="slide-title reveal reveal-d1">Industries We Cater To</h2>
@@ -967,8 +1016,10 @@ org_chart("Company Overview", "Structure · Quality Manual Annex-D2, Rev. 4", "O
     ],
     footnote="** Refer list as per attached Annexure-1")
 
-# ---- 6-8. Company Layout & Plot Overview ---------------------------------
-visual("Company Overview", "Facilities", "Company Layout & Plot Overview", None, [6, 7, 8])
+# ---- 6-8. Company Layout & Plot Overview (full-bleed, photos fill their
+#           aspect-weighted cells edge-to-edge) ------------------------------
+photo_showcase("Company Overview", "Facilities", "Company Layout & Plot Overview",
+    [(IMG(6, 1), None), (IMG(7, 1), None), (IMG(8, 1), None)], fill=True)
 
 # ---- 9. Company Layout (annotated site plan + legend) --------------------
 site_plan("Company Overview", "Facilities · Vitech Heavy Equipments Pvt. Ltd, Shahapur", "Company Layout",
@@ -1003,7 +1054,7 @@ site_plan("Company Overview", "Facilities · Vitech Heavy Equipments Pvt. Ltd, S
 photo_showcase("Workshop & Facilities", "Infrastructure", "Workshop Overview — Shahapur Campus",
     [(IMG(10, 4), "Workshop with Admin Building"),
      (IMG(10, 1), "Open Yard — 6,000 sq.mtr · Goliath Crane 25 MT × 39 mtr span"),
-     (IMG(10, 3), "Stainless / Exotic Steel Bay — 22 × 120 mtr × 2 Nos.")])
+     (IMG(10, 3), "Stainless / Exotic Steel Bay — 22 × 120 mtr × 2 Nos.")], fill=True)
 
 photo_showcase("Workshop & Facilities", "Infrastructure", "Workshop Overview — Fabrication Bays",
     [(IMG(11, 1), "Stainless / Exotic Steel Bay 1 — 22 × 120 mtr"),
@@ -1123,7 +1174,7 @@ spec("Automation & Welding", "Automated Welding", "Tube-to-Tube Sheet Welding on
 spec("Automation & Welding", "Weld Overlay", "Weld Overlay Capability", "",
      [("Overlay A", "SA 516 Gr. 70 + SA 240 Gr. 317L overlay"),
       ("Overlay B", "SA 240 Gr. 316 + Hastelloy C 276 overlay")],
-     25, layout="showcase",
+     25, layout="showcase", fill=True,
      table=[
         ["Sr.", "Description", "Process", "Material", "Layers"],
         ["01", "Shell: min. ID 300mm (& above) × 40mm thk. × 1000mm lg. (max.)", "GTAW & FCAW", "SS 304/316/317L/Hastelloy C276", "3"],
@@ -1181,13 +1232,13 @@ spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Produced Water Skids", "Cair
      [("Material", "Carbon Steel / Duplex"),
       ("Qty", "22 Nos."),
       ("Scope", "Procurement + fabrication of piping spools + structure + assembly + E&I procurement & installation + heat tracing + insulation + FAT")],
-     87, layout="showcase")
+     87, layout="showcase", fill=True)
 
 spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Produced Water Skids — Fabrication Progress", "Cairn Energy, Rajasthan, India",
      [("Material", "Carbon Steel / Duplex"),
       ("Qty", "22 Nos."),
       ("Scope", "Procurement + fabrication of piping spools + structure + assembly + E&I procurement & installation + heat tracing + insulation + FAT")],
-     88, layout="showcase")
+     88, layout="showcase", fill=True, files=[IMG(88, 1), IMG(88, 3)])
 
 spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Static Mixer (ASME U Stamp — EIL)", "HPCL Visakhapatnam (EIL)",
      [("Material", "Carbon steel body (SA 106 Gr.B) with SS 316 steam tracing tubes"),
@@ -1241,14 +1292,14 @@ spec("Food Processing & Oleo Chemical", "Food Processing", "Spiral Heat Exchange
       ("Quantity", "150+ such jobs manufactured to date"),
       ("Weight", "60 – 120 tons"),
       ("High pressure", "Steam coils"), ("Low pressure", "Clamping coils")],
-     [31, 32], layout="showcase", extra="For Europe, Russia, South America, USA, Africa, Asia")
+     [31, 32], layout="showcase", fill=True, extra="For Europe, Russia, South America, USA, Africa, Asia")
 
 spec("Food Processing & Oleo Chemical", "Food Processing", "Soft Flex U-Tube Heat Exchanger", "For a project in India",
      [("Material", "SA 240 Gr. 304; tubesheets SA 240 Gr. 304; tubes SA 213 TP 304"),
       ("Size", "Ø 1.8 mtr × 20.3 mtr L"),
       ("U-tubes", "30mm OD × 2mm thk."),
       ("Qty / Weight", "1 No. / 35 tons")],
-     33, layout="showcase")
+     33, layout="showcase", fill=True)
 
 spec("Food Processing & Oleo Chemical", "Oleo Chemical", "Cladded Splitter Columns", "Adani Wilmar Ltd, India",
      [("Column 1 — Material", "SA 516 Gr. 70 + SS 317L clad"),
@@ -1257,7 +1308,7 @@ spec("Food Processing & Oleo Chemical", "Oleo Chemical", "Cladded Splitter Colum
       ("Column 2 — Material", "SA 516 Gr.70 + SA 240 Gr.317L clad, SS 317L internals"),
       ("Column 2 — Size", "Ø 1.92 mtr × (50+3mm thk) × 55 mtr L"),
       ("Column 2 — Qty / Wt.", "2 Nos. / 150 tons each")],
-     [34, 35], layout="showcase")
+     [34, 35], layout="showcase", fill=True)
 
 spec("Food Processing & Oleo Chemical", "Oleo Chemical", "Cladded Columns with Trays", "PTSOI, Indonesia",
      [("Material", "SA 516 Gr. 70 + SS 317L"),
@@ -1288,7 +1339,7 @@ spec("Food Processing & Oleo Chemical", "Food Processing", "First Stage Evaporat
       ("Size", "Ø 2.305/3.426 mtr × 18.39 mtr L"),
       ("Tubes", "OD 31.75 × 1.25 thk. — qty 2,196 Nos."),
       ("Qty / Weight", "1 No. / 56 tons")],
-     40, layout="showcase")
+     40, layout="showcase", fill=True)
 
 spec("Food Processing & Oleo Chemical", "Food Processing", "Vacuum Condenser", "CHS Inc., USA",
      [("Material", "SA 516 Gr. 70"),
@@ -1319,7 +1370,7 @@ spec("Food Processing & Oleo Chemical", "Food Processing", "Hydrogenation Reacto
 # ---- 45. Divider: Fertilizer ------------------------------------------
 divider("Fertilizer", "Fertilizer",
         "Prill towers, converters and heat exchangers for the world's largest fertilizer producers — including a 305 MT Prill Tower for Chambal Fertilizer & Chemicals Ltd.",
-        bg_img=51, index_label="VI")
+        bg_img=(51, 4), index_label="VI")
 
 spec("Fertilizer", "Coromandel International Ltd", "Acid Cooler", "",
      [("Material", "Shell side SA 240 Type 304L; channel side SA 516 Gr 70"),
@@ -1335,12 +1386,19 @@ spec("Fertilizer", "Fertilizer", "Tail Gas Stack", "Chambal Fertilizer & Chemica
       ("Qty / Weight", "1 No. / 20 tons")],
      47)
 
-spec("Fertilizer", "Fertilizer · Shop Fabrication", "Prill Tower — Fabrication", "Chambal Fertilizer & Chemicals Ltd., Rajasthan",
+spec("Fertilizer", "Fertilizer · Shop Fabrication", "Prill Tower — Fabrication: Skirt & Top Plenum", "Chambal Fertilizer & Chemicals Ltd., Rajasthan",
      [("Material", "SA 240 Gr. 304L"),
       ("Size", "Ø 5.3/7.1/8.9 × 68.17 mtr length"),
       ("Qty / Weight", "1 No. / 305.25 MT"),
-      ("Fabrication Stages", "Skirt & Top Plenum · Hopper (Polished to 0.4Ra Finish) · Shell Rolling")],
-     [48, 49, 50], images_count=4, layout="showcase")
+      ("Stage", "Skirt & top plenum sections fabricated")],
+     48, layout="showcase", fill=True, files=[IMG(48, 1), IMG(48, 2)])
+
+spec("Fertilizer", "Fertilizer · Shop Fabrication", "Prill Tower — Fabrication: Hopper & Shell Rolling", "Chambal Fertilizer & Chemicals Ltd., Rajasthan",
+     [("Material", "SA 240 Gr. 304L"),
+      ("Size", "Ø 5.3/7.1/8.9 × 68.17 mtr length"),
+      ("Qty / Weight", "1 No. / 305.25 MT"),
+      ("Stages", "Hopper (polished to 0.4Ra finish) · Shell rolling")],
+     49, layout="showcase", fill=True, files=[IMG(49, 1), IMG(50, 1)])
 
 spec("Fertilizer", "Site Installation", "Prill Tower — Installation at Site", "Chambal Fertilizer & Chemicals Ltd., Rajasthan",
      [("Stage", "Tower sections delivered — top plenum lifted into the supporting structure")],
@@ -1356,7 +1414,7 @@ spec("Fertilizer", "Fertilizer · Shop + Site Fabricated", "Hot Interpass Heat E
       ("Tubes", "50.8mm OD × 2.1mm thk. × 6.1 mtr L — qty 2,808 Nos."),
       ("Qty / Weight", "1 No. / 85 tons"),
       ("Transport", "3 pieces — (1st) Ø 6.9×6.1m, (2nd) Ø 5.6×3.85m, (3rd) Ø 5.6×3m; all large nozzles shipped loose")],
-     [52, 53], layout="showcase", milestone="Site Assembly — erected at IFFCO site")
+     [52, 53], layout="showcase", fill=True, milestone="Site Assembly — erected at IFFCO site")
 
 spec("Fertilizer", "Fertilizer · Shop + Site Fabricated", "Cold Interpass Heat Exchanger", "IFFCO, Paradip, Odisha",
      [("Material", "SA 240 Gr. 316L (shell & channel side); tubesheets & tubes SA 213 TP 316L"),
@@ -1364,7 +1422,7 @@ spec("Fertilizer", "Fertilizer · Shop + Site Fabricated", "Cold Interpass Heat 
       ("Tubes", "50.8mm OD × 2.41mm thk. × 10.1 mtr L — qty 2,841 Nos."),
       ("Qty / Weight", "1 No. / 135 tons"),
       ("Transport", "3 pieces — (1st) Ø 5.4×10.5m, (2nd & 3rd) Ø 5.4×2.5m, bustle Ø 6.9m ×2 dispatched in halves; large nozzles shipped loose")],
-     [54, 55], layout="showcase", milestone="Site Assembly — erected at IFFCO site")
+     [54, 55], layout="showcase", fill=True, milestone="Site Assembly — erected at IFFCO site")
 
 spec("Fertilizer", "Fertilizer · Shop + Site Fabricated", "Converter", "IFFCO, Paradip, Odisha",
      [("Material", "SA 240 Gr. 304H"),
@@ -1485,15 +1543,19 @@ spec("Water & Desalination", "Water & Desalination", "Pre-Fabricated Piping Spoo
       ("Qty", "80,000 inch-dia.")],
      75)
 
-spec("Water & Desalination", "Water Treatment", "Skid Mounted Packages", "H2 Green Steel, Sweden",
+spec("Water & Desalination", "Water Treatment", "Skid Mounted Packages — Skid 1", "H2 Green Steel, Sweden",
      [("Scope", "Procurement + fabrication of piping spools + structure + assembly + E&I procurement & installation + heat tracing + insulation + FAT"),
-      ("Skid 1 — Material", "SA 312 Tp.316L + IS 2062"),
-      ("Skid 1 — Size", "2.5m H × 2m W × 5m L"),
-      ("Skid 1 — Qty / Wt.", "11 Nos. / 28 tons"),
-      ("Skid 2 — Material", "SA 106 Gr.B (rubber lining) & SA 312 TP 316L"),
-      ("Skid 2 — Size", "6.6m L × 4.1m W × 3.75m H"),
-      ("Skid 2 — Qty / Wt.", "10 Nos. / 110 tons")],
-     [76, 77], images_count=4, layout="showcase")
+      ("Material", "SA 312 Tp.316L + IS 2062"),
+      ("Size", "2.5m H × 2m W × 5m L"),
+      ("Qty / Wt.", "11 Nos. / 28 tons")],
+     76, layout="showcase", fill=True, files=[IMG(76, 1), IMG(76, 2)])
+
+spec("Water & Desalination", "Water Treatment", "Skid Mounted Packages — Skid 2", "H2 Green Steel, Sweden",
+     [("Scope", "Procurement + fabrication of piping spools + structure + assembly + E&I procurement & installation + heat tracing + insulation + FAT"),
+      ("Material", "SA 106 Gr.B (rubber lining) & SA 312 TP 316L"),
+      ("Size", "6.6m L × 4.1m W × 3.75m H"),
+      ("Qty / Wt.", "10 Nos. / 110 tons")],
+     77, layout="showcase", fill=True, files=[IMG(77, 1), IMG(77, 2)])
 
 spec("Water & Desalination", "Water Treatment", "ZLD Softeners (Rubber Lined), PED + CE Marking", "H2 Green Steel, Sweden",
      [("Material", "SA 516 Gr. 70N"),
@@ -1636,7 +1698,7 @@ photo_showcase("Exhibitions & Approvals", "Industry Presence", "Vitech at Exhibi
 
 photo_showcase("Exhibitions & Approvals", "Industry Presence", "Vitech at Exhibitions — WEFTEC · CHEMTECH",
     [(IMG(112, 5), "WEFTEC 2025, Chicago"),
-     (IMG(112, 4), "CHEMTECH 2026, Mumbai")])
+     (IMG(112, 4), "CHEMTECH 2026, Mumbai")], fill=True)
 
 # ---- 115. Divider: Appreciation Letters --------------------------------------
 divider("Client Appreciation", "Appreciation<br><span>Letters</span>",

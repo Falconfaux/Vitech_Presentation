@@ -539,16 +539,11 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
   position: absolute; inset: 0; z-index: 0; overflow: hidden;
   background: var(--azure-deep);
 }
-.tpl-siteplan .siteplan-canvas .media-blur {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: cover; transform: scale(1.12);
-  filter: blur(30px) brightness(.32) saturate(.7);
-}
 .tpl-siteplan .siteplan-canvas .media-full {
   position: absolute; inset: 0; width: 100%; height: 100%;
   object-fit: contain; cursor: zoom-in;
   /* clear the title scrim (top), the legend panel (right) and the hint (bottom) */
-  padding: calc(var(--fit,1) * 5.4rem) calc(var(--fit,1) * 23.5rem) calc(var(--fit,1) * 1.2rem) calc(var(--pad) * .35);
+  padding: calc(var(--fit,1) * 4.6rem) calc(var(--fit,1) * 21rem) calc(var(--fit,1) * .7rem) calc(var(--pad) * .2);
 }
 .tpl-siteplan .siteplan-canvas::after {
   content: ""; position: absolute; left: 0; right: 0; top: 0;
@@ -570,11 +565,11 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 }
 .siteplan-stat span { font-size: .72rem; font-weight: 600; color: var(--steel-light); letter-spacing: .04em; text-transform: uppercase; }
 .tpl-siteplan .siteplan-legend {
-  position: absolute; top: 50%; right: calc(var(--pad) * .45); transform: translateY(-50%);
-  z-index: 2; width: calc(var(--fit,1) * 21.5rem); max-height: calc(100% - 6rem);
+  position: absolute; top: 50%; right: calc(var(--pad) * .35); transform: translateY(-50%);
+  z-index: 2; width: calc(var(--fit,1) * 19.5rem); max-height: calc(100% - 7rem);
   overflow-y: auto; pointer-events: auto;
-  display: grid; gap: calc(var(--fit,1) * .32rem);
-  padding: calc(var(--fit,1) * 1rem) calc(var(--fit,1) * 1.1rem);
+  display: grid; gap: calc(var(--fit,1) * .26rem);
+  padding: calc(var(--fit,1) * .85rem) calc(var(--fit,1) * 1rem);
   border-radius: 16px;
   background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .82), rgba(var(--azure-deep-rgb), .92));
   border: 1px solid rgba(var(--azure-bright-rgb), .35); border-top: 3px solid var(--amber);
@@ -716,6 +711,15 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
   position: relative; z-index: 2; text-align: left; width: 100%;
   padding: 0 .85rem .8rem; text-shadow: 0 1px 4px rgba(0,0,0,.6);
 }
+/* industries slide: tighten the title block and slide padding so the photo
+   tiles get the freed height */
+.tpl-visual.industry-slide .slide-inner {
+  padding-top: calc(var(--fit,1) * 3.6rem); /* clear the fixed brand mark */
+  padding-left: calc(var(--pad) * .6); padding-right: calc(var(--pad) * .6);
+  padding-bottom: calc(var(--pad) * .45 + 32px);
+}
+.tpl-visual.industry-slide .industry-grid { margin-top: 1.1rem; gap: .85rem; }
+.tpl-visual.industry-slide .industry-tile.has-photo span { font-size: .92rem; }
 @media (max-width: 860px) { .industry-grid { grid-template-columns: repeat(2, 1fr); } }
 
 /* ---------------------------------------------------------------------- */
@@ -997,6 +1001,26 @@ table.spec-table td.cell-no { color: var(--steel); }
 .tpl-spec.layout-showcase.panel-side .spec-extra-table table.spec-table td,
 .tpl-spec.layout-showcase.panel-side .spec-extra-table table.spec-table th { padding: calc(var(--fit,1) * .4rem) calc(var(--fit,1) * .5rem); }
 
+/* photo-fill: showcase variant without the blurred backdrop — each photo
+   fills its cell edge-to-edge (object-fit: cover). Column widths are set
+   inline at build time from the real image aspect ratios, so the crop stays
+   minimal. Cells marked panel-clear reserve a bottom band so the glass panel
+   strip never covers a photo. */
+.tpl-spec.layout-showcase.photo-fill .showcase-canvas .media-full {
+  object-fit: cover; padding: 0 !important;
+}
+.tpl-spec.layout-showcase.photo-fill:not(.panel-side):not(.showcase-photos) .showcase-canvas > .media-full,
+.tpl-spec.layout-showcase.photo-fill .showcase-cell.panel-clear .media-full {
+  padding-bottom: calc(var(--fit,1) * 8.9rem) !important;
+}
+/* keep the fixed chrome (brand mark, counter) legible over bright photos —
+   showcase-photos slides already carry their own darker title scrim */
+.tpl-spec.layout-showcase.photo-fill:not(.showcase-photos) .showcase-canvas::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 0;
+  height: calc(var(--fit,1) * 4.5rem); z-index: 1; pointer-events: none;
+  background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .62), rgba(var(--azure-deep-rgb), 0));
+}
+
 .spec-list { display: grid; gap: calc(var(--fit,1) * .65rem); margin-top: calc(var(--fit,1) * 1.2rem); }
 .spec-row { display: grid; grid-template-columns: 130px 1fr; gap: calc(var(--fit,1) * .8rem); font-size: calc(var(--fit,1) * .92rem); padding: calc(var(--fit,1) * .55rem) 0; border-top: 1px solid rgba(255,255,255,.08); }
 .spec-row:first-child { border-top: none; }
@@ -1076,6 +1100,7 @@ table.spec-table td.cell-no { color: var(--steel); }
   .tpl-spec.layout-stack .spec-content { width: 100%; }
   .tpl-spec.layout-stack .spec-hero { min-height: calc(var(--fit,1) * 180px); }
   .tpl-spec.layout-showcase .showcase-canvas .media-full { padding: 3.2rem .6rem 46vh; }
+  .tpl-spec.layout-showcase.photo-fill .showcase-cell.panel-clear .media-full { padding-bottom: 46vh !important; }
   .tpl-spec.layout-showcase .showcase-panel { padding: 1rem 1.1rem; }
 }
 
