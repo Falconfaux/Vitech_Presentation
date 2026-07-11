@@ -711,11 +711,20 @@ table.spec-table tr:nth-child(even) td { background: rgba(255,255,255,.02); }
 }
 .table-grid-2col .table-wrap { margin-top: calc(var(--fit,1) * 1.1rem); margin-bottom: 0; align-self: start; }
 
+/* text-only slides: generous type so the tables own the slide (the --fit
+   auto-shrinker still protects the densest ones) */
+.tpl-table .slide-inner { justify-content: center; padding-top: calc(var(--fit,1) * clamp(2rem, 5vh, 3.5rem)); }
+.tpl-table table.spec-table { font-size: calc(var(--fit,1) * 1.14rem); }
+.tpl-table table.spec-table th { font-size: calc(var(--fit,1) * .92rem); padding: calc(var(--fit,1) * var(--fit,1) * .95rem) calc(var(--fit,1) * 1.2rem); }
+.tpl-table table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .9rem) calc(var(--fit,1) * 1.2rem); }
+.tpl-table .table-note { font-size: calc(var(--fit,1) * .95rem); }
+.tpl-table .slide-sub { font-size: calc(var(--fit,1) * 1.1rem); }
+
 .tpl-table.dense .table-wrap { margin-top: calc(var(--fit,1) * var(--fit,1) * .9rem); margin-bottom: 0; }
-.tpl-table.dense table.spec-table { font-size: .84rem; }
-.tpl-table.dense table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .5rem) calc(var(--fit,1) * .8rem); line-height: calc(var(--fit,1) * var(--fit,1) * 1.35); }
-.tpl-table.dense table.spec-table th { padding: calc(var(--fit,1) * var(--fit,1) * .55rem) calc(var(--fit,1) * .8rem); font-size: .72rem; }
-.tpl-table.dense .table-note { font-size: .76rem; }
+.tpl-table.dense table.spec-table { font-size: calc(var(--fit,1) * .94rem); }
+.tpl-table.dense table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .55rem) calc(var(--fit,1) * .9rem); line-height: calc(var(--fit,1) * var(--fit,1) * 1.38); }
+.tpl-table.dense table.spec-table th { padding: calc(var(--fit,1) * var(--fit,1) * .65rem) calc(var(--fit,1) * .9rem); font-size: .82rem; }
+.tpl-table.dense .table-note { font-size: .85rem; }
 
 /* ---------------------------------------------------------------------- */
 /* Shared uncropped media frame: full photo (object-fit: contain) layered  */
@@ -834,6 +843,23 @@ table.spec-table tr:nth-child(even) td { background: rgba(255,255,255,.02); }
   padding-top: calc(var(--fit,1) * .35rem);
   padding-bottom: calc(var(--fit,1) * 12rem);
 }
+/* aspect-aware 3-photo arrangements (set at build time from real image
+   aspect ratios): grid3 = two cells up top + the widest photo spanning the
+   bottom row; mosaic3 = portrait full-height left, two landscape stacked
+   right. Wide photos render ~2× larger than in column strips. */
+.tpl-spec.layout-showcase .showcase-canvas.n3.grid3 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+.tpl-spec.layout-showcase .showcase-canvas.n3.grid3 .showcase-cell:nth-child(3) { grid-column: 1 / 3; }
+.tpl-spec.layout-showcase .showcase-canvas.n3.mosaic3 { grid-template-columns: 1fr 2fr; grid-template-rows: 1fr 1fr; }
+.tpl-spec.layout-showcase .showcase-canvas.n3.mosaic3 .showcase-cell:first-child { grid-row: 1 / 3; }
+/* only cells touching the bottom edge reserve panel clearance */
+.tpl-spec.layout-showcase .showcase-canvas.n3.grid3 .showcase-cell:nth-child(-n+2) .media-full,
+.tpl-spec.layout-showcase .showcase-canvas.n3.mosaic3 .showcase-cell:nth-child(2) .media-full {
+  padding: calc(var(--pad) * .5) calc(var(--pad) * .12) calc(var(--fit,1) * .35rem);
+}
+.tpl-spec.layout-showcase .showcase-canvas.n3.grid3 .showcase-cell:nth-child(3) .media-full,
+.tpl-spec.layout-showcase .showcase-canvas.n3.mosaic3 .showcase-cell:nth-child(3) .media-full {
+  padding: calc(var(--fit,1) * .35rem) calc(var(--pad) * .12) calc(var(--fit,1) * 9rem);
+}
 /* caption chip pinned to a cell's lower edge (used by full-bleed photo slides) */
 .tpl-spec.layout-showcase .showcase-cap {
   position: absolute; left: 12px; right: 12px; bottom: 12px; z-index: 2;
@@ -855,6 +881,16 @@ table.spec-table tr:nth-child(even) td { background: rgba(255,255,255,.02); }
 .tpl-spec.layout-showcase.showcase-photos .showcase-canvas.n4 .showcase-cell .media-full,
 .tpl-spec.layout-showcase.showcase-photos .showcase-canvas.n4 .showcase-cell:nth-child(n+3) .media-full {
   padding: calc(var(--fit,1) * 5rem) calc(var(--pad) * .08) calc(var(--fit,1) * 3.2rem);
+}
+/* grid3/mosaic3 photo slides: only top-row cells clear the title scrim; the
+   bottom row keeps just enough room for its caption chip */
+.tpl-spec.layout-showcase.showcase-photos .showcase-canvas.n3.grid3 .showcase-cell:nth-child(-n+2) .media-full,
+.tpl-spec.layout-showcase.showcase-photos .showcase-canvas.n3.mosaic3 .showcase-cell:nth-child(2) .media-full {
+  padding: calc(var(--fit,1) * 5rem) calc(var(--pad) * .08) calc(var(--fit,1) * 3rem);
+}
+.tpl-spec.layout-showcase.showcase-photos .showcase-canvas.n3.grid3 .showcase-cell:nth-child(3) .media-full,
+.tpl-spec.layout-showcase.showcase-photos .showcase-canvas.n3.mosaic3 .showcase-cell:nth-child(3) .media-full {
+  padding: calc(var(--fit,1) * .5rem) calc(var(--pad) * .08) calc(var(--fit,1) * 3.2rem);
 }
 .tpl-spec.layout-showcase.showcase-photos .slide-inner { justify-content: flex-start; }
 /* keep the right-most caption clear of the fixed nav arrows */
@@ -900,6 +936,29 @@ table.spec-table tr:nth-child(even) td { background: rgba(255,255,255,.02); }
 }
 .tpl-spec.layout-showcase .spec-row .k { padding-top: 0; margin-bottom: .2rem; }
 .tpl-spec.layout-showcase .spec-row .v { font-size: calc(var(--fit,1) * .9rem); }
+
+/* panel-side: showcase slides carrying a spec table — the bottom strip would
+   bury the photos, so the photos own the left ~62% at full height and the
+   panel docks to the right edge as a vertical glass column. */
+.tpl-spec.layout-showcase.panel-side .showcase-canvas { right: 38%; }
+.tpl-spec.layout-showcase.panel-side .showcase-canvas .media-full,
+.tpl-spec.layout-showcase.panel-side .showcase-cell .media-full {
+  padding: calc(var(--fit,1) * 3.2rem) calc(var(--pad) * .12) calc(var(--fit,1) * .8rem);
+}
+.tpl-spec.layout-showcase.panel-side .slide-inner {
+  justify-content: center; align-items: flex-end;
+  padding-bottom: var(--pad);
+}
+.tpl-spec.layout-showcase.panel-side .showcase-panel {
+  width: 36%; max-height: calc(100% - 4rem); overflow-y: auto;
+}
+.tpl-spec.layout-showcase.panel-side .showcase-head { display: block; }
+.tpl-spec.layout-showcase.panel-side .client-badge { margin-top: .6rem; }
+.tpl-spec.layout-showcase.panel-side .spec-list { display: grid; gap: calc(var(--fit,1) * .6rem); }
+.tpl-spec.layout-showcase.panel-side .spec-row { flex: none; }
+.tpl-spec.layout-showcase.panel-side .spec-extra-table table.spec-table { font-size: calc(var(--fit,1) * .74rem); }
+.tpl-spec.layout-showcase.panel-side .spec-extra-table table.spec-table td,
+.tpl-spec.layout-showcase.panel-side .spec-extra-table table.spec-table th { padding: calc(var(--fit,1) * .4rem) calc(var(--fit,1) * .5rem); }
 
 .spec-list { display: grid; gap: calc(var(--fit,1) * .65rem); margin-top: calc(var(--fit,1) * 1.2rem); }
 .spec-row { display: grid; grid-template-columns: 130px 1fr; gap: calc(var(--fit,1) * .8rem); font-size: calc(var(--fit,1) * .92rem); padding: calc(var(--fit,1) * .55rem) 0; border-top: 1px solid rgba(255,255,255,.08); }

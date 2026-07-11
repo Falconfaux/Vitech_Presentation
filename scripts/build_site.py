@@ -102,6 +102,28 @@ def resolve_stack(files, layout=None):
     avg_aspect = sum(img_aspect(f) for f in files) / n
     return avg_aspect >= (1.3 if n == 1 else 1.0)
 
+def arrange_showcase(items):
+    """Pick the cell arrangement for a 3-photo showcase canvas so wide photos
+    render big instead of shrinking into tall column strips.
+    items: list of (src, extra_html). All-landscape sets become 'grid3' (two
+    cells up top, the widest photo spanning the full bottom row); sets with
+    exactly one portrait become 'mosaic3' (portrait full-height on the left,
+    the two landscape photos stacked on the right). Portrait-leaning sets
+    keep the default columns. Returns (ordered_items, extra_class)."""
+    if len(items) != 3:
+        return items, ""
+    aspects = [img_aspect(src) for src, _ in items]
+    portraits = [i for i, a in enumerate(aspects) if a < 1.1]
+    if not portraits and min(aspects) >= 1.15:
+        widest = max(range(3), key=lambda i: aspects[i])
+        ordered = [items[i] for i in range(3) if i != widest] + [items[widest]]
+        return ordered, " grid3"
+    if len(portraits) == 1 and all(a >= 1.15 for i, a in enumerate(aspects) if i not in portraits):
+        p = portraits[0]
+        ordered = [items[p]] + [items[i] for i in range(3) if i != p]
+        return ordered, " mosaic3"
+    return items, ""
+
 def media_frame(src, extra_cls=""):
     """Uncropped media frame: the full photo (object-fit: contain) layered
     over a blurred, darkened cover copy of itself, so an aspect-ratio
@@ -626,14 +648,18 @@ def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, ex
                       '<img class="media-full" data-src="{f}" alt="">').format(f=shown[0])
             n_cls = ""
         else:
+            cell_items, arr_cls = arrange_showcase([(f, "") for f in shown])
             canvas = "".join(
                 '<div class="showcase-cell">'
                 '<img class="media-blur" data-src="{f}" alt="">'
                 '<img class="media-full" data-src="{f}" alt="">'
-                '</div>'.format(f=f) for f in shown)
-            n_cls = " n{0}".format(len(shown))
+                '</div>'.format(f=f) for f, _ in cell_items)
+            n_cls = " n{0}{1}".format(len(shown), arr_cls)
+        # a spec table is too tall for the bottom strip — dock the panel on the
+        # right edge instead so it never covers the photos
+        side_cls = " panel-side" if table else ""
         body = '''
-    <section class="slide tpl-spec layout-showcase" id="s{id}" data-section="{section}">
+    <section class="slide tpl-spec layout-showcase{side_cls}" id="s{id}" data-section="{section}">
       <div class="showcase-canvas{n_cls}" aria-hidden="true">
         {canvas}
       </div>
@@ -650,8 +676,8 @@ def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, ex
           {table}
         </div>
       </div>
-    </section>'''.format(id=id, section=esc(section), canvas=canvas, n_cls=n_cls, eyebrow=esc(eyebrow),
-                          title=title, client=client_html, extra=extra_html,
+    </section>'''.format(id=id, section=esc(section), canvas=canvas, n_cls=n_cls, side_cls=side_cls,
+                          eyebrow=esc(eyebrow), title=title, client=client_html, extra=extra_html,
                           rows=rows, milestone=milestone_html, table=table_html)
         add(id, section, "spec", body)
         return
@@ -693,6 +719,7 @@ def photo_showcase(section, eyebrow, title, items, sub=None):
     title overlaid on a top scrim and an optional caption chip pinned to the
     bottom of each cell. items: list of (img_src, caption-or-None)."""
     id = next_id()
+    cell_items, arr_cls = arrange_showcase(list(items))
     cells = "".join(
         '<div class="showcase-cell">'
         '<img class="media-blur" data-src="{f}" alt="" aria-hidden="true">'
@@ -700,11 +727,11 @@ def photo_showcase(section, eyebrow, title, items, sub=None):
         '{cap}</div>'.format(
             f=src,
             cap='<div class="showcase-cap">{0}</div>'.format(nb(cap)) if cap else "")
-        for src, cap in items)
+        for src, cap in cell_items)
     sub_html = '<p class="slide-sub">{0}</p>'.format(nb(sub)) if sub else ""
     body = '''
     <section class="slide tpl-spec layout-showcase showcase-photos" id="s{id}" data-section="{section}">
-      <div class="showcase-canvas n{n}">
+      <div class="showcase-canvas n{n}{arr_cls}">
         {cells}
       </div>
       <div class="slide-inner">
@@ -714,7 +741,7 @@ def photo_showcase(section, eyebrow, title, items, sub=None):
           {sub}
         </div>
       </div>
-    </section>'''.format(id=id, section=esc(section), n=min(len(items), 4), cells=cells,
+    </section>'''.format(id=id, section=esc(section), n=min(len(items), 4), arr_cls=arr_cls, cells=cells,
                           eyebrow=esc(eyebrow), title=title, sub=sub_html)
     add(id, section, "spec", body)
 
