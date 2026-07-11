@@ -40,6 +40,7 @@
       else if (i === prevIndex && prevIndex !== index) s.classList.add("prev");
     });
     current = index;
+    document.body.classList.toggle("on-cover", index === 0);
     counterNow.textContent = index + 1;
     progress.style.width = ((index + 1) / total * 100) + "%";
     if (counterSection) counterSection.textContent = slides[index].getAttribute("data-section") || "";
