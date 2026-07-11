@@ -53,6 +53,14 @@
   function next() { goTo(current + 1); }
   function prev() { goTo(current - 1); }
 
+  // retire the navigation hint once the viewer starts moving through the deck
+  var hintEl = document.querySelector(".hint");
+  var _goTo = goTo;
+  goTo = function (index, pushHash) {
+    if (hintEl && index > 0) hintEl.classList.add("hide");
+    _goTo(index, pushHash);
+  };
+
   document.getElementById("btn-next").addEventListener("click", next);
   document.getElementById("btn-prev").addEventListener("click", prev);
 

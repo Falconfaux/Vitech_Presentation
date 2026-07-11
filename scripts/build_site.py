@@ -277,30 +277,46 @@ def visual(section, eyebrow, title, sub, slide_no, images_count=1, row=False, ca
                           media=media, cap=cap, stats=stats_html)
     add(id, section, "visual", body)
 
-def _org_col(role, name, chain, cls=""):
-    name_html = '<small>{0}</small>'.format(esc(name)) if name else ""
-    chain_html = ""
-    if chain:
-        chain_html = '<div class="org-chain">{0}</div>'.format(
-            "".join('<div>{0}</div>'.format(esc(c)) for c in chain)
-        )
-    return '<div class="org-col{2}"><div class="org-card">{0}{1}</div>{3}</div>'.format(
-        esc(role), name_html, (" " + cls) if cls else "", chain_html
-    )
+def _org_card(role, names, cls="org-card"):
+    names_html = '<small>{0}</small>'.format("<br>".join(esc(n) for n in names)) if names else ""
+    return '<div class="{0}">{1}{2}</div>'.format(cls, esc(role), names_html)
 
-def org_chart(section, eyebrow, title, exec_chain, dept_columns, gm, footnote=None):
+def _org_column(col, style):
+    """One department column: manager card at top, then each subordinate as its
+    own card joined by short vertical connectors (mirrors the original chart)."""
+    parts = [_org_card(col["role"], col.get("names", []), "org-card org-card-mgr")]
+    for sub in col.get("chain", []):
+        parts.append('<div class="org-vline"></div>')
+        parts.append(_org_card(sub["role"], sub.get("names", []), "org-card org-card-sub"))
+    return '<div class="org-col" style="{0}">{1}</div>'.format(style, "".join(parts))
+
+def org_chart(section, eyebrow, title, exec_chain, left_columns, gm, gm_peer, gm_branches, right_columns, footnote=None):
+    """Replicates the original Quality Manual chart: a vertical executive chain
+    (MD → Director → VP), a bus feeding ten department columns, with the
+    General Manager + Technical Manager pair hanging one level above the four
+    middle columns that report to the GM."""
     id = next_id()
     exec_html = "".join(
         '<div class="org-card org-card-exec">{0}<small>{1}</small></div><div class="org-connector"></div>'.format(esc(role), esc(name))
         for role, name in exec_chain
     )
-    dept_html = "".join(_org_col(d["role"], d.get("name", ""), d.get("chain", [])) for d in dept_columns)
-    gm_inner = "".join(_org_col(b["role"], b.get("name", ""), b.get("chain", [])) for b in gm["branches"])
-    gm_col = (
-        '<div class="org-col org-col-gm"><div class="org-card">{role}<small>{name}</small></div>'
-        '<div class="org-card org-card-peer">{peer_role}<small>{peer_name}</small></div>'
-        '<div class="org-gm-branches">{inner}</div></div>'
-    ).format(role=esc(gm["role"]), name=esc(gm["name"]), peer_role=esc(gm["peer_role"]), peer_name=esc(gm["peer_name"]), inner=gm_inner)
+    n_left = len(left_columns)
+    n_gm = len(gm_branches)
+    cols = []
+    # full-height columns left of the GM group
+    for i, col in enumerate(left_columns):
+        cols.append(_org_column(col, "grid-column:{0};grid-row:1/3".format(i + 1)))
+    # GM + Technical Manager header spanning the GM branch columns
+    cols.append(
+        '<div class="org-gm-head" style="grid-column:{0}/{1};grid-row:1">{2}{3}</div>'.format(
+            n_left + 1, n_left + 1 + n_gm,
+            _org_card(gm["role"], gm.get("names", []), "org-card org-card-gm"),
+            _org_card(gm_peer["role"], gm_peer.get("names", []), "org-card org-card-peer"))
+    )
+    for i, col in enumerate(gm_branches):
+        cols.append(_org_column(col, "grid-column:{0};grid-row:2".format(n_left + 1 + i)))
+    for i, col in enumerate(right_columns):
+        cols.append(_org_column(col, "grid-column:{0};grid-row:1/3".format(n_left + n_gm + 1 + i)))
     foot_html = '<div class="org-footnote reveal reveal-d3">{0}</div>'.format(esc(footnote)) if footnote else ""
     body = '''
     <section class="slide tpl-orgchart" id="s{id}" data-section="{section}">
@@ -310,15 +326,18 @@ def org_chart(section, eyebrow, title, exec_chain, dept_columns, gm, footnote=No
         <div class="org-tree reveal reveal-d2">
           {exec_html}
           <div class="org-bus"></div>
-          <div class="org-row-depts">{dept_html}{gm_col}</div>
+          <div class="org-grid">{cols}</div>
         </div>
         {foot}
       </div>
     </section>'''.format(id=id, section=esc(section), eyebrow=esc(eyebrow), title=title,
-                          exec_html=exec_html, dept_html=dept_html, gm_col=gm_col, foot=foot_html)
+                          exec_html=exec_html, cols="".join(cols), foot=foot_html)
     add(id, section, "orgchart", body)
 
 def site_plan(section, eyebrow, title, img_src, legend, stat=None):
+    """Full-bleed site plan: the CAD drawing owns the whole slide (uncropped
+    over a blurred fill), the title overlays the top scrim and the legend
+    floats as a glass panel docked to the right edge."""
     id = next_id()
     parts = []
     for num, txt in legend:
@@ -330,18 +349,21 @@ def site_plan(section, eyebrow, title, img_src, legend, stat=None):
     stat_html = ""
     if stat:
         v, l = stat
-        stat_html = ('<div class="stat-row reveal reveal-d3" style="margin-top:1rem">'
-                      '<div class="stat-tile"><div class="num">{0}</div><div class="lbl">{1}</div></div></div>').format(esc(v), esc(l))
+        stat_html = '<div class="siteplan-stat">{0} <span>{1}</span></div>'.format(esc(v), esc(l))
     body = '''
     <section class="slide tpl-siteplan" id="s{id}" data-section="{section}">
+      <div class="siteplan-canvas site-plan-map">
+        <img class="media-blur" data-src="{img}" alt="" aria-hidden="true" loading="lazy">
+        <img class="media-full" data-src="{img}" alt="" loading="lazy">
+        <p class="site-plan-hint">Click to enlarge</p>
+      </div>
       <div class="slide-inner">
-        <div class="eyebrow reveal">{eyebrow}</div>
-        <h2 class="slide-title reveal reveal-d1">{title}</h2>
-        <div class="site-plan reveal reveal-d2">
-          <div class="site-plan-map media-frame"><img class="media-blur" data-src="{img}" alt="" aria-hidden="true" loading="lazy"><img class="media-full" data-src="{img}" alt="" loading="lazy"><p class="site-plan-hint">Click to enlarge</p></div>
-          <div class="site-plan-legend">{legend}</div>
+        <div class="siteplan-titlebar reveal reveal-d1">
+          <div class="eyebrow">{eyebrow}</div>
+          <h2 class="slide-title">{title}</h2>
+          {stat}
         </div>
-        {stat}
+        <aside class="siteplan-legend reveal reveal-d2">{legend}</aside>
       </div>
     </section>'''.format(id=id, section=esc(section), eyebrow=esc(eyebrow), title=title,
                           img=img_src, legend=legend_html, stat=stat_html)
@@ -349,109 +371,163 @@ def site_plan(section, eyebrow, title, img_src, legend, stat=None):
 
 _LOCATION_MAP_SVG = '''
 <svg class="location-map-svg" viewBox="0 0 1000 600" xmlns="http://www.w3.org/2000/svg">
-  <!-- vertical corridors -->
-  <rect class="lm-road-minor" x="246" y="118" width="28" height="442"/>
-  <rect class="lm-road-minor" x="706" y="118" width="28" height="442"/>
-  <!-- cross roads -->
-  <rect class="lm-road-minor" x="60" y="216" width="880" height="26"/>
-  <rect class="lm-road-minor" x="40" y="330" width="920" height="26"/>
-  <!-- main highway -->
-  <rect class="lm-road-main" x="30" y="104" width="940" height="32"/>
-  <line class="lm-road-dash" x1="30" y1="120" x2="970" y2="120"/>
-  <!-- roundabouts -->
-  <circle class="lm-roundabout" cx="260" cy="120" r="19"/>
-  <circle class="lm-roundabout" cx="720" cy="120" r="19"/>
-  <!-- rabale railway station -->
-  <rect class="lm-landmark-box" x="130" y="34" width="230" height="38"/>
-  <text class="lm-label-box" x="245" y="58" text-anchor="middle">RABALE RAILWAY STATION</text>
-  <line class="lm-connector" x1="260" y1="72" x2="260" y2="101"/>
-  <!-- direction arrows on main road -->
-  <path class="lm-arrow" d="M110,120 L142,105 L142,135 Z"/>
-  <text class="lm-dir" x="150" y="94" text-anchor="start">← TOWARDS NEW MUMBAI</text>
-  <path class="lm-arrow" d="M890,120 L858,105 L858,135 Z"/>
-  <text class="lm-dir" x="850" y="94" text-anchor="end">TOWARDS THANE →</text>
-  <text class="lm-road-title" x="500" y="94" text-anchor="middle">THANE BELAPUR ROAD</text>
-  <!-- Nhava Sheva Port callout -->
-  <path class="lm-arrow" d="M60,190 L45,160 L75,160 Z"/>
-  <rect class="lm-callout-box" x="34" y="190" width="230" height="76" rx="8"/>
-  <text class="lm-callout-title" x="149" y="214" text-anchor="middle">TOWARDS MUMBAI</text>
-  <text class="lm-callout" x="149" y="234" text-anchor="middle">Nhava Sheva Port via</text>
-  <text class="lm-callout" x="149" y="250" text-anchor="middle">Thane–Belapur Rd (NH 348A)</text>
-  <text class="lm-callout-dist" x="149" y="268" text-anchor="middle">38.4 KM</text>
-  <!-- internal MIDC road label -->
-  <text class="lm-road-title-sm" x="500" y="209" text-anchor="middle">INTERNAL MIDC ROAD</text>
-  <!-- Vrushali Hotel -->
-  <circle class="lm-landmark-dot" cx="290" cy="168" r="6"/>
-  <text class="lm-landmark" x="304" y="172" text-anchor="start">Vrushali Hotel</text>
-  <!-- Shankar Hotel -->
-  <circle class="lm-landmark-dot" cx="290" cy="278" r="6"/>
-  <text class="lm-landmark" x="304" y="282" text-anchor="start">Shankar Hotel</text>
-  <!-- MIDC road label -->
-  <text class="lm-road-title-sm" x="500" y="323" text-anchor="middle">MIDC ROAD</text>
-  <!-- plot grid backdrop -->
-  <rect class="lm-plot-area" x="60" y="356" width="880" height="204" rx="6"/>
+  <!-- Rabale railway station above the main road -->
+  <rect class="lm-landmark-box" x="120" y="26" width="240" height="40" rx="3"/>
+  <text class="lm-label-box" x="240" y="51" text-anchor="middle">RABALE RAILWAY STATION</text>
+
+  <!-- Thane Belapur Road with two roundabouts -->
+  <rect class="lm-road-main" x="30" y="98" width="940" height="32"/>
+  <line class="lm-road-dash" x1="30" y1="114" x2="970" y2="114"/>
+  <text class="lm-road-title" x="545" y="92" text-anchor="middle">THANE BELAPUR ROAD</text>
+  <ellipse class="lm-roundabout" cx="358" cy="114" rx="24" ry="17"/>
+  <ellipse class="lm-roundabout" cx="748" cy="114" rx="24" ry="17"/>
+  <path class="lm-arrow" d="M60,114 L94,100 L94,128 Z"/>
+  <rect class="lm-arrow" x="94" y="110" width="38" height="8"/>
+  <text class="lm-dir" x="140" y="90" text-anchor="start">TOWARDS (NEW MUMBAI)</text>
+  <path class="lm-arrow" d="M940,114 L906,100 L906,128 Z"/>
+  <rect class="lm-arrow" x="868" y="110" width="38" height="8"/>
+  <text class="lm-dir" x="930" y="90" text-anchor="end">TOWARDS (THANE)</text>
+
+  <!-- Nhava Sheva Port callout (left) -->
+  <path class="lm-arrow" d="M48,166 L86,152 L86,180 Z"/>
+  <rect class="lm-arrow" x="86" y="162" width="42" height="8"/>
+  <text class="lm-callout-title" x="150" y="200" text-anchor="start">( TOWARDS MUMBAI )</text>
+  <text class="lm-callout-dist" x="40" y="226" text-anchor="start">NHAVA SHEVA PORT</text>
+  <text class="lm-callout" x="40" y="248" text-anchor="start">Via — Thane–Belapur Rd. (NH 348A)</text>
+  <text class="lm-callout" x="40" y="266" text-anchor="start">Distance — 38.4 KM</text>
+
+  <!-- internal vertical roads -->
+  <rect class="lm-road-minor" x="345" y="130" width="26" height="470"/>
+  <rect class="lm-road-minor" x="735" y="130" width="26" height="248"/>
+  <path class="lm-arrow" d="M358,152 L346,180 L370,180 Z"/>
+  <path class="lm-arrow" d="M748,152 L736,180 L760,180 Z"/>
+
+  <!-- Vrushali Hotel on the first vertical road -->
+  <rect class="lm-hotel" x="374" y="176" width="24" height="38"/>
+  <path class="lm-arrow" d="M398,195 L424,183 L424,207 Z" style="opacity:.85"/>
+  <text class="lm-landmark" x="452" y="178" text-anchor="start">VRUSHALI HOTEL</text>
+
+  <!-- Internal MIDC Road -->
+  <rect class="lm-road-minor" x="345" y="246" width="625" height="26"/>
+  <text class="lm-road-title-sm" x="560" y="240" text-anchor="middle">INTERNAL MIDC ROAD</text>
+
+  <!-- Shankar Hotel below the internal road -->
+  <rect class="lm-hotel" x="374" y="292" width="24" height="38"/>
+  <path class="lm-arrow" d="M398,311 L424,299 L424,323 Z" style="opacity:.85"/>
+  <text class="lm-landmark" x="452" y="296" text-anchor="start">SHANKAR HOTEL</text>
+
+  <!-- MIDC Road -->
+  <rect class="lm-road-minor" x="130" y="350" width="840" height="26"/>
+  <text class="lm-road-title-sm" x="248" y="344" text-anchor="middle">MIDC ROAD</text>
+  <path class="lm-arrow" d="M262,363 L292,351 L292,375 Z"/>
+  <rect class="lm-arrow" x="292" y="359" width="30" height="8"/>
+  <path class="lm-arrow" d="M846,363 L816,351 L816,375 Z"/>
+  <rect class="lm-arrow" x="786" y="359" width="30" height="8"/>
+
+  <!-- MIDC plot blocks (lower-right quadrant) -->
+  <rect class="lm-plot-area" x="530" y="392" width="120" height="48"/>
+  <rect class="lm-plot-area" x="672" y="392" width="120" height="48"/>
+  <rect class="lm-plot-area" x="814" y="392" width="76" height="48"/>
+  <rect class="lm-plot-area" x="912" y="392" width="58" height="48"/>
+  <rect class="lm-plot-area" x="530" y="456" width="120" height="48"/>
+  <rect class="lm-plot-area" x="672" y="456" width="120" height="48"/>
+  <rect class="lm-plot-area" x="912" y="456" width="58" height="48"/>
+  <rect class="lm-plot-area" x="530" y="520" width="120" height="48"/>
+  <rect class="lm-plot-area" x="672" y="520" width="120" height="48"/>
+
   <!-- Vitech Equipments plot -->
-  <rect class="lm-plot-vitech" x="176" y="392" width="150" height="86" rx="6"/>
-  <text class="lm-plot-label" x="251" y="428" text-anchor="middle">VITECH</text>
-  <text class="lm-plot-label" x="251" y="448" text-anchor="middle">EQUIPMENTS</text>
+  <rect class="lm-plot-vitech" x="404" y="404" width="112" height="76" rx="3"/>
+  <text class="lm-plot-label-sm" x="460" y="437" text-anchor="middle">VITECH</text>
+  <text class="lm-plot-label-sm" x="460" y="454" text-anchor="middle">EQUIPMENTS</text>
+  <path class="lm-arrow" d="M415,388 L403,360 L427,360 Z" style="opacity:.85"/>
+
   <!-- Vitech Fabricators plot -->
-  <rect class="lm-plot-vitech" x="746" y="490" width="150" height="58" rx="6"/>
-  <text class="lm-plot-label-sm" x="821" y="513" text-anchor="middle">VITECH</text>
-  <text class="lm-plot-label-sm" x="821" y="530" text-anchor="middle">FABRICATORS</text>
-  <!-- route from main road corridors to plots -->
-  <path class="lm-route" d="M260,139 V392" />
-  <path class="lm-route" d="M720,139 V400 H821 V490" />
+  <rect class="lm-plot-vitech" x="814" y="516" width="156" height="56" rx="3"/>
+  <text class="lm-plot-label-sm" x="892" y="539" text-anchor="middle">VITECH</text>
+  <text class="lm-plot-label-sm" x="892" y="556" text-anchor="middle">FABRICATORS</text>
+
+  <!-- route arrows toward Vitech Fabricators -->
+  <path class="lm-arrow" d="M358,498 L346,470 L370,470 Z"/>
+  <path class="lm-arrow" d="M800,545 L770,533 L770,557 Z"/>
+  <rect class="lm-arrow" x="740" y="541" width="30" height="8"/>
+  <path class="lm-arrow" d="M802,466 L793,444 L811,444 Z"/>
+  <path class="lm-route" d="M358,272 V350"/>
+  <path class="lm-route" d="M748,272 V350"/>
 </svg>
 '''
 
 _LOCATION_MAP_SVG_SHAHAPUR = '''
 <svg class="location-map-svg" viewBox="0 0 1000 600" xmlns="http://www.w3.org/2000/svg">
-  <!-- main highway -->
+  <!-- top estate road linking the left corridors to the Shirol road -->
+  <rect class="lm-road-minor" x="105" y="84" width="716" height="24"/>
+  <!-- two left access corridors with two-way arrows -->
+  <rect class="lm-road-minor" x="105" y="84" width="24" height="300"/>
+  <rect class="lm-road-minor" x="185" y="84" width="24" height="300"/>
+  <path class="lm-arrow" d="M117,150 L107,176 L127,176 Z"/>
+  <path class="lm-arrow" d="M117,300 L107,274 L127,274 Z"/>
+  <path class="lm-arrow" d="M197,150 L187,176 L207,176 Z"/>
+  <path class="lm-arrow" d="M197,300 L187,274 L207,274 Z"/>
+
+  <!-- shirol access road (right side, north of highway) -->
+  <rect class="lm-road-minor" x="795" y="52" width="26" height="332"/>
+  <path class="lm-arrow" d="M808,64 L794,94 L822,94 Z"/>
+  <text class="lm-road-title-sm" x="808" y="42" text-anchor="middle">SHIROL</text>
+
+  <!-- vitech compound with V.H.E.P.L. plot inside -->
+  <rect class="lm-plot-area" x="310" y="148" width="270" height="140" rx="4"/>
+  <rect class="lm-plot-vitech" x="345" y="182" width="165" height="72" rx="4"/>
+  <text class="lm-plot-label" x="427" y="224" text-anchor="middle">V.H.E.P.L</text>
+
+  <!-- Cliffkumar Heavy Engg plot, right of the compound -->
+  <rect class="lm-landmark-box" x="600" y="160" width="185" height="54" rx="4"/>
+  <text class="lm-label-box" x="692" y="182" text-anchor="middle" style="font-size:12.5px">CLIFFKUMAR HEAVY ENGG.</text>
+  <text class="lm-label-box" x="692" y="200" text-anchor="middle" style="font-size:12.5px">PVT. LTD.</text>
+
+  <!-- feeder road from the top estate road, with entry arrows toward VHEPL -->
+  <rect class="lm-road-minor" x="735" y="108" width="22" height="106"/>
+  <path class="lm-arrow" d="M746,126 L736,152 L756,152 Z"/>
+  <path class="lm-arrow" d="M600,242 L632,230 L632,254 Z"/>
+  <rect class="lm-arrow" x="632" y="238" width="34" height="8"/>
+  <path class="lm-arrow" d="M690,242 L722,230 L722,254 Z"/>
+  <rect class="lm-arrow" x="722" y="238" width="34" height="8"/>
+  <path class="lm-route" d="M580,242 H512"/>
+
+  <!-- Aman Hotel -->
+  <text class="lm-landmark" x="632" y="306" text-anchor="middle">AMAN HOTEL</text>
+  <rect class="lm-landmark-box" x="585" y="318" width="95" height="26" rx="3"/>
+  <path class="lm-arrow" d="M686,331 L710,319 L710,343 Z" style="opacity:.85"/>
+
+  <!-- Hotel Dalvi -->
+  <text class="lm-landmark" x="898" y="306" text-anchor="middle">HOTEL DALVI</text>
+  <rect class="lm-landmark-box" x="850" y="318" width="95" height="26" rx="3"/>
+  <path class="lm-arrow" d="M840,331 L816,319 L816,343 Z" style="opacity:.85"/>
+
+  <!-- route from VHEPL down to the highway -->
+  <path class="lm-route" d="M427,288 V384"/>
+
+  <!-- NH 160 highway (bottom) -->
   <rect class="lm-road-main" x="30" y="384" width="940" height="32"/>
   <line class="lm-road-dash" x1="30" y1="400" x2="970" y2="400"/>
   <text class="lm-road-title" x="500" y="374" text-anchor="middle">NH 160 — MUMBAI–NASHIK HIGHWAY</text>
-  <path class="lm-arrow" d="M110,400 L142,385 L142,415 Z"/>
-  <text class="lm-dir" x="150" y="440" text-anchor="start">← TOWARDS MUMBAI</text>
-  <path class="lm-arrow" d="M890,400 L858,385 L858,415 Z"/>
-  <text class="lm-dir" x="850" y="440" text-anchor="end">TOWARDS KASARA–NASHIK →</text>
+  <path class="lm-arrow" d="M352,446 L384,434 L384,458 Z"/>
+  <rect class="lm-arrow" x="384" y="442" width="36" height="8"/>
+  <text class="lm-dir" x="432" y="452" text-anchor="start">MUMBAI</text>
+  <path class="lm-arrow" d="M760,446 L728,434 L728,458 Z"/>
+  <rect class="lm-arrow" x="692" y="442" width="36" height="8"/>
+  <text class="lm-dir" x="682" y="452" text-anchor="end">KASARA – NASHIK</text>
 
-  <!-- shirol access road (right side, north of highway) -->
-  <rect class="lm-road-minor" x="796" y="60" width="26" height="324"/>
-  <path class="lm-arrow" d="M809,58 L794,86 L824,86 Z"/>
-  <text class="lm-road-title-sm" x="809" y="48" text-anchor="middle">SHIROL</text>
-
-  <!-- estate plot backdrop -->
-  <rect class="lm-plot-area" x="60" y="130" width="880" height="220" rx="6"/>
-
-  <!-- V.H.E.P.L. plot -->
-  <rect class="lm-plot-vitech" x="210" y="196" width="190" height="92" rx="6"/>
-  <text class="lm-plot-label" x="305" y="248" text-anchor="middle">V.H.E.P.L.</text>
-
-  <!-- Cliffkumar Heavy Engg plot -->
-  <rect class="lm-landmark-box" x="470" y="206" width="240" height="70" rx="6"/>
-  <text class="lm-label-box" x="590" y="234" text-anchor="middle" style="font-size:13px">CLIFFKUMAR HEAVY ENGG.</text>
-  <text class="lm-label-box" x="590" y="252" text-anchor="middle" style="font-size:13px">PVT. LTD.</text>
-  <path class="lm-route" d="M470,255 H400"/>
-  <path class="lm-route" d="M470,230 H400"/>
-
-  <!-- Aman Hotel landmark -->
-  <circle class="lm-landmark-dot" cx="300" cy="318" r="6"/>
-  <text class="lm-landmark" x="314" y="322" text-anchor="start">Aman Hotel</text>
-  <line class="lm-connector" x1="300" y1="288" x2="300" y2="312"/>
-
-  <!-- Hotel Dalvi landmark -->
-  <circle class="lm-landmark-dot" cx="770" cy="318" r="6"/>
-  <text class="lm-landmark" x="784" y="322" text-anchor="start">Hotel Dalvi</text>
-  <line class="lm-connector" x1="809" y1="288" x2="770" y2="312"/>
-
-  <!-- route from VHEPL to highway -->
-  <path class="lm-route" d="M305,288 V384"/>
-
-  <!-- Ombermali Railway Station -->
-  <rect class="lm-landmark-box" x="700" y="472" width="220" height="60" rx="8"/>
-  <text class="lm-callout-title" x="810" y="496" text-anchor="middle">OMBERMALI</text>
-  <text class="lm-callout-title" x="810" y="514" text-anchor="middle">RAILWAY STATION</text>
-  <line class="lm-connector" x1="810" y1="416" x2="810" y2="472"/>
+  <!-- Ombermali Railway Station with flanking track hatching -->
+  <line class="lm-rail" x1="655" y1="502" x2="742" y2="502"/>
+  <line class="lm-rail-tick" x1="668" y1="492" x2="668" y2="512"/>
+  <line class="lm-rail-tick" x1="686" y1="492" x2="686" y2="512"/>
+  <line class="lm-rail-tick" x1="704" y1="492" x2="704" y2="512"/>
+  <line class="lm-rail-tick" x1="722" y1="492" x2="722" y2="512"/>
+  <rect class="lm-landmark-box" x="742" y="470" width="216" height="62" rx="4"/>
+  <text class="lm-callout-title" x="850" y="496" text-anchor="middle">OMBERMALI</text>
+  <text class="lm-callout-title" x="850" y="514" text-anchor="middle">RAILWAY STATION</text>
+  <line class="lm-rail" x1="958" y1="502" x2="1000" y2="502"/>
+  <line class="lm-rail-tick" x1="970" y1="492" x2="970" y2="512"/>
+  <line class="lm-rail-tick" x1="988" y1="492" x2="988" y2="512"/>
 </svg>
 '''
 
@@ -472,8 +548,7 @@ def location_map(section, eyebrow, title, note=None, svg=None, distances=None):
         <div class="eyebrow reveal">{eyebrow}</div>
         <h2 class="slide-title reveal reveal-d1">{title}</h2>
         {note}
-        <div class="location-map reveal reveal-d2">{svg}</div>
-        {dist}
+        <div class="location-map reveal reveal-d2">{svg}{dist}</div>
       </div>
     </section>'''.format(id=id, section=esc(section), eyebrow=esc(eyebrow), title=title, note=note_html,
                           svg=svg or _LOCATION_MAP_SVG, dist=dist_html)
@@ -514,9 +589,10 @@ def data_table(section, eyebrow, title, tables, note=None, sub=None, columns=1, 
                           tables=tables_html, note=note_html)
     add(id, section, "table", body)
 
-def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, extra=None, table=None, milestone=None, media_layout=None, layout=None):
+def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, extra=None, table=None, milestone=None, media_layout=None, layout=None, files=None):
     id = next_id()
-    files = media_files(slide_no, images_count)
+    if files is None:
+        files = media_files(slide_no, images_count)
     stack = resolve_stack(files, layout)
     tpl_cls = "tpl-spec layout-stack" if stack else "tpl-spec"
     rows = "".join(
@@ -540,12 +616,26 @@ def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, ex
     # whole slide (uncropped, over a blurred fill) and the spec card floats
     # over its lower portion as a bottom strip — so the one photo is shown
     # once, as large as possible, instead of duplicated into hero + band.
-    if len(files) == 1 and layout != "split":
+    # With layout="showcase" the same treatment tiles 2–4 photos into
+    # full-height cells (n2 = 2 cols, n3 = 3 cols, n4 = 2×2), each photo
+    # uncropped over its own blurred fill.
+    if files and layout != "split" and (len(files) == 1 or layout == "showcase"):
+        shown = files[:4]
+        if len(shown) == 1:
+            canvas = ('<img class="media-blur" data-src="{f}" alt="">'
+                      '<img class="media-full" data-src="{f}" alt="">').format(f=shown[0])
+            n_cls = ""
+        else:
+            canvas = "".join(
+                '<div class="showcase-cell">'
+                '<img class="media-blur" data-src="{f}" alt="">'
+                '<img class="media-full" data-src="{f}" alt="">'
+                '</div>'.format(f=f) for f in shown)
+            n_cls = " n{0}".format(len(shown))
         body = '''
     <section class="slide tpl-spec layout-showcase" id="s{id}" data-section="{section}">
-      <div class="showcase-canvas" aria-hidden="true">
-        <img class="media-blur" data-src="{f}" alt="">
-        <img class="media-full" data-src="{f}" alt="">
+      <div class="showcase-canvas{n_cls}" aria-hidden="true">
+        {canvas}
       </div>
       <div class="slide-inner">
         <div class="showcase-panel reveal reveal-d1">
@@ -560,7 +650,7 @@ def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, ex
           {table}
         </div>
       </div>
-    </section>'''.format(id=id, section=esc(section), f=files[0], eyebrow=esc(eyebrow),
+    </section>'''.format(id=id, section=esc(section), canvas=canvas, n_cls=n_cls, eyebrow=esc(eyebrow),
                           title=title, client=client_html, extra=extra_html,
                           rows=rows, milestone=milestone_html, table=table_html)
         add(id, section, "spec", body)
@@ -595,6 +685,37 @@ def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, ex
     </section>'''.format(id=id, tpl_cls=tpl_cls, section=esc(section), eyebrow=esc(eyebrow), title=title, hero=hero_html,
                           media=media_grid(band_files, stack, media_layout), client=client_html, extra=extra_html, rows=rows,
                           milestone=milestone_html, table=table_html)
+    add(id, section, "spec", body)
+
+def photo_showcase(section, eyebrow, title, items, sub=None):
+    """Full-bleed photo slide: 2–4 full-height cells, each photo shown whole
+    over its own blurred fill (same recipe as the spec showcase), with the
+    title overlaid on a top scrim and an optional caption chip pinned to the
+    bottom of each cell. items: list of (img_src, caption-or-None)."""
+    id = next_id()
+    cells = "".join(
+        '<div class="showcase-cell">'
+        '<img class="media-blur" data-src="{f}" alt="" aria-hidden="true">'
+        '<img class="media-full" data-src="{f}" alt="">'
+        '{cap}</div>'.format(
+            f=src,
+            cap='<div class="showcase-cap">{0}</div>'.format(nb(cap)) if cap else "")
+        for src, cap in items)
+    sub_html = '<p class="slide-sub">{0}</p>'.format(nb(sub)) if sub else ""
+    body = '''
+    <section class="slide tpl-spec layout-showcase showcase-photos" id="s{id}" data-section="{section}">
+      <div class="showcase-canvas n{n}">
+        {cells}
+      </div>
+      <div class="slide-inner">
+        <div class="showcase-titlebar reveal reveal-d1">
+          <div class="eyebrow">{eyebrow}</div>
+          <h2 class="slide-title">{title}</h2>
+          {sub}
+        </div>
+      </div>
+    </section>'''.format(id=id, section=esc(section), n=min(len(items), 4), cells=cells,
+                          eyebrow=esc(eyebrow), title=title, sub=sub_html)
     add(id, section, "spec", body)
 
 def gallery_cols(n):
@@ -673,22 +794,25 @@ prose("Company Overview", "Since 1992", "Company Introduction",
         "VITECH GROUP was established in the year 1992 and is a professionally managed engineering company.",
         "VITECH is specialized in mechanical design & fabrication of equipment catering to Oil/Gas, Water & "
         "Desalination, Petrochemical, Paper & Pulp, Fertilizer, Edible Oil, Pharmaceutical, Dairy & other industries, "
-        "across all grades of materials.",
-        "For the last 33 years we have handled projects under leading third-party inspection agencies — adapting to "
-        "change and working with total dedication as we march toward new goals.",
+        "across all grades of materials — for the last 33 years, adapting to change and working with total dedication.",
+      ],
+      labeled_chips=[
+        {"label": "Material Grades We Fabricate",
+         "items": ["Carbon Steel", "Cladded Steel", "SS 304/304L", "316/316L", "310S", "321", "347",
+                   "6% Moly", "Duplex & Super Duplex SS", "Inconel 600/601/625", "Incoloy 800",
+                   "Titanium (SB 265 Gr.1 & 2)", "Hastelloy C-276"]},
       ],
       fact_rows=[
         ("Certifications", "ISO 9001:2015 · ISO 14001:2015 · ISO 45001:2018"),
-        ("Approvals & Stamps", "ASME U, U2, NB, R Stamp · EIL-Approved for Pressure Vessels (CS up to 75 mm & SS up to 18 mm) · "
-                                "IBR Certified for Pipe Fabrication, Pressure Vessels & Heat Exchangers Class 1 (pressure up to 125 kg/cm²)"),
-        ("Cladded Capability", "CS + Austenitic SS Clad (Grades 304/304L/316/316L/317/317L/321/347) — Cladded Pressure Vessels & "
-                                "Columns up to 25 mm, CS Columns up to 25 mm"),
-        ("Piping Spool Capability", "CS up to 10″ (12.7mm thk) & 12–24″ (6.35mm thk) · SS (304, 304L, 316 & 316L) up to 24″ (6.35mm thk)"),
+        ("Approvals & Stamps", "ASME U, U2, NB, R Stamp · EIL-Approved Pressure Vessels (CS up to 75 mm, SS up to 18 mm) · "
+                                "IBR Certified Class 1 (pressure up to 125 kg/cm²)"),
+        ("Cladded Capability", "CS + Austenitic SS Clad (304/304L/316/316L/317/317L/321/347) — vessels & columns up to 25 mm"),
+        ("Piping Spool Capability", "CS up to 10″ (12.7mm) & 12–24″ (6.35mm) · SS up to 24″ (6.35mm)"),
       ],
       stats=[
         {"count": 1992, "label": "Established"},
         {"count": 33, "suffix": "+", "label": "Years of Experience"},
-        {"count": 4, "label": "Global Class Societies+"},
+        {"count": 3, "label": "Manufacturing Units"},
       ],
       side_title="We specialize in",
       side_items=[
@@ -700,22 +824,6 @@ prose("Company Overview", "Since 1992", "Company Introduction",
         "Storage tanks",
         "Piping spools (CS, SS, DSS/SDSS)",
       ])
-
-# ---- 2b. Materials & Third-Party Approvals (split out of Company Introduction
-#          so that slide isn't overloaded — same content, own slide) ---------
-prose("Company Overview", "Since 1992", "Materials & Third-Party Approvals",
-      ["VITECH fabricates across the full spectrum of material grades, working under internationally "
-       "recognized third-party inspection agencies to meet the most demanding project specifications."],
-      labeled_chips=[
-        {"label": "Third-Party Inspection Agencies",
-         "items": ["Lloyds Register", "IR Class", "SGS", "Bureau Veritas", "TUV Nord", "TUV SUD", "ABS", "ABS Marine"]},
-      ],
-      chips=[{"t": t} for t in [
-          "Carbon Steel", "Cladded Steel", "SS 304/304L", "316/316L", "310S", "321", "347",
-          "6% Moly", "Duplex & Super Duplex SS", "Inconel 600/601/625", "Incoloy 800",
-          "Titanium (SB 265 Gr.1 & 2)", "Hastelloy C-276"
-      ]],
-      center=True)
 
 # ---- 3. Engineering Capability -----------------------------------------
 prose("Company Overview", "Design & Engineering", "Engineering Capability",
@@ -779,54 +887,57 @@ _industries_body = '''
     </section>'''.format(id=_industries_id, tiles=_tiles)
 add(_industries_id, "Company Overview", "visual", _industries_body)
 
-# ---- 5. Organisation Chart ---------------------------------------------
+# ---- 5. Organisation Chart (1:1 with the Quality Manual Annex-D2 chart) ----
 org_chart("Company Overview", "Structure · Quality Manual Annex-D2, Rev. 4", "Organisation Chart",
     exec_chain=[
         ("Managing Director", "Mr. Charles Dsouza"),
         ("Director", "Mr. Vivek Charles Dsouza"),
         ("Vice President", "Mr. T.N. Shetty"),
     ],
-    dept_columns=[
-        {"role": "Manager QA & QC", "name": "Mr. Samir P., Mr. Deepak K.", "chain": [
-            "QC Engineers**",
-            "Welding Engineer — Mr. Samir P., Mr. Deepak K.",
-            "NDT Level 1 & 2**",
+    left_columns=[
+        {"role": "Manager QA & QC", "names": ["Mr. Samir P.", "Mr. Deepak K."], "chain": [
+            {"role": "QC Engineers **"},
+            {"role": "Welding Engineer", "names": ["Mr. Samir P.", "Mr. Deepak K."]},
+            {"role": "NDT Level 1 & 2 **"},
         ]},
-        {"role": "Manager Accounts", "name": "Mr. Vishwas Yadav", "chain": [
-            "Asst. Accounts — Mrs. Usha Bisht, Mrs. Rekha Shetty",
+        {"role": "Manager Accounts", "names": ["Mr. Vishwas Yadav"], "chain": [
+            {"role": "Asst. Accounts", "names": ["Mrs. Usha Bisht", "Mrs. Rekha Shetty"]},
         ]},
-        {"role": "HRD Officer", "name": "Mr. Navnath, Ms. Ruchika"},
-        {"role": "Purchase Incharge", "name": "Mr. Yashwant S., Mr. Rajendra T.", "chain": [
-            "Purchase Engineer — Mr. Hitesh P., Mr. Ganesh R.",
+        {"role": "HRD Officer", "names": ["Mr. Navnath", "Ms. Ruchika"]},
+        {"role": "Purchase Incharge", "names": ["Mr. Yashwant S.", "Mr. Rajendra T."], "chain": [
+            {"role": "Purchase Engineer", "names": ["Mr. Hitesh P.", "Mr. Ganesh R."]},
         ]},
-        {"role": "Project Manager", "name": "Mr. Mayur B., Mr. Dharmendra J.", "chain": [
-            "Project Engineer — Mr. Samir G., Mr. Mayur D.",
-            "Mechanical Draughtsmans / CNC Programmer**",
-            "CNC Operators**",
+        {"role": "Project Manager", "names": ["Mr. Mayur B.", "Mr. Dharmendra J."], "chain": [
+            {"role": "Project Engineer", "names": ["Mr. Samir G.", "Mr. Mayur D."]},
+            {"role": "Mechanical Draughtsmans / CNC Programer **"},
+            {"role": "CNC Operators **"},
         ]},
     ],
-    gm={
-        "role": "General Manager", "name": "Mr. Pramod Dubey",
-        "peer_role": "Technical Manager", "peer_name": "Mr. Varghes Nadar",
-        "branches": [
-            {"role": "HSE Committee", "name": "— members to be confirmed —"},
-            {"role": "EHS Officer", "name": "Mr. Priyesh Kumar", "chain": [
-                "Stores Incharge — Mr. Mehraj S. (Asst: Sandeep K., Edvin D.)",
-                "Maintenance Incharge — Mr. Milind P. (Asst**)",
-            ]},
-            {"role": "Manager Production", "name": "1. Mr. Arun W.  2. Mr. Chetan K.", "chain": [
-                "Production Engineers**",
-                "Fitters, Welders, Grinders, Helpers & Others",
-            ]},
-            {"role": "Manager Business Development", "name": "Mr. Anthony Dsouza, Mr. Ryan Fernandes", "chain": [
-                "Estimation Engineers**",
-            ]},
-            {"role": "Manager Engineering", "name": "Mr. Sourabh K.", "chain": [
-                "Design Engineers — Mr. Ankit Shetty, Mr. Moreshwar",
-                "Mechanical Draughtsmans**",
-            ]},
-        ],
-    },
+    gm={"role": "General Manager", "names": ["Mr. Pramod Dubey"]},
+    gm_peer={"role": "Technical Manager", "names": ["Varghes Nadar"]},
+    gm_branches=[
+        {"role": "HSE Committee", "chain": [
+            {"role": "Stores Incharge", "names": ["Mr. Mehraj S."]},
+            {"role": "Stores Assistants", "names": ["Mr. Sandeep K.", "Mr. Edvin D."]},
+        ]},
+        {"role": "EHS Officer", "names": ["Mr. Priyesh Kumar"], "chain": [
+            {"role": "Maintenance Incharge", "names": ["Mr. Milind P."]},
+            {"role": "Maintenance Assistants **"},
+        ]},
+        {"role": "Manager Production", "names": ["1. Mr. Arun W.", "2. Mr. Chetan K."], "chain": [
+            {"role": "Production Engineers **"},
+            {"role": "Fitters, Welders, Grinders, Helpers & Others"},
+        ]},
+        {"role": "Manager Business Development", "names": ["Mr. Anthony Dsouza", "Mr. Ryan Fernandes"], "chain": [
+            {"role": "Estimation Engineers **"},
+        ]},
+    ],
+    right_columns=[
+        {"role": "Manager Engineering", "names": ["Mr. Sourabh K."], "chain": [
+            {"role": "Design Engineers", "names": ["Mr. Ankit Shetty", "Mr. Moreshwar"]},
+            {"role": "Mechanical Draughtsmans **"},
+        ]},
+    ],
     footnote="** Refer list as per attached Annexure-1")
 
 # ---- 6-8. Company Layout & Plot Overview ---------------------------------
@@ -860,17 +971,22 @@ site_plan("Company Overview", "Facilities · Vitech Heavy Equipments Pvt. Ltd, S
     ],
     stat=("104,000", "Total Plot Area (sq. mtr.)"))
 
-# ---- 10-15. Workshop Overview --------------------------------------------
-visual("Workshop & Facilities", "Infrastructure", "Workshop Overview — Shahapur Campus", None, [10, 11, 12],
-       stat_row=[
-         ("22×120 mtr", "Bay 3 — Carbon Steel / Cladded Steel"),
-         ("22×120 mtr", "Bay 1 — Stainless / Exotic Steel"),
-         ("22×120 mtr", "Bay 2 — Stainless / Exotic Steel"),
-         ("25×100 mtr", "Bay 4 — Piping Spool Assembly"),
-         ("25×50 mtr", "Bay 5 — Skid Module Assembly"),
-         ("6,000 sq.mtr", "Open Yard Area"),
-         ("25 MT × 39 mtr", "Goliath Crane Capacity / Span"),
-       ])
+# ---- 10-15. Workshop Overview (three full-bleed slides, groupings and
+#             captions follow the original deck's slides 10-12) -------------
+photo_showcase("Workshop & Facilities", "Infrastructure", "Workshop Overview — Shahapur Campus",
+    [(IMG(10, 4), "Workshop with Admin Building"),
+     (IMG(10, 1), "Open Yard — 6,000 sq.mtr · Goliath Crane 25 MT × 39 mtr span"),
+     (IMG(10, 3), "Stainless / Exotic Steel Bay — 22 × 120 mtr × 2 Nos.")])
+
+photo_showcase("Workshop & Facilities", "Infrastructure", "Workshop Overview — Fabrication Bays",
+    [(IMG(11, 1), "Stainless / Exotic Steel Bay 1 — 22 × 120 mtr"),
+     (IMG(11, 2), "Stainless / Exotic Steel Bay 2 — 22 × 120 mtr"),
+     (IMG(11, 3), "Carbon Steel / Cladded Steel Bay 3 — 22 × 120 mtr")])
+
+photo_showcase("Workshop & Facilities", "Infrastructure", "Workshop Overview — Piping & Skid Bays",
+    [(IMG(10, 2), "Carbon Steel / Cladded Steel Bay — 22 × 120 mtr"),
+     (IMG(12, 1), "Piping Spool Bay 4 — 25 × 100 mtr"),
+     (IMG(12, 2), "Skid Module Bay 5 — 25 × 50 mtr")])
 
 data_table("Workshop & Facilities", "Group Capability", "Workshop Overview — Group Infrastructure",
       [
@@ -975,12 +1091,12 @@ divider("Automation & Welding", "Automation<br><span>Systems</span>",
 # ---- 24-29. Automated welding / overlay / pipe systems --------------------
 spec("Automation & Welding", "Automated Welding", "Tube-to-Tube Sheet Welding on Automated Welding Head", "",
      [("Process", "Titanium Gr.1 tube to Titanium Gr.2 tubesheet — GTAW welding in process")],
-     24, media_layout="row")
+     24, layout="showcase")
 
 spec("Automation & Welding", "Weld Overlay", "Weld Overlay Capability", "",
      [("Overlay A", "SA 516 Gr. 70 + SA 240 Gr. 317L overlay"),
       ("Overlay B", "SA 240 Gr. 316 + Hastelloy C 276 overlay")],
-     25,
+     25, layout="showcase",
      table=[
         ["Sr.", "Description", "Process", "Material", "Layers"],
         ["01", "Shell: min. ID 300mm (& above) × 40mm thk. × 1000mm lg. (max.)", "GTAW & FCAW", "SS 304/316/317L/Hastelloy C276", "3"],
@@ -992,23 +1108,23 @@ spec("Automation & Welding", "Weld Overlay", "Weld Overlay Capability", "",
 
 spec("Automation & Welding", "PLC Controlled", "Pipe Spool Bevelling, Cutting & Setup Stations", "",
      [("Capability", "Up to 24″ NB"), ("Length", "12 mtr.")],
-     27)
+     27, layout="showcase")
 
 spec("Automation & Welding", "Automated Systems", "Pipe Welding on Automated System / Orbital Pipe Machine", "",
      [("Automated system", "3″ NB to 20″ NB pipe, length 12 mtr."),
       ("Orbital pipe machine", "19mm OD – 77mm OD")],
-     28)
+     28, layout="showcase")
 
 spec("Automation & Welding", "Automated Machines", "Welding on Automated Machines", "",
      [("Force TIG (German make)", "Square butt joint welding up to 10mm in single pass"),
       ("Automated GMAW system (Canadian make)", "Specialised for GMAW & FCAW in 1G, 2G & 3G positions, carbon steel & stainless steel")],
-     29)
+     29, layout="showcase")
 
 # ---- 82. Lithium ----------------------------------------------------------
 spec("Oil, Gas, Lithium & Aerospace", "Lithium", "Tanks and Vessels", "Lithium Nevada Thacker Pass Project (USA)",
      [("Material", "Duplex SST 2205 / SA240 Gr 316L"),
       ("Total qty / weight", "15 Nos. / 30 MT")],
-     82)
+     82, layout="showcase")
 
 # ---- 83. Divider: Oil & Petrochemical --------------------------------------
 divider("Oil, Gas, Lithium & Aerospace", "Oil &<br><span>Petrochemical</span>",
@@ -1026,7 +1142,7 @@ spec("Oil, Gas, Lithium & Aerospace", "Oil & Petrochemical", "Ethane Tower Heat 
      [("Material", "SA 240 Gr. 304/304L dual certified"),
       ("Size", "Ø 4000mm ID × 13,809mm L × 52mm thk"),
       ("Total qty / weight", "1 No. / 97 MT")],
-     85)
+     85, layout="showcase")
 
 spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Demethanizer Prestripper No.2 — New SS Tower", "Reliance Industries — Nagothane Refinery",
      [("Material", "SA 240 Gr. 304/304L dual certified"),
@@ -1038,13 +1154,13 @@ spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Produced Water Skids", "Cair
      [("Material", "Carbon Steel / Duplex"),
       ("Qty", "22 Nos."),
       ("Scope", "Procurement + fabrication of piping spools + structure + assembly + E&I procurement & installation + heat tracing + insulation + FAT")],
-     87)
+     87, layout="showcase")
 
 spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Produced Water Skids — Fabrication Progress", "Cairn Energy, Rajasthan, India",
      [("Material", "Carbon Steel / Duplex"),
       ("Qty", "22 Nos."),
       ("Scope", "Procurement + fabrication of piping spools + structure + assembly + E&I procurement & installation + heat tracing + insulation + FAT")],
-     88)
+     88, layout="showcase")
 
 spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Static Mixer (ASME U Stamp — EIL)", "HPCL Visakhapatnam (EIL)",
      [("Material", "Carbon steel body (SA 106 Gr.B) with SS 316 steam tracing tubes"),
@@ -1056,7 +1172,7 @@ spec("Oil, Gas, Lithium & Aerospace", "Oil & Petrochemical", "Inlet & Outlet Dis
      [("Material", "Inconel 601 (UNS06601)"),
       ("Size", "Ø 2.1 mtr × 2.08 mtr L"),
       ("Qty / Weight", "10 sets / 2 tons")],
-     90)
+     90, layout="showcase")
 
 spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Storage Tank — Insulation + Sacrificial Anode + Internal Glass Flake Lining", "Cairn Energy, India",
      [("Material", "SA 516 Gr.70 NACE"),
@@ -1067,13 +1183,13 @@ spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Storage Tank — Insulation 
 spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas / Petrochemical", "Static Mixers (ASME U Stamp) with Grayloc Connectors", "NRL Expansion Project, Sulzer Chemtech India Pvt Ltd",
      [("Mixer A", "SA 182 F347 & SA 182 F321 — Ø 466.7 & 482.7mm OD × 4000mm lg. × 50mm thk — 8 tons, 1 No."),
       ("Mixer B", "SA 183 F321 — Ø 457.2mm OD × 4000mm lg. × 50mm thk — 7 tons, 1 No.")],
-     92)
+     92, layout="showcase")
 
 spec("Oil, Gas, Lithium & Aerospace", "Aerospace", "Exhaust Collector — U Stamp", "Pratt & Whitney, Canada",
      [("Material", "SS 321"),
       ("Size", "Ø 1.176 mtr × 32mm thk × 1 mtr L"),
       ("Qty / Weight", "1 No. / 5 tons")],
-     93)
+     93, layout="showcase")
 
 spec("Oil, Gas, Lithium & Aerospace", "Paper & Pulp", "Evaporator — Effect 7", "APL, India",
      [("Material", "SA 240 Gr. 304 & SA 516 Gr. 70; tubesheets SA 240 Gr. 304L; tubes SA 249 TP 304L"),
@@ -1098,14 +1214,14 @@ spec("Food Processing & Oleo Chemical", "Food Processing", "Spiral Heat Exchange
       ("Quantity", "150+ such jobs manufactured to date"),
       ("Weight", "60 – 120 tons"),
       ("High pressure", "Steam coils"), ("Low pressure", "Clamping coils")],
-     [31, 32], extra="For Europe, Russia, South America, USA, Africa, Asia")
+     [31, 32], layout="showcase", extra="For Europe, Russia, South America, USA, Africa, Asia")
 
 spec("Food Processing & Oleo Chemical", "Food Processing", "Soft Flex U-Tube Heat Exchanger", "For a project in India",
      [("Material", "SA 240 Gr. 304; tubesheets SA 240 Gr. 304; tubes SA 213 TP 304"),
       ("Size", "Ø 1.8 mtr × 20.3 mtr L"),
       ("U-tubes", "30mm OD × 2mm thk."),
       ("Qty / Weight", "1 No. / 35 tons")],
-     33)
+     33, layout="showcase")
 
 spec("Food Processing & Oleo Chemical", "Oleo Chemical", "Cladded Splitter Columns", "Adani Wilmar Ltd, India",
      [("Column 1 — Material", "SA 516 Gr. 70 + SS 317L clad"),
@@ -1114,7 +1230,7 @@ spec("Food Processing & Oleo Chemical", "Oleo Chemical", "Cladded Splitter Colum
       ("Column 2 — Material", "SA 516 Gr.70 + SA 240 Gr.317L clad, SS 317L internals"),
       ("Column 2 — Size", "Ø 1.92 mtr × (50+3mm thk) × 55 mtr L"),
       ("Column 2 — Qty / Wt.", "2 Nos. / 150 tons each")],
-     [34, 35])
+     [34, 35], layout="showcase")
 
 spec("Food Processing & Oleo Chemical", "Oleo Chemical", "Cladded Columns with Trays", "PTSOI, Indonesia",
      [("Material", "SA 516 Gr. 70 + SS 317L"),
@@ -1145,7 +1261,7 @@ spec("Food Processing & Oleo Chemical", "Food Processing", "First Stage Evaporat
       ("Size", "Ø 2.305/3.426 mtr × 18.39 mtr L"),
       ("Tubes", "OD 31.75 × 1.25 thk. — qty 2,196 Nos."),
       ("Qty / Weight", "1 No. / 56 tons")],
-     40)
+     40, layout="showcase")
 
 spec("Food Processing & Oleo Chemical", "Food Processing", "Vacuum Condenser", "CHS Inc., USA",
      [("Material", "SA 516 Gr. 70"),
@@ -1184,7 +1300,7 @@ spec("Fertilizer", "Coromandel International Ltd", "Acid Cooler", "",
       ("Tubes", "ASTM A-249 TP316L with Hastelloy cathodic protection"),
       ("Size", "Ø 1346mm × 11,812mm overall length"),
       ("Qty / Weight", "1 No. / 24 MT")],
-     46)
+     46, layout="showcase")
 
 spec("Fertilizer", "Fertilizer", "Tail Gas Stack", "Chambal Fertilizer & Chemicals Ltd., Rajasthan",
      [("Material", "SA 240 Gr 304"),
@@ -1196,13 +1312,16 @@ spec("Fertilizer", "Fertilizer · Shop Fabrication", "Prill Tower — Fabricatio
      [("Material", "SA 240 Gr. 304L"),
       ("Size", "Ø 5.3/7.1/8.9 × 68.17 mtr length"),
       ("Qty / Weight", "1 No. / 305.25 MT"),
-      ("Fabrication Stages", "Skirt & Top Plenum · Hopper (Polished to 0.4Ra Finish) · Shell Rolling"),
-      ("Note", "Hopper fabricated and internally polished to 0.4Ra finish")],
-     [48, 49, 50], images_count=4)
+      ("Fabrication Stages", "Skirt & Top Plenum · Hopper (Polished to 0.4Ra Finish) · Shell Rolling")],
+     [48, 49, 50], images_count=4, layout="showcase")
 
 spec("Fertilizer", "Site Installation", "Prill Tower — Installation at Site", "Chambal Fertilizer & Chemicals Ltd., Rajasthan",
+     [("Stage", "Tower sections delivered — top plenum lifted into the supporting structure")],
+     51, layout="showcase", files=[IMG(51, 1), IMG(51, 2)])
+
+spec("Fertilizer", "Site Installation", "Prill Tower — Erection Complete", "Chambal Fertilizer & Chemicals Ltd., Rajasthan",
      [("Milestone", "Full tower erected and commissioned on site")],
-     51)
+     51, layout="showcase", files=[IMG(51, 3), IMG(51, 4)])
 
 spec("Fertilizer", "Fertilizer · Shop + Site Fabricated", "Hot Interpass Heat Exchanger", "IFFCO, Paradip, Odisha",
      [("Material", "SA 240 Gr. 304 (shell & channel side); tubesheets SA 240 Gr. 304; tubes SA 213 TP 304"),
@@ -1210,7 +1329,7 @@ spec("Fertilizer", "Fertilizer · Shop + Site Fabricated", "Hot Interpass Heat E
       ("Tubes", "50.8mm OD × 2.1mm thk. × 6.1 mtr L — qty 2,808 Nos."),
       ("Qty / Weight", "1 No. / 85 tons"),
       ("Transport", "3 pieces — (1st) Ø 6.9×6.1m, (2nd) Ø 5.6×3.85m, (3rd) Ø 5.6×3m; all large nozzles shipped loose")],
-     [52, 53], milestone="Site Assembly — erected at IFFCO site")
+     [52, 53], layout="showcase", milestone="Site Assembly — erected at IFFCO site")
 
 spec("Fertilizer", "Fertilizer · Shop + Site Fabricated", "Cold Interpass Heat Exchanger", "IFFCO, Paradip, Odisha",
      [("Material", "SA 240 Gr. 316L (shell & channel side); tubesheets & tubes SA 213 TP 316L"),
@@ -1218,13 +1337,13 @@ spec("Fertilizer", "Fertilizer · Shop + Site Fabricated", "Cold Interpass Heat 
       ("Tubes", "50.8mm OD × 2.41mm thk. × 10.1 mtr L — qty 2,841 Nos."),
       ("Qty / Weight", "1 No. / 135 tons"),
       ("Transport", "3 pieces — (1st) Ø 5.4×10.5m, (2nd & 3rd) Ø 5.4×2.5m, bustle Ø 6.9m ×2 dispatched in halves; large nozzles shipped loose")],
-     [54, 55], milestone="Site Assembly — erected at IFFCO site")
+     [54, 55], layout="showcase", milestone="Site Assembly — erected at IFFCO site")
 
 spec("Fertilizer", "Fertilizer · Shop + Site Fabricated", "Converter", "IFFCO, Paradip, Odisha",
      [("Material", "SA 240 Gr. 304H"),
       ("Size", "Ø 12 mtr × 20 mtr L"),
       ("Qty / Weight", "1 No. / 330 tons")],
-     [56, 57], milestone="After Insulation at Site — insulated and erected at IFFCO site")
+     [56, 57], layout="showcase", milestone="After Insulation at Site — insulated and erected at IFFCO site")
 
 gallery("Fertilizer", "Client Recognition", "IFFCO Project-Specific Approval Letter", 58)
 
@@ -1232,33 +1351,33 @@ spec("Fertilizer", "Fertilizer", "Ducts", "Ma’aden (Saudi Arabia) — Phosphat
      [("Material", "SS 304, SS304L, SS304H, SS316L, IS2062 Gr B"),
       ("Size", "~2,700mm each"),
       ("Total qty / weight", "23 Nos. / 520 MT")],
-     59)
+     59, layout="showcase")
 
 spec("Fertilizer", "Fertilizer", "K-COT Converter — Regenerator Support Structure", "K-COT Converter (KBR Inc.), USA",
      [("Material", "SA 240 Gr. 304H"),
       ("Size", "3450×17250×100mm ×4 pcs & Ø 1975×100mm ×4 Nos."),
       ("Qty", "8 Nos. (7 tons each)"),
       ("Weight", "30 MT")],
-     60)
+     60, layout="showcase")
 
 spec("Fertilizer", "Fertilizer", "Partition Plates for Ammonia Converter Baskets", "KBR Inc., USA",
      [("Material", "SA 240 Gr. 304"),
       ("Size", "Up to 3 mtr dia."),
       ("Qty / Weight", "32 Nos. / 10 MT")],
-     61)
+     61, layout="showcase")
 
 spec("Fertilizer", "Fertilizer", "KBR Distributor Grids — Ammonia Basket Converter Internals", "Talcher Fertilizers Ltd., Odisha, India (KBR Inc.)",
      [("Material", "SA 240 Gr. 304"),
       ("Size", "2.6 mtr × 9.35 mtr L"),
       ("Qty / Weight", "8 Nos. / 65 tons")],
-     62)
+     62, layout="showcase")
 
 spec("Fertilizer", "Sulphuric Acid Plant", "ZECOR Z — Piping Spools & Pipe Fittings (Shop + Site)", "Hindalco Industries Ltd, India",
      [("Material", "ZECOR Z"),
       ("Size", "2″ NB to 30″ NB"),
       ("Qty", "7,500 inch-dia & 5,000 inch-mtr"),
       ("Weight", "30 tons")],
-     63)
+     63, layout="showcase")
 
 # ---- 64. Divider: Water & Desalination ------------------------------------
 divider("Water & Desalination", "Water &<br><span>Desalination</span>",
@@ -1283,7 +1402,7 @@ spec("Water & Desalination", "Zero Liquid Discharge", "Flash / Distillate Tank &
       ("Condenser material", "SA 240 UNS S32205 (shell) & SA 240 UNS S32750 (channel)"),
       ("Condenser tubes", "SB 338 Gr.2, 25.4mm OD × 0.72mm — qty 212 Nos."),
       ("Condenser size / qty", "640mm OD × 3172mm to tubesheet face / 1 No.")],
-     67)
+     67, layout="showcase")
 
 spec("Water & Desalination", "Zero Liquid Discharge", "Forced Circulation Heat Exchanger (FCHX)", "Qatar Fertilizer Company (QAFCO)",
      [("Material", "SA 240 UNS S32205 (shell & channel side)"),
@@ -1297,7 +1416,7 @@ spec("Water & Desalination", "Zero Liquid Discharge", "Heat Exchanger", "Grasim 
       ("Size", "Ø 1.85/2.1 mtr × 8mm thk × 14 mtr L"),
       ("Tubes", "38.1mm OD × 0.711mm thk × 10.7 mtr L — qty 1,100 Nos."),
       ("Qty / Weight", "1 No. / 25 tons")],
-     69)
+     69, layout="showcase")
 
 spec("Water & Desalination", "Zero Liquid Discharge", "Heat Exchanger — Twin Units", "Hindustan Zinc Ltd & Hindalco Industries Ltd, India",
      [("Material", "SA 516 Gr.70 (shell) & SA 240 UNS S31254 (tube); tubesheets SA 516 Gr.70 + Ti.Gr.1 explosion bonded; tubes Titanium Gr.2 (welded)"),
@@ -1305,14 +1424,14 @@ spec("Water & Desalination", "Zero Liquid Discharge", "Heat Exchanger — Twin U
       ("Size B", "Ø 1.8 mtr × 10mm thk × 11.2 mtr L"),
       ("Tubes", "31.75mm OD × 0.711mm thk × 7.5m (qty 1,350) and ×8m (qty 1,600) Nos."),
       ("Qty / Weight", "1 No. each — A) 18 tons  B) 20 tons")],
-     70)
+     70, layout="showcase")
 
 spec("Water & Desalination", "Zero Liquid Discharge", "Crystallizer & Deaerator", "Hindustan Zinc Ltd, Hindalco Industries Ltd, Grasim Industries Ltd (Nagda, MP), India",
      [("Crystallizer material", "SA 240 Gr. 31254 (6% Moly)"),
       ("Crystallizer size / qty / wt.", "Ø 3.66 mtr × 9.75 mtr L / 1 No. / 12 tons"),
       ("Deaerator material", "SA 240 Gr. 31254 (6% Moly)"),
       ("Deaerator size / qty / wt.", "Ø 0.6 mtr × 4.2 mtr L / 2 Nos. / 2 tons")],
-     71)
+     71, layout="showcase")
 
 spec("Water & Desalination", "Zero Liquid Discharge", "Brine Concentrator", "Grasim Industries Ltd, Nagda, MP, India",
      [("Material", "SA 240 Gr. 316L (shell & tube side); tubesheets SA 240 Gr. 316L; tubes SA 179 UNS S31803 (welded)"),
@@ -1325,13 +1444,13 @@ spec("Water & Desalination", "Water & Desalination", "Piping Spools — PDO", "P
      [("Material", "SS 316L & Super Duplex 32750"),
       ("Size", "1″ to 6″ × 12 mtr length"),
       ("Qty", "12,500 inch-dia.")],
-     73)
+     73, layout="showcase")
 
 spec("Water & Desalination", "Water & Desalination", "Piping Spools — KOC", "Kuwait Oil Company",
      [("Material", "Duplex 32205 / Super Duplex 32750"),
       ("Size", "2″ to 10″ × 12 mtr length"),
       ("Qty", "40,000 inch-dia.")],
-     74)
+     74, layout="showcase")
 
 spec("Water & Desalination", "Water & Desalination", "Pre-Fabricated Piping Spools", "Pertamina, Indonesia",
      [("Material", "SS 316L / UNS S32750 / CS"),
@@ -1347,13 +1466,13 @@ spec("Water & Desalination", "Water Treatment", "Skid Mounted Packages", "H2 Gre
       ("Skid 2 — Material", "SA 106 Gr.B (rubber lining) & SA 312 TP 316L"),
       ("Skid 2 — Size", "6.6m L × 4.1m W × 3.75m H"),
       ("Skid 2 — Qty / Wt.", "10 Nos. / 110 tons")],
-     [76, 77], images_count=4)
+     [76, 77], images_count=4, layout="showcase")
 
 spec("Water & Desalination", "Water Treatment", "ZLD Softeners (Rubber Lined), PED + CE Marking", "H2 Green Steel, Sweden",
      [("Material", "SA 516 Gr. 70N"),
       ("Size", "Ø 3000mm × 3,353mm TL-TL"),
       ("Total qty / weight", "3 Nos. / 25 MT")],
-     78)
+     78, layout="showcase")
 
 spec("Water & Desalination", "Water Treatment", "Rapid Mix & Flocculation Tank", "H2 Green Steel, Sweden",
      [("Material", "SA 240 Gr. 304"),
@@ -1365,13 +1484,13 @@ spec("Water & Desalination", "Water Treatment", "Multimedia Filter (Internal Coa
      [("Material", "SA 516 Gr. 70N"),
       ("Size", "Ø 3000mm × 10,102mm TL-TL"),
       ("Total qty / weight", "7 Nos. / 108 MT")],
-     80)
+     80, layout="showcase")
 
 spec("Water & Desalination", "Water Treatment", "Cartridge Filter", "Saudi Aramco, Zuluf Water Treatment Plant",
      [("Material", "SA 516 Gr 70; tubesheet Super Duplex S32750 (30mm thk.)"),
       ("Size", "Ø 1460mm ID × 1750mm TS-TS"),
       ("Total qty / weight", "12 Nos. / 3.8 MT each")],
-     81)
+     81, layout="showcase")
 
 # ---- 96. Electrical & Instrumentation ---------------------------------------
 prose("Electrical & Instrumentation", "In-House Team", "Electrical & Instrumentation Capability",
@@ -1423,7 +1542,7 @@ gallery("Health, Safety & Environment", "Toolbox Talks", "Safety Instructions �
 spec("Packing, Dispatch & Ongoing Jobs", "Packing, Preservation & Dispatch", "Tarpaulin Wrapping & Nitrogen Purging", "",
      [("Tarpaulin wrapping", "Loading & lashing on trailer"),
       ("Nitrogen purging", "Supply of cylinder with its accessories")],
-     101)
+     101, layout="showcase")
 
 spec("Packing, Dispatch & Ongoing Jobs", "ODC Dispatch", "SS304 Distillation Column — Single-Piece Transport", "",
      [("Description", "46.5 mtr long distillation column, transported in a single piece"),
@@ -1481,9 +1600,16 @@ data_table("Packing, Dispatch & Ongoing Jobs", "Ongoing Jobs — Lithium", "Ongo
       ],
       sub="Thacker Pass P-30090 LNC Project", columns=2, dense=True)
 
-# ---- 112. Exhibitions & Shop Approvals ---------------------------------------
-gallery("Exhibitions & Approvals", "Industry Presence · Shop Approvals", "Vitech at Exhibitions & Shop Approvals", [112, 114],
-        caption="IEW 2026, Goa · FAI 2025, Delhi · GRPC 2025, Delhi · WEFTEC 2025, Chicago · CHEMTECH 2026, Mumbai")
+# ---- 112. Exhibitions (split across two full-bleed slides; slide114_img02 is
+#           a corrupt all-black frame, intentionally dropped) ------------------
+photo_showcase("Exhibitions & Approvals", "Industry Presence", "Vitech at Exhibitions — IEW · FAI · GRPC",
+    [(IMG(112, 2), "IEW 2026, Goa"),
+     (IMG(112, 1), "FAI 2025, Delhi"),
+     (IMG(112, 3), "GRPC 2025, Delhi")])
+
+photo_showcase("Exhibitions & Approvals", "Industry Presence", "Vitech at Exhibitions — WEFTEC · CHEMTECH",
+    [(IMG(112, 5), "WEFTEC 2025, Chicago"),
+     (IMG(112, 4), "CHEMTECH 2026, Mumbai")])
 
 # ---- 115. Divider: Appreciation Letters --------------------------------------
 divider("Client Appreciation", "Appreciation<br><span>Letters</span>",
