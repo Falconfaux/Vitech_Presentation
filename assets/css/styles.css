@@ -291,13 +291,17 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 /* ---------------------------------------------------------------------- */
 
 .tpl-cover .slide-inner {
-  align-items: flex-start; text-align: left; justify-content: flex-end;
-  padding-bottom: calc(var(--pad) + 48px);
+  align-items: stretch; text-align: left; justify-content: space-between;
+  padding-top: calc(var(--pad) + 20px);
+  padding-bottom: calc(var(--pad) + 40px);
 }
+.tpl-cover .cover-top, .tpl-cover .cover-bottom { display: flex; flex-direction: column; align-items: flex-start; }
+/* top band carries the logo + wordmark, bottom band the stats/contact; the
+   photographed centre stays clear so the people remain visible */
 .tpl-cover .slide-scrim {
   background:
-    linear-gradient(180deg, rgba(var(--azure-deep-rgb),.30) 0%, rgba(var(--azure-deep-rgb),0) 28%, rgba(var(--azure-deep-rgb),.22) 60%, rgba(var(--azure-deep-rgb),.92) 100%),
-    linear-gradient(100deg, rgba(var(--azure-deep-rgb),.90) 0%, rgba(var(--azure-deep-rgb),.60) 42%, rgba(var(--azure-deep-rgb),.16) 74%, rgba(var(--azure-deep-rgb),.04) 100%);
+    linear-gradient(180deg, rgba(var(--azure-deep-rgb),.62) 0%, rgba(var(--azure-deep-rgb),.10) 24%, rgba(var(--azure-deep-rgb),0) 46%, rgba(var(--azure-deep-rgb),.24) 66%, rgba(var(--azure-deep-rgb),.92) 100%),
+    linear-gradient(100deg, rgba(var(--azure-deep-rgb),.72) 0%, rgba(var(--azure-deep-rgb),.34) 44%, rgba(var(--azure-deep-rgb),.08) 74%, rgba(var(--azure-deep-rgb),.02) 100%);
 }
 .tpl-cover.active .slide-bg-img { animation: kenburns 20s ease-out forwards; }
 .tpl-cover .cover-logo {
@@ -394,7 +398,11 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 .tpl-prose .content-grid {
   display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(1.5rem, 4vw, 4rem); align-items: start;
 }
-.tpl-prose p { color: #d7dcea; font-size: calc(var(--fit,1) * 1.15rem); line-height: calc(var(--fit,1) * 1.8); margin-bottom: calc(var(--fit,1) * 1.3rem); }
+.tpl-prose p { color: #d7dcea; font-size: calc(var(--fit,1) * 1.22rem); line-height: calc(var(--fit,1) * 1.74); margin-bottom: calc(var(--fit,1) * 1.3rem); }
+/* prose fact rows read as body copy, not fine print */
+.tpl-prose .spec-row { font-size: calc(var(--fit,1) * .98rem); }
+.tpl-prose .spec-row .k { font-size: .78rem; }
+.tpl-prose .spec-row .v { font-size: calc(var(--fit,1) * .98rem); }
 .tpl-prose .stat-row { display: flex; flex-wrap: wrap; gap: calc(var(--fit,1) * 1.4rem); margin: calc(var(--fit,1) * 2.2rem) 0; }
 .tpl-prose .spec-list { margin-bottom: calc(var(--fit,1) * 1.4rem); }
 .labeled-chip-group { margin-top: calc(var(--fit,1) * 1.6rem); }
@@ -427,7 +435,10 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 }
 .side-panel h3 { font-size: .78rem; text-transform: uppercase; letter-spacing: .1em; color: var(--amber); margin-bottom: calc(var(--fit,1) * .9rem); }
 .side-panel ul { list-style: none; padding: 0; display: grid; gap: calc(var(--fit,1) * .55rem); }
-.side-panel li { font-size: .88rem; color: #dfe4f0; display: flex; gap: .55rem; align-items: flex-start; line-height: calc(var(--fit,1) * 1.4); }
+.side-panel li { font-size: .93rem; color: #dfe4f0; display: flex; gap: .55rem; align-items: flex-start; line-height: calc(var(--fit,1) * 1.42); }
+/* long capability lists stay compact so dense slides don't overflow */
+.side-panel.wide li { font-size: .84rem; line-height: calc(var(--fit,1) * 1.34); }
+.side-panel.wide ul { gap: calc(var(--fit,1) * .42rem); }
 .side-panel li::before { content: "—"; color: var(--azure-bright); flex-shrink: 0; }
 .side-panel.wide { grid-column: 1 / -1; margin-top: calc(var(--fit,1) * var(--fit,1) * 1.2rem); }
 .side-panel.wide ul { display: block; columns: 2; column-gap: 2.5rem; }
@@ -488,6 +499,9 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 .org-card-sub small { color: #aeb6cc; }
 
 .org-connector { width: 2px; height: calc(var(--fit,1) * var(--fit,1) * 16px); background: rgba(var(--azure-bright-rgb),.4); }
+/* Director (left) + VP (right) leadership pair beneath the MD */
+.org-exec-pair { display: flex; justify-content: center; align-items: stretch; gap: calc(var(--fit,1) * .8rem); }
+.org-exec-pair .org-card-exec { min-width: 300px; }
 .org-vline { width: 2px; height: calc(var(--fit,1) * var(--fit,1) * 12px); background: rgba(var(--azure-bright-rgb),.3); flex-shrink: 0; }
 
 .org-bus { position: relative; width: 100%; max-width: 1560px; height: 2px; }
@@ -974,11 +988,14 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    photo uncropped over its own blurred fill — the single-photo recipe, tiled. */
 .tpl-spec.layout-showcase .showcase-canvas.n2,
 .tpl-spec.layout-showcase .showcase-canvas.n3,
-.tpl-spec.layout-showcase .showcase-canvas.n4 { display: grid; gap: 5px; }
+.tpl-spec.layout-showcase .showcase-canvas.n4 { display: grid; gap: 11px; background: var(--azure-deep); }
+.tpl-spec.layout-showcase .showcase-canvas.n1 { display: grid; grid-template-columns: 1fr; grid-template-rows: 1fr; }
 .tpl-spec.layout-showcase .showcase-canvas.n2 { grid-template-columns: 1fr 1fr; }
 .tpl-spec.layout-showcase .showcase-canvas.n3 { grid-template-columns: 1fr 1fr 1fr; }
 .tpl-spec.layout-showcase .showcase-canvas.n4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
-.tpl-spec.layout-showcase .showcase-cell { position: relative; overflow: hidden; min-width: 0; min-height: 0; }
+/* multi-photo showcases: a visible gutter + hairline so touching photos read
+   as distinct frames instead of blurring into one image */
+.tpl-spec.layout-showcase .showcase-cell { position: relative; overflow: hidden; min-width: 0; min-height: 0; outline: 1px solid rgba(255,255,255,.10); outline-offset: -1px; }
 .tpl-spec.layout-showcase .showcase-cell .media-full {
   padding: calc(var(--pad) * .55) calc(var(--pad) * .12) calc(var(--fit,1) * 8.9rem);
 }
@@ -1059,7 +1076,6 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   border-radius: 18px;
   background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .55), rgba(var(--azure-deep-rgb), .85));
   border: 1px solid rgba(var(--azure-bright-rgb), .35);
-  border-top: 3px solid var(--amber);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   box-shadow: 0 18px 50px rgba(0,0,0,.45);
@@ -1087,7 +1103,7 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 /* panel-side: showcase slides carrying a spec table — the bottom strip would
    bury the photos, so the photos own the left ~62% at full height and the
    panel docks to the right edge as a vertical glass column. */
-.tpl-spec.layout-showcase.panel-side .showcase-canvas { right: 38%; }
+.tpl-spec.layout-showcase.panel-side .showcase-canvas { right: 44%; }
 .tpl-spec.layout-showcase.panel-side .showcase-canvas .media-full,
 .tpl-spec.layout-showcase.panel-side .showcase-cell .media-full {
   padding: calc(var(--fit,1) * 3.2rem) calc(var(--pad) * .12) calc(var(--fit,1) * .8rem);
@@ -1097,15 +1113,17 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   padding-bottom: var(--pad);
 }
 .tpl-spec.layout-showcase.panel-side .showcase-panel {
-  width: 36%; max-height: calc(100% - 4rem); overflow-y: auto;
+  width: 42%; max-height: calc(100% - 3rem); overflow-y: auto;
 }
+.tpl-spec.layout-showcase.panel-side .slide-title { font-size: calc(var(--fit,1) * clamp(1.5rem, 2.4vw, 2.15rem)); }
 .tpl-spec.layout-showcase.panel-side .showcase-head { display: block; }
 .tpl-spec.layout-showcase.panel-side .client-badge { margin-top: .6rem; }
-.tpl-spec.layout-showcase.panel-side .spec-list { display: grid; gap: calc(var(--fit,1) * .6rem); }
+.tpl-spec.layout-showcase.panel-side .spec-list { display: grid; gap: calc(var(--fit,1) * .7rem); }
 .tpl-spec.layout-showcase.panel-side .spec-row { flex: none; }
-.tpl-spec.layout-showcase.panel-side .spec-extra-table table.spec-table { font-size: calc(var(--fit,1) * .74rem); }
+.tpl-spec.layout-showcase.panel-side .spec-row .v { font-size: calc(var(--fit,1) * .98rem); }
+.tpl-spec.layout-showcase.panel-side .spec-extra-table table.spec-table { font-size: calc(var(--fit,1) * .86rem); }
 .tpl-spec.layout-showcase.panel-side .spec-extra-table table.spec-table td,
-.tpl-spec.layout-showcase.panel-side .spec-extra-table table.spec-table th { padding: calc(var(--fit,1) * .4rem) calc(var(--fit,1) * .5rem); }
+.tpl-spec.layout-showcase.panel-side .spec-extra-table table.spec-table th { padding: calc(var(--fit,1) * .5rem) calc(var(--fit,1) * .62rem); }
 
 /* panel-compact: short-spec showcase slides (a headline + a couple of spec
    pairs). The panel shrinks to fit its content and docks bottom-left so the
@@ -1135,6 +1153,17 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 .tpl-spec.layout-showcase.panel-compact .spec-row .k::after {
   content: "·"; color: var(--steel); margin-left: .5rem; font-weight: 400;
 }
+/* panel-tl: dock the compact panel to the TOP-left so a tall vessel below it
+   stays fully visible (used on the cladded column slides) */
+.tpl-spec.layout-showcase.panel-compact.panel-tl .slide-inner { justify-content: flex-start; }
+.tpl-spec.layout-showcase.photo-fill.panel-compact.panel-tl .showcase-cell.panel-clear .media-full,
+.tpl-spec.layout-showcase.photo-fill.panel-compact.panel-tl .showcase-canvas > .media-full {
+  padding-top: 0 !important; padding-bottom: 0 !important;
+}
+/* panel-right: push the compact panel to the RIGHT so the subject on the left
+   of the frame reads clearly */
+.tpl-spec.layout-showcase.panel-compact.panel-right .slide-inner { align-items: flex-end; text-align: right; }
+.tpl-spec.layout-showcase.panel-compact.panel-right .spec-list { justify-content: flex-end; }
 /* photo-fill compact: shrink the reserved bottom band so photos fill nearly
    to the edge; the small frosted panel blends over the lower-left corner. */
 .tpl-spec.layout-showcase.photo-fill.panel-compact .showcase-cell.panel-clear .media-full,
