@@ -191,32 +191,38 @@ def hero_img(files):
 
 def cover(section, title_html, locations, contact_lines, bg_img, tagline=None, stats=None):
     id = next_id()
-    loc_html = "".join(
-        '<div><b>{0}</b>{1}</div>'.format(esc(l[0]), nb(l[1])) for l in locations
-    )
+    # locations render as a quiet inline meta row: bold company name + city,
+    # separated by amber dots
+    loc_parts = []
+    for i, l in enumerate(locations):
+        if i:
+            loc_parts.append('<span class="sep"></span>')
+        loc_parts.append('<span><b>{0}</b> {1}</span>'.format(esc(l[0]), nb(l[1])))
+    loc_html = '<div class="cover-meta reveal reveal-d3">{0}</div>'.format("".join(loc_parts)) if locations else ""
     tagline_html = '<p class="cover-tagline reveal reveal-d1">{0}</p>'.format(esc(tagline)) if tagline else ""
     stats_html = ""
     if stats:
         tiles = "".join(
-            '<div class="stat-tile"><div class="num">{v}</div><div class="lbl">{l}</div></div>'.format(v=esc(v), l=esc(l))
+            '<div class="stat"><div class="num">{v}</div><div class="lbl">{l}</div></div>'.format(v=esc(v), l=esc(l))
             for v, l in stats
         )
-        stats_html = '<div class="stat-row cover-stats reveal reveal-d2">{0}</div>'.format(tiles)
+        stats_html = '<div class="cover-statbar reveal reveal-d2">{0}</div>'.format(tiles)
     body = '''
     <section class="slide tpl-cover" id="s{id}" data-section="{section}">
       {bg}
       <div class="slide-inner">
         <img class="cover-logo reveal" src="assets/images/brand/vitech-lockup.png" alt="Vitech Group of Companies">
         <h1 class="reveal reveal-d1">{title}</h1>
+        <div class="cover-rule reveal reveal-d1"></div>
         {tagline}
         {stats}
-        <div class="cover-locations reveal reveal-d2">{loc}</div>
+        {loc}
         <div class="cover-contact reveal reveal-d3">{contact}</div>
       </div>
       <div class="scroll-cue"><span>Scroll to begin</span><span class="dot"></span></div>
     </section>'''.format(id=id, section=esc(section), bg=lazybg(bg_img), title=title_html,
                           tagline=tagline_html, stats=stats_html,
-                          loc=loc_html, contact="<br>".join(esc(c) for c in contact_lines))
+                          loc=loc_html, contact="  ·  ".join(esc(c) for c in contact_lines))
     add(id, section, "cover", body)
 
 def divider(section, title_html, sub, bg_img=None, index_label=""):
@@ -392,20 +398,31 @@ def org_chart(section, eyebrow, title, exec_chain, left_columns, gm, gm_peer, gm
 
 def site_plan(section, eyebrow, title, img_src, legend, stat=None):
     """Full-bleed site plan: the CAD drawing owns the whole slide (uncropped,
-    on a flat deep-blue field), the title overlays the top scrim and the
-    legend floats as a glass panel docked to the right edge."""
+    letterboxed just above a slim glass legend bar docked to the bottom edge,
+    so no map marker is covered). Title and plot-area stat float as compact
+    frosted chips in the top corners."""
     id = next_id()
-    parts = []
+    # split the flat legend list into groups (each starts with a ("group", …))
+    groups, cur = [], None
     for num, txt in legend:
         if num == "group":
-            parts.append('<div class="legend-group-header">{0}</div>'.format(esc(txt)))
+            cur = {"title": txt, "items": []}
+            groups.append(cur)
         else:
-            parts.append('<div class="legend-item"><div class="legend-num">{0}</div><div class="legend-txt">{1}</div></div>'.format(esc(num), nb(txt)))
-    legend_html = "".join(parts)
+            (cur or groups.setdefault(0, {"title": "", "items": []}))["items"].append((num, txt))
+    cols = []
+    for g in groups:
+        items = "".join(
+            '<div class="legend-item"><span class="legend-num">{0}</span>'
+            '<span class="legend-txt">{1}</span></div>'.format(esc(num), nb(txt))
+            for num, txt in g["items"])
+        cols.append('<div class="legend-col"><div class="legend-group-header">{0}</div>{1}</div>'.format(
+            esc(g["title"]), items))
+    legend_html = "".join(cols)
     stat_html = ""
     if stat:
         v, l = stat
-        stat_html = '<div class="siteplan-stat">{0} <span>{1}</span></div>'.format(esc(v), esc(l))
+        stat_html = '<div class="siteplan-stat reveal reveal-d1">{0} <span>{1}</span></div>'.format(esc(v), esc(l))
     body = '''
     <section class="slide tpl-siteplan" id="s{id}" data-section="{section}">
       <div class="siteplan-canvas site-plan-map">
@@ -416,8 +433,8 @@ def site_plan(section, eyebrow, title, img_src, legend, stat=None):
         <div class="siteplan-titlebar reveal reveal-d1">
           <div class="eyebrow">{eyebrow}</div>
           <h2 class="slide-title">{title}</h2>
-          {stat}
         </div>
+        {stat}
         <aside class="siteplan-legend reveal reveal-d2">{legend}</aside>
       </div>
     </section>'''.format(id=id, section=esc(section), eyebrow=esc(eyebrow), title=title,
@@ -609,6 +626,23 @@ def location_map(section, eyebrow, title, note=None, svg=None, distances=None):
                           svg=svg or _LOCATION_MAP_SVG, dist=dist_html)
     add(id, section, "locationmap", body)
 
+def _cell(c):
+    """A cell is normally a string; a list renders as stacked itemised rows
+    — (dimension, name, area) triples in the three-colour scheme — so long
+    multi-entry values (covered bays, crane fleets) never collapse into a
+    semicolon run-on paragraph."""
+    if not isinstance(c, (list, tuple)):
+        return "<td>{0}</td>".format(nb(c))
+    items = []
+    for entry in c:
+        dim, name, area = (tuple(entry) + ("", ""))[:3]
+        items.append(
+            '<div class="cell-item"><span class="ci-dim">{0}</span>{1}{2}</div>'.format(
+                esc(dim),
+                '<span class="ci-name">{0}</span>'.format(esc(name)) if name else "",
+                '<span class="ci-area">{0}</span>'.format(esc(area)) if area else ""))
+    return '<td class="cell-list">{0}</td>'.format("".join(items))
+
 def data_table(section, eyebrow, title, tables, note=None, sub=None, columns=1, dense=False, headers=None):
     id = next_id()
     if headers is None:
@@ -622,7 +656,7 @@ def data_table(section, eyebrow, title, tables, note=None, sub=None, columns=1, 
             thead = ""
             body_rows = t
         rows = "".join(
-            "<tr>" + "".join("<td>{0}</td>".format(nb(c)) for c in row) + "</tr>" for row in body_rows
+            "<tr>" + "".join(_cell(c) for c in row) + "</tr>" for row in body_rows
         )
         blocks.append('<div class="table-wrap reveal reveal-d2"><table class="spec-table">{0}<tbody>{1}</tbody></table></div>'.format(thead, rows))
     note_html = '<p class="table-note reveal reveal-d3">{0}</p>'.format(nb(note)) if note else ""
@@ -701,6 +735,11 @@ def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, ex
         # a spec table is too tall for the bottom strip — dock the panel on the
         # right edge instead so it never covers the photos
         side_cls = " panel-side" if table else ""
+        # short-spec showcase slides (a headline + a couple of spec pairs) get a
+        # compact panel: it shrinks to fit-content and docks bottom-left instead
+        # of stretching a full-width blurred band across the photos.
+        if not table and not extra and len(specs) <= 3:
+            side_cls += " panel-compact"
         if fill:
             side_cls += " photo-fill"
         body = '''
@@ -828,18 +867,151 @@ def gallery(section, eyebrow, title, slide_no, caption=None, sub=None):
                           imgs=imgs, cap=cap, cols=cols)
     add(id, section, "gallery", body)
 
-def closer(section, title_html, contact_lines, bg_img):
+_WATER_SVG = '''
+<svg class="water-svg" viewBox="0 0 920 640" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="Rainwater harvesting flow: roof runoff is piped to an underground filtration plant, stored in a 400,000 litre tank and pumped to campus uses; overflow recharges groundwater">
+  <!-- below-grade band -->
+  <rect class="ws-underground" x="0" y="400" width="920" height="240"/>
+  <line class="ws-ground" x1="20" y1="400" x2="900" y2="400"/>
+  <text class="ws-sub" x="24" y="424">BELOW GROUND</text>
+
+  <!-- rain cloud + drops -->
+  <path class="ws-cloud" d="M110 118a34 34 0 0 1 33-26 40 40 0 0 1 76-8 30 30 0 0 1 41 28 24 24 0 0 1-4 47H132a30 30 0 0 1-22-41z"/>
+  <g class="ws-rain">
+    <line x1="112" y1="182" x2="104" y2="204"/><line x1="152" y1="176" x2="144" y2="198"/>
+    <line x1="192" y1="184" x2="184" y2="206"/><line x1="232" y1="174" x2="224" y2="196"/>
+    <line x1="268" y1="182" x2="260" y2="204"/><line x1="138" y1="212" x2="130" y2="234"/>
+    <line x1="212" y1="214" x2="204" y2="236"/><line x1="252" y1="208" x2="244" y2="230"/>
+  </g>
+
+  <!-- workshop building -->
+  <polygon class="ws-build" points="58,258 186,214 314,258 314,400 58,400"/>
+  <polyline class="ws-roof" points="48,262 186,214 324,262"/>
+  <rect class="ws-band" x="58" y="300" width="256" height="16"/>
+  <text class="ws-label" x="186" y="340" text-anchor="middle">WORKSHOP ROOF</text>
+  <text class="ws-sub" x="186" y="362" text-anchor="middle">rain collection</text>
+
+  <!-- downpipe: roof -> filtration -->
+  <path class="ws-pipe" d="M318 262 L336 262 L336 470 L364 470"/>
+  <path class="ws-flow" d="M318 262 L336 262 L336 470 L364 470"/>
+
+  <!-- filtration plant -->
+  <rect class="ws-node" x="364" y="434" width="112" height="76" rx="10"/>
+  <line class="ws-filter" x1="380" y1="458" x2="460" y2="458"/>
+  <line class="ws-filter" x1="380" y1="472" x2="460" y2="472"/>
+  <line class="ws-filter" x1="380" y1="486" x2="460" y2="486"/>
+  <text class="ws-label" x="420" y="536" text-anchor="middle">FILTRATION PLANT</text>
+
+  <!-- pipe: filtration -> tank -->
+  <path class="ws-pipe" d="M476 470 L532 470"/>
+  <path class="ws-flow" d="M476 470 L532 470"/>
+
+  <!-- storage tank -->
+  <rect class="ws-node" x="532" y="424" width="204" height="106" rx="12"/>
+  <path class="ws-water" d="M540 462 q17 -8 34 0 t34 0 t34 0 t34 0 t34 0 t17 0 v60 a10 10 0 0 1 -10 10 h-167 a10 10 0 0 1 -10 -10 z"/>
+  <text class="ws-label" x="634" y="500" text-anchor="middle">STORAGE TANK</text>
+  <text class="ws-strong" x="634" y="521" text-anchor="middle">400,000 L</text>
+  <text class="ws-label" x="634" y="556" text-anchor="middle">UNDERGROUND STORAGE</text>
+
+  <!-- pump riser + distribution -->
+  <path class="ws-pipe" d="M660 424 L660 132 L688 132"/>
+  <path class="ws-flow" d="M660 424 L660 132 L688 132"/>
+  <path class="ws-pipe" d="M660 212 L688 212"/><path class="ws-flow" d="M660 212 L688 212"/>
+  <path class="ws-pipe" d="M660 292 L688 292"/><path class="ws-flow" d="M660 292 L688 292"/>
+  <path class="ws-pipe" d="M660 372 L688 372"/><path class="ws-flow" d="M660 372 L688 372"/>
+  <circle class="ws-pump" cx="660" cy="404" r="9"/>
+  <text class="ws-sub" x="676" y="409">pump</text>
+
+  <!-- use chips -->
+  <g class="ws-chip"><rect x="688" y="110" width="212" height="44" rx="22"/><text x="794" y="137" text-anchor="middle">GARDENS &amp; LANDSCAPING</text></g>
+  <g class="ws-chip"><rect x="688" y="190" width="212" height="44" rx="22"/><text x="794" y="217" text-anchor="middle">LIVESTOCK WATER</text></g>
+  <g class="ws-chip"><rect x="688" y="270" width="212" height="44" rx="22"/><text x="794" y="297" text-anchor="middle">CAR &amp; DOG WASHING</text></g>
+  <g class="ws-chip"><rect x="688" y="350" width="212" height="44" rx="22"/><text x="794" y="377" text-anchor="middle">FIRE &amp; EMERGENCY WATER</text></g>
+
+  <!-- overflow -> groundwater -->
+  <path class="ws-pipe" d="M736 500 L790 500 L790 574"/>
+  <path class="ws-flow" d="M736 500 L790 500 L790 574"/>
+  <polygon class="ws-arrow" points="790,590 782,574 798,574"/>
+  <text class="ws-label" x="790" y="614" text-anchor="middle">OVERFLOW → GROUNDWATER</text>
+</svg>'''
+
+def water_slide(section, eyebrow, title):
+    """Merged sustainability slide: custom SVG flow diagram of the rainwater
+    harvesting system (replacing the stock clip-art photo) beside typeset
+    process copy and the wastewater-recycling summary."""
     id = next_id()
+    body = '''
+    <section class="slide tpl-water" id="s{id}" data-section="{section}">
+      <div class="slide-inner">
+        <div class="eyebrow reveal">{eyebrow}</div>
+        <h2 class="slide-title reveal reveal-d1">{title}</h2>
+        <div class="water-grid">
+          <div class="water-diagram reveal reveal-d2">{svg}</div>
+          <div class="water-content reveal reveal-d3">
+            <h3>Rainwater Harvesting</h3>
+            <ol class="water-steps">
+              <li>Rain falling on the workshop roofs is channelled through collection piping to an underground filtration plant.</li>
+              <li>The filtered water is stored in an underground tank with a <b>400,000-litre</b> capacity and pumped out for use across the campus.</li>
+            </ol>
+            <h3>Wastewater Recycling Plant</h3>
+            <p>Wastewater is collected and treated in our on-site recycling plant; the treated water is reused for drip irrigation, garden watering and toilet flushing — cutting fresh-water demand across the campus.</p>
+            <div class="chip-row">
+              <span class="chip on">Reduced water pollution</span>
+              <span class="chip on">No water transport needed</span>
+              <span class="chip on">Improved sustainability</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>'''.format(id=id, section=esc(section), eyebrow=esc(eyebrow), title=esc(title), svg=_WATER_SVG)
+    add(id, section, "water", body)
+
+_CLOSER_ICONS = {
+    "phone": '<path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.24 11 11 0 0 0 3.5.56 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1 11 11 0 0 0 .56 3.5 1 1 0 0 1-.24 1z"/>',
+    "email": '<path d="M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/><path d="m3.5 6.5 8.5 6 8.5-6" fill="none" stroke="currentColor" stroke-width="1.6"/>',
+    "web": '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3 12h18M12 3c2.5 2.6 2.5 15.4 0 18M12 3c-2.5 2.6-2.5 15.4 0 18" fill="none" stroke="currentColor" stroke-width="1.6"/>',
+}
+
+def _closer_icon(text):
+    t = text.lower()
+    if "@" in t:
+        return "email"
+    if "www" in t or ".com" in t:
+        return "web"
+    return "phone"
+
+def closer(section, title_html, contact_lines, bg_img, locations=None):
+    id = next_id()
+    chips = "".join(
+        '<a class="closer-chip" href="{href}">'
+        '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">{icon}</svg>'
+        '<span>{label}</span></a>'.format(
+            icon=_CLOSER_ICONS[_closer_icon(c)],
+            label=esc(c.replace("TEL: ", "")),
+            href=("mailto:" + c if _closer_icon(c) == "email"
+                  else "https://" + c if _closer_icon(c) == "web"
+                  else "tel:" + c.replace("TEL: ", "").replace(" ", "")))
+        for c in contact_lines)
+    loc_html = ""
+    if locations:
+        loc_parts = []
+        for i, l in enumerate(locations):
+            if i:
+                loc_parts.append('<span class="sep"></span>')
+            loc_parts.append('<span><b>{0}</b> {1}</span>'.format(esc(l[0]), nb(l[1])))
+        loc_html = '<div class="closer-locations reveal reveal-d3">{0}</div>'.format("".join(loc_parts))
     body = '''
     <section class="slide tpl-closer" id="s{id}" data-section="{section}">
       {bg}
       <div class="slide-inner">
         <img class="cover-logo reveal" src="assets/images/brand/vitech-lockup.png" alt="Vitech Group of Companies">
         <h1 class="reveal reveal-d1">{title}</h1>
-        <p class="closer-contact reveal reveal-d2">{contact}</p>
+        <div class="cover-rule reveal reveal-d1"></div>
+        <div class="closer-contact reveal reveal-d2">{chips}</div>
+        {loc}
       </div>
     </section>'''.format(id=id, section=esc(section), bg=lazybg(bg_img), title=title_html,
-                          contact="<br>".join(contact_lines))
+                          chips=chips, loc=loc_html)
     add(id, section, "closer", body)
 
 # ===========================================================================
@@ -1056,39 +1228,61 @@ photo_showcase("Workshop & Facilities", "Infrastructure", "Workshop Overview —
      (IMG(10, 1), "Open Yard — 6,000 sq.mtr · Goliath Crane 25 MT × 39 mtr span"),
      (IMG(10, 3), "Stainless / Exotic Steel Bay — 22 × 120 mtr × 2 Nos.")], fill=True)
 
-photo_showcase("Workshop & Facilities", "Infrastructure", "Workshop Overview — Fabrication Bays",
+photo_showcase("Workshop & Facilities", "Infrastructure", "Workshop Overview — Stainless & Exotic Steel Bays",
     [(IMG(11, 1), "Stainless / Exotic Steel Bay 1 — 22 × 120 mtr"),
-     (IMG(11, 2), "Stainless / Exotic Steel Bay 2 — 22 × 120 mtr"),
-     (IMG(11, 3), "Carbon Steel / Cladded Steel Bay 3 — 22 × 120 mtr")])
+     (IMG(11, 2), "Stainless / Exotic Steel Bay 2 — 22 × 120 mtr")], fill=True)
+
+photo_showcase("Workshop & Facilities", "Infrastructure", "Workshop Overview — Carbon & Cladded Steel Bays",
+    [(IMG(11, 3), "Carbon Steel / Cladded Steel Bay 3 — 22 × 120 mtr"),
+     (IMG(10, 2), "Carbon Steel / Cladded Steel Bay — 22 × 120 mtr")], fill=True)
 
 photo_showcase("Workshop & Facilities", "Infrastructure", "Workshop Overview — Piping & Skid Bays",
-    [(IMG(10, 2), "Carbon Steel / Cladded Steel Bay — 22 × 120 mtr"),
-     (IMG(12, 1), "Piping Spool Bay 4 — 25 × 100 mtr"),
-     (IMG(12, 2), "Skid Module Bay 5 — 25 × 50 mtr")])
+    [(IMG(12, 1), "Piping Spool Bay 4 — 25 × 100 mtr"),
+     (IMG(12, 2), "Skid Module Bay 5 — 25 × 50 mtr")], fill=True)
 
-data_table("Workshop & Facilities", "Group Capability", "Workshop Overview — Group Infrastructure",
+data_table("Workshop & Facilities", "Group Capability", "Group Infrastructure — Plot & Covered Bays",
       [
         [
           ["Manufacturing Units", "VHEPL — Shahapur, Thane", "VEPL — Rabale, Navi Mumbai", "VFPL — Rabale, Navi Mumbai"],
           ["Total Plot Area (sq. mtr.)", "104,000", "3,300", "1,000"],
+          ["Covered Bays",
+           [("22 × 120 mtr ×3", "Bay 3–5", "7,920 sq.mtr"),
+            ("25 × 100 mtr ×1", "Skid & Piping", "2,500 sq.mtr"),
+            ("25 × 50 mtr ×1", "Skid Assembly", "1,250 sq.mtr"),
+            ("25 × 20 mtr ×1", "CNC Bay", "500 sq.mtr"),
+            ("20 × 50 mtr ×1", "Light Fabrication", "1,000 sq.mtr")],
+           [("20 × 80 mtr ×1", "Main Bay", ""),
+            ("6 × 80 mtr ×1", "Auxiliary Bay", ""),
+            ("8 × 80 mtr ×1", "Auxiliary Bay", "")],
+           [("20 × 40 mtr ×1", "Main Bay", "")]],
+          ["Open Yard / Material Storage",
+           [("5,950 sq.mtr", "Open Yard", ""),
+            ("2,000 sq.mtr", "Material Storage", "")],
+           "—", "—"],
         ],
-        [
-          ["EOT Crane (hook clearance 13 mtr.)", "35/5T ×4, 15T ×2 (Bay 3&4), 50T/10T ×2, 15T ×1 (Bay 5)", "30/10T, 20T, 10T, 5T ×1 each", "20T, 10T"],
-          ["Goliath Crane (hook clearance 12 mtr., span 39 mtr.)", "25/5T ×1, 25T ×1, 15T ×4, 10T ×4, 7.5T ×1", "—", "—"],
-          ["Material Transfer Car", "5T ×1, 25T ×3, 30T ×2, 25T ×1, 5T ×1", "—", "—"],
-        ],
-        [
-          ["Covered Bays", "22×120mtr ×3 (7,920 sq.mtr, Bay 3-5); 25×100mtr ×1 (2,500 sq.mtr, Skid & Piping); 25×50mtr ×1 (1,250 sq.mtr, Skid Assembly); 25×20mtr ×1 (500 sq.mtr, CNC Bay); 20×50mtr ×1 (1,000 sq.mtr, Light Fabrication)",
-           "20×80mtr ×1 (Main Bay); 6×80mtr ×1, 8×80mtr ×1 (Auxiliary Bays)", "20×40mtr ×1 (Main Bay)"],
-          ["Open Yard / Material Storage Area", "5,950 sq.mtr (open yard); 2,000 sq.mtr (material storage)", "—", "—"],
-        ],
-        [["Total Skilled, Unskilled Workers & Employees", ""], ["VHEPL", "345"], ["VEPL", "97"], ["VFPL", "30"], ["Total", "472"]],
-        [["Manufacture Jobs in Single Piece Up To", "500 tons"], ["Planned Combined Production Capability", "700 MT / month"],
-         ["Shifts", "3 / day, 6 days a week"], ["Capability", "Max job size: 5.5 × 55 mtr (single pc.) · Max diameter: 6 × 15 mtr length · 125 mm thk."]],
       ],
-      note="All indications in red on the original plant plan denote provisions under construction (target completion 31 Dec 2026). We can also manufacture larger jobs in sections and reassemble in a single piece close to the port.",
-      columns=2, dense=True,
-      headers=[True, False, False, True, False])
+      note="All indications in red on the original plant plan denote provisions under construction (target completion 31 Dec 2026).")
+
+data_table("Workshop & Facilities", "Group Capability", "Group Infrastructure — Cranes, Workforce & Capability",
+      [
+        [
+          ["Manufacturing Units", "VHEPL — Shahapur, Thane", "VEPL — Rabale, Navi Mumbai", "VFPL — Rabale, Navi Mumbai"],
+          ["EOT Crane (hook clearance 13 mtr.)",
+           [("35/5T ×4", "", ""), ("15T ×2", "Bay 3 & 4", ""), ("50T/10T ×2", "", ""), ("15T ×1", "Bay 5", "")],
+           [("30/10T, 20T", "", ""), ("10T, 5T ×1 each", "", "")],
+           [("20T, 10T", "", "")]],
+          ["Goliath Crane (hook clearance 12 mtr., span 39 mtr.)",
+           [("25/5T ×1, 25T ×1", "", ""), ("15T ×4, 10T ×4", "", ""), ("7.5T ×1", "", "")], "—", "—"],
+          ["Material Transfer Car",
+           [("5T ×1, 25T ×3", "", ""), ("30T ×2, 25T ×1", "", ""), ("5T ×1", "", "")], "—", "—"],
+          ["Skilled & Unskilled Workers, Employees", "345", "97", "30"],
+        ],
+        [["Group Workforce", "472 Total"], ["Single-Piece Jobs Up To", "500 tons"],
+         ["Planned Combined Production", "700 MT / month"], ["Shifts", "3 / day, 6 days a week"],
+         ["Capability", "Max job size: 5.5 × 55 mtr (single pc.) · Max diameter: 6 × 15 mtr length · 125 mm thk."]],
+      ],
+      note="We can also manufacture larger jobs in sections and reassemble in a single piece close to the port.",
+      columns=1, dense=True, headers=[True, False])
 
 # ---- 16-17. Location Map --------------------------------------------------
 location_map("Workshop & Facilities", "Location", "Location Map — Vitech Heavy Equipments Pvt. Ltd. (V.H.E.P.L.)",
@@ -1290,25 +1484,32 @@ spec("Food Processing & Oleo Chemical", "Food Processing", "Spiral Heat Exchange
      [("Material", "SS 304L with high & low pressure steam coils, under PED"),
       ("Size", "1.6 mtr to 4.8 mtr dia. × up to 40 mtr length"),
       ("Quantity", "150+ such jobs manufactured to date"),
-      ("Weight", "60 – 120 tons"),
-      ("High pressure", "Steam coils"), ("Low pressure", "Clamping coils")],
-     [31, 32], layout="showcase", fill=True, extra="For Europe, Russia, South America, USA, Africa, Asia")
+      ("Weight", "60 – 120 tons")],
+     None, layout="showcase", fill=True, files=[IMG(31, 1), IMG(32, 1)],
+     extra="For Europe, Russia, South America, USA, Africa, Asia")
+
+spec("Food Processing & Oleo Chemical", "Food Processing", "Spiral Heat Exchangers — Coil Detail", "",
+     [("High pressure", "Steam coils"), ("Low pressure", "Clamping coils")],
+     None, layout="showcase", fill=True, files=[IMG(32, 2)])
 
 spec("Food Processing & Oleo Chemical", "Food Processing", "Soft Flex U-Tube Heat Exchanger", "For a project in India",
      [("Material", "SA 240 Gr. 304; tubesheets SA 240 Gr. 304; tubes SA 213 TP 304"),
       ("Size", "Ø 1.8 mtr × 20.3 mtr L"),
       ("U-tubes", "30mm OD × 2mm thk."),
       ("Qty / Weight", "1 No. / 35 tons")],
-     33, layout="showcase", fill=True)
+     None, layout="showcase", fill=True, files=[IMG(33, 2), IMG(33, 3)])
 
-spec("Food Processing & Oleo Chemical", "Oleo Chemical", "Cladded Splitter Columns", "Adani Wilmar Ltd, India",
-     [("Column 1 — Material", "SA 516 Gr. 70 + SS 317L clad"),
-      ("Column 1 — Size", "Ø 1.75 mtr (45+3mm thk) × 52 mtr L"),
-      ("Column 1 — Qty / Wt.", "1 No. / 150 tons"),
-      ("Column 2 — Material", "SA 516 Gr.70 + SA 240 Gr.317L clad, SS 317L internals"),
-      ("Column 2 — Size", "Ø 1.92 mtr × (50+3mm thk) × 55 mtr L"),
-      ("Column 2 — Qty / Wt.", "2 Nos. / 150 tons each")],
-     [34, 35], layout="showcase", fill=True)
+spec("Food Processing & Oleo Chemical", "Oleo Chemical", "Cladded Splitter Columns — Column 1", "Adani Wilmar Ltd, India",
+     [("Material", "SA 516 Gr. 70 + SS 317L clad"),
+      ("Size", "Ø 1.75 mtr (45+3mm thk) × 52 mtr L"),
+      ("Qty / Weight", "1 No. / 150 tons")],
+     None, layout="showcase", fill=True, files=[IMG(34, 1), IMG(35, 1)])
+
+spec("Food Processing & Oleo Chemical", "Oleo Chemical", "Cladded Splitter Columns — Column 2", "Adani Wilmar Ltd, India",
+     [("Material", "SA 516 Gr.70 + SA 240 Gr.317L clad, SS 317L internals"),
+      ("Size", "Ø 1.92 mtr × (50+3mm thk) × 55 mtr L"),
+      ("Qty / Weight", "2 Nos. / 150 tons each")],
+     None, layout="showcase", fill=True, files=[IMG(35, 2)])
 
 spec("Food Processing & Oleo Chemical", "Oleo Chemical", "Cladded Columns with Trays", "PTSOI, Indonesia",
      [("Material", "SA 516 Gr. 70 + SS 317L"),
@@ -1408,21 +1609,29 @@ spec("Fertilizer", "Site Installation", "Prill Tower — Erection Complete", "Ch
      [("Milestone", "Full tower erected and commissioned on site")],
      51, layout="showcase", files=[IMG(51, 3), IMG(51, 4)])
 
-spec("Fertilizer", "Fertilizer · Shop + Site Fabricated", "Hot Interpass Heat Exchanger", "IFFCO, Paradip, Odisha",
+spec("Fertilizer", "Fertilizer · Shop Fabrication", "Hot Interpass Heat Exchanger", "IFFCO, Paradip, Odisha",
      [("Material", "SA 240 Gr. 304 (shell & channel side); tubesheets SA 240 Gr. 304; tubes SA 213 TP 304"),
       ("Size", "Ø 6.03 mtr × 15 mtr L"),
       ("Tubes", "50.8mm OD × 2.1mm thk. × 6.1 mtr L — qty 2,808 Nos."),
-      ("Qty / Weight", "1 No. / 85 tons"),
-      ("Transport", "3 pieces — (1st) Ø 6.9×6.1m, (2nd) Ø 5.6×3.85m, (3rd) Ø 5.6×3m; all large nozzles shipped loose")],
-     [52, 53], layout="showcase", fill=True, milestone="Site Assembly — erected at IFFCO site")
+      ("Qty / Weight", "1 No. / 85 tons")],
+     None, layout="showcase", fill=True, files=[IMG(52, 1), IMG(52, 2)])
 
-spec("Fertilizer", "Fertilizer · Shop + Site Fabricated", "Cold Interpass Heat Exchanger", "IFFCO, Paradip, Odisha",
+spec("Fertilizer", "Fertilizer · Site Assembly", "Hot Interpass Heat Exchanger — Site Erection", "IFFCO, Paradip, Odisha",
+     [("Transport", "3 pieces — (1st) Ø 6.9×6.1m, (2nd) Ø 5.6×3.85m, (3rd) Ø 5.6×3m; all large nozzles shipped loose")],
+     None, layout="showcase", fill=True, files=[IMG(53, 1)],
+     milestone="Site Assembly — erected at IFFCO site")
+
+spec("Fertilizer", "Fertilizer · Shop Fabrication", "Cold Interpass Heat Exchanger", "IFFCO, Paradip, Odisha",
      [("Material", "SA 240 Gr. 316L (shell & channel side); tubesheets & tubes SA 213 TP 316L"),
       ("Size", "Ø 4.5 mtr shell (Ø 6.9 mtr with bustle) × 16 mtr L"),
       ("Tubes", "50.8mm OD × 2.41mm thk. × 10.1 mtr L — qty 2,841 Nos."),
-      ("Qty / Weight", "1 No. / 135 tons"),
-      ("Transport", "3 pieces — (1st) Ø 5.4×10.5m, (2nd & 3rd) Ø 5.4×2.5m, bustle Ø 6.9m ×2 dispatched in halves; large nozzles shipped loose")],
-     [54, 55], layout="showcase", fill=True, milestone="Site Assembly — erected at IFFCO site")
+      ("Qty / Weight", "1 No. / 135 tons")],
+     None, layout="showcase", fill=True, files=[IMG(54, 1), IMG(54, 2)])
+
+spec("Fertilizer", "Fertilizer · Site Assembly", "Cold Interpass Heat Exchanger — Site Erection", "IFFCO, Paradip, Odisha",
+     [("Transport", "3 pieces — (1st) Ø 5.4×10.5m, (2nd & 3rd) Ø 5.4×2.5m, bustle Ø 6.9m ×2 dispatched in halves; large nozzles shipped loose")],
+     None, layout="showcase", fill=True, files=[IMG(55, 1)],
+     milestone="Site Assembly — erected at IFFCO site")
 
 spec("Fertilizer", "Fertilizer · Shop + Site Fabricated", "Converter", "IFFCO, Paradip, Odisha",
      [("Material", "SA 240 Gr. 304H"),
@@ -1533,9 +1742,12 @@ spec("Water & Desalination", "Water & Desalination", "Piping Spools — PDO", "P
 
 spec("Water & Desalination", "Water & Desalination", "Piping Spools — KOC", "Kuwait Oil Company",
      [("Material", "Duplex 32205 / Super Duplex 32750"),
-      ("Size", "2″ to 10″ × 12 mtr length"),
-      ("Qty", "40,000 inch-dia.")],
-     74, layout="showcase")
+      ("Size", "2″ to 10″ × 12 mtr length")],
+     None, layout="showcase", fill=True, files=[IMG(74, 1), IMG(74, 2)])
+
+spec("Water & Desalination", "Water & Desalination", "Piping Spools — KOC — Fabrication", "Kuwait Oil Company",
+     [("Qty", "40,000 inch-dia.")],
+     None, layout="showcase", fill=True, files=[IMG(74, 3)])
 
 spec("Water & Desalination", "Water & Desalination", "Pre-Fabricated Piping Spools", "Pertamina, Indonesia",
      [("Material", "SS 316L / UNS S32750 / CS"),
@@ -1543,14 +1755,7 @@ spec("Water & Desalination", "Water & Desalination", "Pre-Fabricated Piping Spoo
       ("Qty", "80,000 inch-dia.")],
      75)
 
-spec("Water & Desalination", "Water Treatment", "Skid Mounted Packages — Skid 1", "H2 Green Steel, Sweden",
-     [("Scope", "Procurement + fabrication of piping spools + structure + assembly + E&I procurement & installation + heat tracing + insulation + FAT"),
-      ("Material", "SA 312 Tp.316L + IS 2062"),
-      ("Size", "2.5m H × 2m W × 5m L"),
-      ("Qty / Wt.", "11 Nos. / 28 tons")],
-     76, layout="showcase", fill=True, files=[IMG(76, 1), IMG(76, 2)])
-
-spec("Water & Desalination", "Water Treatment", "Skid Mounted Packages — Skid 2", "H2 Green Steel, Sweden",
+spec("Water & Desalination", "Water Treatment", "Skid Mounted Packages", "H2 Green Steel, Sweden",
      [("Scope", "Procurement + fabrication of piping spools + structure + assembly + E&I procurement & installation + heat tracing + insulation + FAT"),
       ("Material", "SA 106 Gr.B (rubber lining) & SA 312 TP 316L"),
       ("Size", "6.6m L × 4.1m W × 3.75m H"),
@@ -1722,19 +1927,15 @@ gallery("Certifications", "IBR / PESO / PDIL", "IBR, PESO & PDIL Certifications"
         caption="IBR — Pipe fabrication, pressure vessel & heat exchanger Class 1 (pressure up to 125 kg/cm²)")
 
 # ---- 134-137. Sustainability --------------------------------------------------
-spec("Sustainability & CSR", "Sustainable Stress-Free Environment", "Rainwater Harvesting System", "",
-     [("Source", "Rainwater collected from the workshop roof")],
-     134)
+water_slide("Sustainability & CSR", "Sustainable Stress-Free Environment",
+            "Rainwater Harvesting & Wastewater Recycling")
 
-prose("Sustainability & CSR", "Sustainable Stress-Free Environment", "Wastewater Recycling Plant",
-      ["Wastewater is collected and recycled in our on-site recycling plant. The treated water is reused across "
-       "multiple purposes on the campus, cutting fresh-water demand and improving overall sustainability."],
-      side_title="Uses",
-      side_items=["Drip irrigation", "Watering the garden", "Flushing in toilets"],
-      chips=[{"t": t} for t in ["Reduced water pollution", "No water transport needed", "Improved sustainability"]])
+photo_showcase("Sustainability & CSR", "Sustainable Stress-Free Environment", "Vegetable Farm & Harvest",
+    [(IMG(136, 1), None), (IMG(136, 2), None)], fill=True)
 
-gallery("Sustainability & CSR", "Sustainable Stress-Free Environment", "Vegetable Farm & Harvest", [136, 137],
-        caption="3,500 fruit-bearing orchard plantations line the periphery of the plot, drip-irrigated using our recycling plant.")
+photo_showcase("Sustainability & CSR", "Sustainable Stress-Free Environment", "Vegetable Farm & Orchards",
+    [(IMG(136, 3), None), (IMG(136, 4), None), (IMG(137, 1), None)], fill=True,
+    sub="3,500 fruit-bearing orchard plantations line the periphery of the plot, drip-irrigated using our recycling plant.")
 
 # ---- 138. CSR -------------------------------------------------------------
 gallery("Sustainability & CSR", "Corporate Social Responsibility", "Corporate Social Responsibility (CSR)", 138,
@@ -1743,7 +1944,12 @@ gallery("Sustainability & CSR", "Corporate Social Responsibility", "Corporate So
 # ---- 139. Thank you --------------------------------------------------------
 closer("Cover", 'THANK <span>YOU</span>',
        ["+91-9372766457 / 58 / 60", "sales@vitechgroupindia.com", "www.vitechgroupindia.com"],
-       139)
+       139,
+       locations=[
+         ("Vitech Heavy Equipments Pvt. Ltd.", "Shahapur, Maharashtra"),
+         ("Vitech Equipments Pvt. Ltd.", "Rabale, Navi Mumbai"),
+         ("Vitech Fabricators Pvt. Ltd.", "Rabale, Navi Mumbai"),
+       ])
 
 # ===========================================================================
 # Assemble section index for jump-menu (ordered, deduplicated by first appearance)
