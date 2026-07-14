@@ -356,25 +356,53 @@ def _org_column(col, style):
         parts.append(_org_card(sub["role"], sub.get("names", []), "org-card org-card-sub"))
     return '<div class="org-col" style="{0}">{1}</div>'.format(style, "".join(parts))
 
-def org_chart(section, eyebrow, title, exec_chain, left_columns, gm, gm_peer, gm_branches, right_columns, footnote=None):
+def _org_branch(columns_before, gm, gm_peer, gm_branches, columns_after):
+    """One bus + department-column grid hanging under a single exec card.
+    Optionally nests the General Manager + Technical Manager pair one level
+    above the gm_branches columns (as in the original chart)."""
+    n_before = len(columns_before)
+    n_gm = len(gm_branches)
+    cols = []
+    for i, col in enumerate(columns_before):
+        cols.append(_org_column(col, "grid-column:{0};grid-row:1/3".format(i + 1)))
+    if gm:
+        cols.append(
+            '<div class="org-gm-head" style="grid-column:{0}/{1};grid-row:1">{2}{3}</div>'.format(
+                n_before + 1, n_before + 1 + n_gm,
+                _org_card(gm["role"], gm.get("names", []), "org-card org-card-gm"),
+                _org_card(gm_peer["role"], gm_peer.get("names", []), "org-card org-card-peer"))
+        )
+        for i, col in enumerate(gm_branches):
+            cols.append(_org_column(col, "grid-column:{0};grid-row:2".format(n_before + 1 + i)))
+    for i, col in enumerate(columns_after):
+        cols.append(_org_column(col, "grid-column:{0};grid-row:1/3".format(n_before + n_gm + 1 + i)))
+    total = n_before + n_gm + len(columns_after)
+    return '''<div class="org-branch">
+      <div class="org-connector"></div>
+      <div class="org-bus"></div>
+      <div class="org-grid" style="grid-template-columns:repeat({0},1fr)">{1}</div>
+    </div>'''.format(total, "".join(cols))
+
+def org_chart(section, eyebrow, title, exec_chain, director_columns, vp_columns, gm, gm_peer, gm_branches, right_columns, footnote=None):
     """Replicates the original Quality Manual chart: a vertical executive chain
-    (MD → Director → VP), a bus feeding ten department columns, with the
-    General Manager + Technical Manager pair hanging one level above the four
-    middle columns that report to the GM."""
+    (MD → Director → VP), then TWO independent department trees hanging one
+    beneath Director and one beneath VP — the General Manager + Technical
+    Manager pair sits one level above the four columns that report to the GM,
+    within the VP's branch."""
     id = next_id()
     def _exec_card(role, name):
         return '<div class="org-card org-card-exec">{0}<small>{1}</small></div>'.format(esc(role), esc(name))
     if len(exec_chain) >= 3:
         # Top execs stack vertically (MD); the final two — Director then VP —
-        # sit side by side (Director on the LEFT of the VP), with the whole
-        # department tree hanging beneath that leadership pair.
+        # sit side by side (Director on the LEFT of the VP), with each one's
+        # own department tree hanging directly beneath that person's card.
         top = exec_chain[:-2]
         director, vp = exec_chain[-2], exec_chain[-1]
         exec_html = "".join(
             _exec_card(role, name) + '<div class="org-connector"></div>'
             for role, name in top
         ) + (
-            '<div class="org-exec-pair">{0}{1}</div><div class="org-connector"></div>'.format(
+            '<div class="org-exec-pair">{0}{1}</div>'.format(
                 _exec_card(*director), _exec_card(*vp))
         )
     else:
@@ -382,23 +410,8 @@ def org_chart(section, eyebrow, title, exec_chain, left_columns, gm, gm_peer, gm
             _exec_card(role, name) + '<div class="org-connector"></div>'
             for role, name in exec_chain
         )
-    n_left = len(left_columns)
-    n_gm = len(gm_branches)
-    cols = []
-    # full-height columns left of the GM group
-    for i, col in enumerate(left_columns):
-        cols.append(_org_column(col, "grid-column:{0};grid-row:1/3".format(i + 1)))
-    # GM + Technical Manager header spanning the GM branch columns
-    cols.append(
-        '<div class="org-gm-head" style="grid-column:{0}/{1};grid-row:1">{2}{3}</div>'.format(
-            n_left + 1, n_left + 1 + n_gm,
-            _org_card(gm["role"], gm.get("names", []), "org-card org-card-gm"),
-            _org_card(gm_peer["role"], gm_peer.get("names", []), "org-card org-card-peer"))
-    )
-    for i, col in enumerate(gm_branches):
-        cols.append(_org_column(col, "grid-column:{0};grid-row:2".format(n_left + 1 + i)))
-    for i, col in enumerate(right_columns):
-        cols.append(_org_column(col, "grid-column:{0};grid-row:1/3".format(n_left + n_gm + 1 + i)))
+    director_branch = _org_branch(director_columns, None, None, [], [])
+    vp_branch = _org_branch(vp_columns, gm, gm_peer, gm_branches, right_columns)
     foot_html = '<div class="org-footnote reveal reveal-d3">{0}</div>'.format(esc(footnote)) if footnote else ""
     body = '''
     <section class="slide tpl-orgchart" id="s{id}" data-section="{section}">
@@ -407,13 +420,16 @@ def org_chart(section, eyebrow, title, exec_chain, left_columns, gm, gm_peer, gm
         <h2 class="slide-title reveal reveal-d1">{title}</h2>
         <div class="org-tree reveal reveal-d2">
           {exec_html}
-          <div class="org-bus"></div>
-          <div class="org-grid">{cols}</div>
+          <div class="org-branches">
+            {director_branch}
+            {vp_branch}
+          </div>
         </div>
         {foot}
       </div>
     </section>'''.format(id=id, section=esc(section), eyebrow=esc(eyebrow), title=title,
-                          exec_html=exec_html, cols="".join(cols), foot=foot_html)
+                          exec_html=exec_html, director_branch=director_branch, vp_branch=vp_branch,
+                          foot=foot_html)
     add(id, section, "orgchart", body)
 
 def site_plan(section, eyebrow, title, img_src, legend, stat=None):
@@ -1058,7 +1074,7 @@ cover("Cover",
         ("1992", "Established"),
         ("33+", "Years of Experience"),
         ("3", "Manufacturing Units"),
-        ("ISO · ASME · EIL", "Certified & Approved"),
+        ("ISO · ASME", "Certified & Approved"),
       ])
 
 # ---- 2. Company Introduction -------------------------------------------
@@ -1099,12 +1115,12 @@ prose("Company Overview", "Design & Engineering", "Engineering Capability",
        "international codes — giving us the capability to design and fabricate both static & process equipment "
        "meeting design conditions and fabrication standards."],
       side_title="Mechanical design standards",
-      side_items=["ASME Sec. I", "ASME Sec. VIII Div. 1", "ASME Sec. VIII Div. 2", "API 650", "API 660", "PD 5500", "AD 2000"],
+      side_items=["ASME Sec. I", "ASME Sec. VIII Div. 1", "ASME Sec. VIII Div. 2", "API 650", "API 660", "PD 5500", "AD 2000", "EN 13445"],
       chips=[{"t": t, "on": True} for t in ["PV Elite", "AutoCAD", "Nozzle PRO"]] +
             [{"t": t} for t in ["ANSYS Mechanical", "STAAD Pro"]],
       stats=[
         {"value": "5", "label": "Design Software Platforms"},
-        {"value": "7", "label": "Design Codes & Standards"},
+        {"value": "8", "label": "Design Codes & Standards"},
       ],
       center=True, bg_img=13)
 
@@ -1159,12 +1175,20 @@ def industries_slide(title, keys):
     add(iid, "Company Overview", "visual", body)
 
 # Core process sectors lead; specialty and energy/advanced follow.
+# Two tiles per slide (rather than 3-4) so each background photo reads at a
+# much larger, far less cropped size.
 industries_slide("Industries We Cater To",
-    ["Oil & Gas", "Water & Desalination", "Fertilizer & Petrochemicals", "Edible Oil & Food"])
+    ["Oil & Gas", "Water & Desalination"])
+industries_slide("Industries We Cater To — cont.",
+    ["Fertilizer & Petrochemicals", "Edible Oil & Food"])
 industries_slide("Industries — Process & Specialty",
-    ["Chemical", "Paper & Pulp", "Pharmaceutical"])
+    ["Chemical", "Paper & Pulp"])
+industries_slide("Industries — Process & Specialty — cont.",
+    ["Pharmaceutical"])
 industries_slide("Industries — Energy & Advanced Materials",
-    ["Power", "Zero Liquid Discharge", "Lithium"])
+    ["Power", "Zero Liquid Discharge"])
+industries_slide("Industries — Energy & Advanced Materials — cont.",
+    ["Lithium"])
 
 # ---- 5. Organisation Chart (1:1 with the Quality Manual Annex-D2 chart) ----
 org_chart("Company Overview", "Structure · Quality Manual Annex-D2, Rev. 4", "Organisation Chart",
@@ -1173,7 +1197,7 @@ org_chart("Company Overview", "Structure · Quality Manual Annex-D2, Rev. 4", "O
         ("Director", "Mr. Vivek Charles Dsouza"),
         ("Vice President", "Mr. T.N. Shetty"),
     ],
-    left_columns=[
+    director_columns=[
         {"role": "Manager QA & QC", "names": ["Mr. Samir P.", "Mr. Deepak K."], "chain": [
             {"role": "QC Engineers **"},
             {"role": "Welding Engineer", "names": ["Mr. Samir P.", "Mr. Deepak K."]},
@@ -1186,6 +1210,8 @@ org_chart("Company Overview", "Structure · Quality Manual Annex-D2, Rev. 4", "O
         {"role": "Purchase Incharge", "names": ["Mr. Yashwant S.", "Mr. Rajendra T."], "chain": [
             {"role": "Purchase Engineer", "names": ["Mr. Hitesh P.", "Mr. Ganesh R."]},
         ]},
+    ],
+    vp_columns=[
         {"role": "Project Manager", "names": ["Mr. Mayur B.", "Mr. Dharmendra J."], "chain": [
             {"role": "Project Engineer", "names": ["Mr. Samir G.", "Mr. Mayur D."]},
             {"role": "Mechanical Draughtsmans / CNC Programer **"},
@@ -1226,7 +1252,7 @@ org_chart("Company Overview", "Structure · Quality Manual Annex-D2, Rev. 4", "O
 photo_showcase("Company Overview", "Facilities", "Company Layout & Plot Overview",
     [(IMG(6, 1), None)])
 photo_showcase("Company Overview", "Facilities", "Plant & Yard — Site Views",
-    [(IMG(7, 1), None), (IMG(8, 1), None)], fill=True)
+    [(IMG(7, 1), None), (IMG(8, 1), None)])
 
 # ---- 9. Company Layout (annotated site plan + legend) --------------------
 site_plan("Company Overview", "Facilities · Vitech Heavy Equipments Pvt. Ltd, Shahapur", "Company Layout",
@@ -1415,11 +1441,11 @@ spec("Automation & Welding", "Weld Overlay", "Weld Overlay Capability", "",
 
 spec("Automation & Welding", "PLC Controlled", "Pipe Spool Bevelling, Cutting & Setup Stations", "",
      [("Capability", "Up to 24″ NB"), ("Length", "12 mtr.")],
-     None, layout="showcase", fill=True, files=[IMG(27, 1), IMG(27, 2)])
+     None, layout="showcase", files=[IMG(27, 1), IMG(27, 2)])
 
 spec("Automation & Welding", "PLC Controlled", "Pipe Spool Setup Station — Detail", "",
      [("Capability", "Up to 24″ NB"), ("Length", "12 mtr.")],
-     None, layout="showcase", fill=True, files=[IMG(27, 3)])
+     None, layout="showcase", files=[IMG(27, 3)])
 
 spec("Automation & Welding", "Automated Systems", "Pipe Welding on Automated System / Orbital Pipe Machine", "",
      [("Automated system", "3″ NB to 20″ NB pipe, length 12 mtr."),
@@ -1536,7 +1562,7 @@ spec("Food Processing & Oleo Chemical", "Food Processing", "Soft Flex U-Tube Hea
       ("Size", "Ø 1.8 mtr × 20.3 mtr L"),
       ("U-tubes", "30mm OD × 2mm thk."),
       ("Qty / Weight", "1 No. / 35 tons")],
-     None, layout="showcase", fill=True, files=[IMG(33, 2), IMG(33, 3)], emphasis=True)
+     None, layout="showcase", fill=True, files=[IMG(33, 3), IMG(33, 2)], emphasis=True)
 
 spec("Food Processing & Oleo Chemical", "Oleo Chemical", "Cladded Splitter Columns — Column 1", "Adani Wilmar Ltd, India",
      [("Material", "SA 516 Gr. 70 + SS 317L clad"),
@@ -1579,7 +1605,7 @@ spec("Food Processing & Oleo Chemical", "Food Processing", "First Stage Evaporat
       ("Size", "Ø 2.305/3.426 mtr × 18.39 mtr L"),
       ("Tubes", "OD 31.75 × 1.25 thk. — qty 2,196 Nos."),
       ("Qty / Weight", "1 No. / 56 tons")],
-     None, layout="showcase", fill=True, files=[IMG(40, 1)])
+     None, layout="showcase", fill=True, files=[IMG(40, 2)])
 
 spec("Food Processing & Oleo Chemical", "Food Processing", "Vacuum Condenser", "CHS Inc., USA",
      [("Material", "SA 516 Gr. 70"),
@@ -1618,7 +1644,7 @@ spec("Fertilizer", "Coromandel International Ltd", "Acid Cooler", "",
       ("Tubes", "ASTM A-249 TP316L with Hastelloy cathodic protection"),
       ("Size", "Ø 1346mm × 11,812mm overall length"),
       ("Qty / Weight", "1 No. / 24 MT")],
-     46, layout="showcase", fill=True)
+     46, layout="showcase")
 
 spec("Fertilizer", "Fertilizer", "Tail Gas Stack", "Chambal Fertilizer & Chemicals Ltd., Rajasthan",
      [("Material", "SA 240 Gr 304"),
@@ -1653,11 +1679,11 @@ spec("Fertilizer", "Fertilizer · Shop Fabrication", "Hot Interpass Heat Exchang
       ("Size", "Ø 6.03 mtr × 15 mtr L"),
       ("Tubes", "50.8mm OD × 2.1mm thk. × 6.1 mtr L — qty 2,808 Nos."),
       ("Qty / Weight", "1 No. / 85 tons")],
-     None, layout="showcase", fill=True, files=[IMG(52, 1), IMG(52, 2)])
+     None, layout="showcase", files=[IMG(52, 1), IMG(52, 2)])
 
 spec("Fertilizer", "Fertilizer · Site Assembly", "Hot Interpass Heat Exchanger — Site Erection", "IFFCO, Paradip, Odisha",
      [("Transport", "3 pieces — (1st) Ø 6.9×6.1m, (2nd) Ø 5.6×3.85m, (3rd) Ø 5.6×3m; all large nozzles shipped loose")],
-     None, layout="showcase", fill=True, files=[IMG(53, 1)],
+     None, layout="showcase", files=[IMG(53, 1)],
      milestone="Site Assembly — erected at IFFCO site")
 
 spec("Fertilizer", "Fertilizer · Shop Fabrication", "Cold Interpass Heat Exchanger", "IFFCO, Paradip, Odisha",
@@ -1665,11 +1691,11 @@ spec("Fertilizer", "Fertilizer · Shop Fabrication", "Cold Interpass Heat Exchan
       ("Size", "Ø 4.5 mtr shell (Ø 6.9 mtr with bustle) × 16 mtr L"),
       ("Tubes", "50.8mm OD × 2.41mm thk. × 10.1 mtr L — qty 2,841 Nos."),
       ("Qty / Weight", "1 No. / 135 tons")],
-     None, layout="showcase", fill=True, files=[IMG(54, 1), IMG(54, 2)])
+     None, layout="showcase", files=[IMG(54, 1), IMG(54, 2)])
 
 spec("Fertilizer", "Fertilizer · Site Assembly", "Cold Interpass Heat Exchanger — Site Erection", "IFFCO, Paradip, Odisha",
      [("Transport", "3 pieces — (1st) Ø 5.4×10.5m, (2nd & 3rd) Ø 5.4×2.5m, bustle Ø 6.9m ×2 dispatched in halves; large nozzles shipped loose")],
-     None, layout="showcase", fill=True, files=[IMG(55, 1)],
+     None, layout="showcase", files=[IMG(55, 1)],
      milestone="Site Assembly — erected at IFFCO site")
 
 spec("Fertilizer", "Fertilizer · Shop + Site Fabricated", "Converter", "IFFCO, Paradip, Odisha",
@@ -1759,12 +1785,15 @@ spec("Water & Desalination", "Zero Liquid Discharge", "Heat Exchanger — Twin U
       ("Qty / Weight", "1 No. each — A) 18 tons  B) 20 tons")],
      70, layout="showcase", fill=True)
 
-spec("Water & Desalination", "Zero Liquid Discharge", "Crystallizer & Deaerator", "Hindustan Zinc Ltd, Hindalco Industries Ltd, Grasim Industries Ltd (Nagda, MP), India",
-     [("Crystallizer material", "SA 240 Gr. 31254 (6% Moly)"),
-      ("Crystallizer size / qty / wt.", "Ø 3.66 mtr × 9.75 mtr L / 1 No. / 12 tons"),
-      ("Deaerator material", "SA 240 Gr. 31254 (6% Moly)"),
-      ("Deaerator size / qty / wt.", "Ø 0.6 mtr × 4.2 mtr L / 2 Nos. / 2 tons")],
-     71, layout="showcase", fill=True)
+spec("Water & Desalination", "Zero Liquid Discharge", "Crystallizer", "Hindustan Zinc Ltd, Hindalco Industries Ltd, Grasim Industries Ltd (Nagda, MP), India",
+     [("Material", "SA 240 Gr. 31254 (6% Moly)"),
+      ("Size / Qty / Weight", "Ø 3.66 mtr × 9.75 mtr L / 1 No. / 12 tons")],
+     None, layout="showcase", fill=True, files=[IMG(71, 1)])
+
+spec("Water & Desalination", "Zero Liquid Discharge", "Deaerator", "Hindustan Zinc Ltd, Hindalco Industries Ltd, Grasim Industries Ltd (Nagda, MP), India",
+     [("Material", "SA 240 Gr. 31254 (6% Moly)"),
+      ("Size / Qty / Weight", "Ø 0.6 mtr × 4.2 mtr L / 2 Nos. / 2 tons")],
+     None, layout="showcase", fill=True, files=[IMG(71, 2)])
 
 spec("Water & Desalination", "Zero Liquid Discharge", "Brine Concentrator", "Grasim Industries Ltd, Nagda, MP, India",
      [("Material", "SA 240 Gr. 316L (shell & tube side); tubesheets SA 240 Gr. 316L; tubes SA 179 UNS S31803 (welded)"),
