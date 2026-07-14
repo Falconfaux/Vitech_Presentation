@@ -493,9 +493,11 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
   padding: calc(var(--fit,1) * 4.2rem) calc(var(--pad) * .2) calc(var(--fit,1) * 8.6rem);
 }
 /* No legend bar docked at the bottom (e.g. a standalone document image) —
-   letterbox symmetrically instead of reserving space for the glass bar. */
+   letterbox symmetrically instead of reserving space for the glass bar, and
+   push the top edge down far enough to clear the title chip (a document's
+   own content starts right at its edge, unlike a photo/drawing with margin). */
 .tpl-siteplan.no-legend .siteplan-canvas .media-full {
-  padding-bottom: calc(var(--fit,1) * 4.2rem);
+  padding: calc(var(--fit,1) * 9.4rem) calc(var(--pad) * .2) calc(var(--fit,1) * 4.2rem);
 }
 .tpl-siteplan .siteplan-canvas::after {
   content: ""; position: absolute; left: 0; right: 0; top: 0;
