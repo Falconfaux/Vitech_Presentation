@@ -343,104 +343,16 @@ def visual(section, eyebrow, title, sub, slide_no, images_count=1, row=False, ca
                           media=media, cap=cap, stats=stats_html)
     add(id, section, "visual", body)
 
-def _org_card(role, names, cls="org-card"):
-    names_html = '<small>{0}</small>'.format("<br>".join(esc(n) for n in names)) if names else ""
-    return '<div class="{0}">{1}{2}</div>'.format(cls, esc(role), names_html)
-
-def _org_column(col, style):
-    """One department column: manager card at top, then each subordinate as its
-    own card joined by short vertical connectors (mirrors the original chart)."""
-    parts = [_org_card(col["role"], col.get("names", []), "org-card org-card-mgr")]
-    for sub in col.get("chain", []):
-        parts.append('<div class="org-vline"></div>')
-        parts.append(_org_card(sub["role"], sub.get("names", []), "org-card org-card-sub"))
-    return '<div class="org-col" style="{0}">{1}</div>'.format(style, "".join(parts))
-
-def _org_branch(columns_before, gm, gm_peer, gm_branches, columns_after):
-    """One bus + department-column grid hanging under a single exec card.
-    Optionally nests the General Manager + Technical Manager pair one level
-    above the gm_branches columns (as in the original chart)."""
-    n_before = len(columns_before)
-    n_gm = len(gm_branches)
-    cols = []
-    for i, col in enumerate(columns_before):
-        cols.append(_org_column(col, "grid-column:{0};grid-row:1/3".format(i + 1)))
-    if gm:
-        cols.append(
-            '<div class="org-gm-head" style="grid-column:{0}/{1};grid-row:1">{2}{3}</div>'.format(
-                n_before + 1, n_before + 1 + n_gm,
-                _org_card(gm["role"], gm.get("names", []), "org-card org-card-gm"),
-                _org_card(gm_peer["role"], gm_peer.get("names", []), "org-card org-card-peer"))
-        )
-        for i, col in enumerate(gm_branches):
-            cols.append(_org_column(col, "grid-column:{0};grid-row:2".format(n_before + 1 + i)))
-    for i, col in enumerate(columns_after):
-        cols.append(_org_column(col, "grid-column:{0};grid-row:1/3".format(n_before + n_gm + 1 + i)))
-    total = n_before + n_gm + len(columns_after)
-    return '''<div class="org-branch">
-      <div class="org-connector"></div>
-      <div class="org-bus"></div>
-      <div class="org-grid" style="grid-template-columns:repeat({0},1fr)">{1}</div>
-    </div>'''.format(total, "".join(cols))
-
-def org_chart(section, eyebrow, title, exec_chain, director_columns, vp_columns, gm, gm_peer, gm_branches, right_columns, footnote=None):
-    """Replicates the original Quality Manual chart: a vertical executive chain
-    (MD → Director → VP), then TWO independent department trees hanging one
-    beneath Director and one beneath VP — the General Manager + Technical
-    Manager pair sits one level above the four columns that report to the GM,
-    within the VP's branch."""
-    id = next_id()
-    def _exec_card(role, name):
-        return '<div class="org-card org-card-exec">{0}<small>{1}</small></div>'.format(esc(role), esc(name))
-    if len(exec_chain) >= 3:
-        # Top execs stack vertically (MD); the final two — Director then VP —
-        # sit side by side (Director on the LEFT of the VP), with each one's
-        # own department tree hanging directly beneath that person's card.
-        top = exec_chain[:-2]
-        director, vp = exec_chain[-2], exec_chain[-1]
-        exec_html = "".join(
-            _exec_card(role, name) + '<div class="org-connector"></div>'
-            for role, name in top
-        ) + (
-            '<div class="org-exec-pair">{0}{1}</div>'.format(
-                _exec_card(*director), _exec_card(*vp))
-        )
-    else:
-        exec_html = "".join(
-            _exec_card(role, name) + '<div class="org-connector"></div>'
-            for role, name in exec_chain
-        )
-    director_branch = _org_branch(director_columns, None, None, [], [])
-    vp_branch = _org_branch(vp_columns, gm, gm_peer, gm_branches, right_columns)
-    foot_html = '<div class="org-footnote reveal reveal-d3">{0}</div>'.format(esc(footnote)) if footnote else ""
-    body = '''
-    <section class="slide tpl-orgchart" id="s{id}" data-section="{section}">
-      <div class="slide-inner">
-        <div class="eyebrow reveal">{eyebrow}</div>
-        <h2 class="slide-title reveal reveal-d1">{title}</h2>
-        <div class="org-tree reveal reveal-d2">
-          {exec_html}
-          <div class="org-branches">
-            {director_branch}
-            {vp_branch}
-          </div>
-        </div>
-        {foot}
-      </div>
-    </section>'''.format(id=id, section=esc(section), eyebrow=esc(eyebrow), title=title,
-                          exec_html=exec_html, director_branch=director_branch, vp_branch=vp_branch,
-                          foot=foot_html)
-    add(id, section, "orgchart", body)
-
-def site_plan(section, eyebrow, title, img_src, legend, stat=None):
-    """Full-bleed site plan: the CAD drawing owns the whole slide (uncropped,
+def site_plan(section, eyebrow, title, img_src, legend=None, stat=None, hint="Click to enlarge"):
+    """Full-bleed site plan: the drawing owns the whole slide (uncropped,
     letterboxed just above a slim glass legend bar docked to the bottom edge,
     so no map marker is covered). Title and plot-area stat float as compact
-    frosted chips in the top corners."""
+    frosted chips in the top corners. With no legend (e.g. a standalone
+    document image), the bottom letterbox shrinks to match the top."""
     id = next_id()
     # split the flat legend list into groups (each starts with a ("group", …))
     groups, cur = [], None
-    for num, txt in legend:
+    for num, txt in (legend or []):
         if num == "group":
             cur = {"title": txt, "items": []}
             groups.append(cur)
@@ -459,11 +371,14 @@ def site_plan(section, eyebrow, title, img_src, legend, stat=None):
     if stat:
         v, l = stat
         stat_html = '<div class="siteplan-stat reveal reveal-d1">{0} <span>{1}</span></div>'.format(esc(v), esc(l))
+    modifier = " no-legend" if not legend else ""
+    hint_html = '<p class="site-plan-hint">{0}</p>'.format(esc(hint)) if hint else ""
+    legend_aside = '<aside class="siteplan-legend reveal reveal-d2">{0}</aside>'.format(legend_html) if legend else ""
     body = '''
-    <section class="slide tpl-siteplan" id="s{id}" data-section="{section}">
+    <section class="slide tpl-siteplan{modifier}" id="s{id}" data-section="{section}">
       <div class="siteplan-canvas site-plan-map">
         <img class="media-full" data-src="{img}" alt="" loading="lazy">
-        <p class="site-plan-hint">Click to enlarge</p>
+        {hint}
       </div>
       <div class="slide-inner">
         <div class="siteplan-titlebar reveal reveal-d1">
@@ -471,10 +386,10 @@ def site_plan(section, eyebrow, title, img_src, legend, stat=None):
           <h2 class="slide-title">{title}</h2>
         </div>
         {stat}
-        <aside class="siteplan-legend reveal reveal-d2">{legend}</aside>
+        {legend}
       </div>
-    </section>'''.format(id=id, section=esc(section), eyebrow=esc(eyebrow), title=title,
-                          img=img_src, legend=legend_html, stat=stat_html)
+    </section>'''.format(id=id, modifier=modifier, section=esc(section), eyebrow=esc(eyebrow), title=title,
+                          img=img_src, hint=hint_html, legend=legend_aside, stat=stat_html)
     add(id, section, "siteplan", body)
 
 _LOCATION_MAP_SVG = '''
@@ -1174,76 +1089,19 @@ def industries_slide(title, keys):
     </section>'''.format(id=iid, title=title, tiles=tiles, cols=len(keys))
     add(iid, "Company Overview", "visual", body)
 
-# Core process sectors lead; specialty and energy/advanced follow.
-# Two tiles per slide (rather than 3-4) so each background photo reads at a
-# much larger, far less cropped size.
+# All ten markets fit across exactly two slides, five tiles each — the tile
+# background now renders with object-fit:contain (see styles.css) so every
+# photo shows in full rather than being cropped to fill the cell.
 industries_slide("Industries We Cater To",
-    ["Oil & Gas", "Water & Desalination"])
+    ["Oil & Gas", "Water & Desalination", "Fertilizer & Petrochemicals", "Edible Oil & Food", "Chemical"])
 industries_slide("Industries We Cater To — cont.",
-    ["Fertilizer & Petrochemicals", "Edible Oil & Food"])
-industries_slide("Industries — Process & Specialty",
-    ["Chemical", "Paper & Pulp"])
-industries_slide("Industries — Process & Specialty — cont.",
-    ["Pharmaceutical"])
-industries_slide("Industries — Energy & Advanced Materials",
-    ["Power", "Zero Liquid Discharge"])
-industries_slide("Industries — Energy & Advanced Materials — cont.",
-    ["Lithium"])
+    ["Paper & Pulp", "Pharmaceutical", "Power", "Zero Liquid Discharge", "Lithium"])
 
-# ---- 5. Organisation Chart (1:1 with the Quality Manual Annex-D2 chart) ----
-org_chart("Company Overview", "Structure · Quality Manual Annex-D2, Rev. 4", "Organisation Chart",
-    exec_chain=[
-        ("Managing Director", "Mr. Charles Dsouza"),
-        ("Director", "Mr. Vivek Charles Dsouza"),
-        ("Vice President", "Mr. T.N. Shetty"),
-    ],
-    director_columns=[
-        {"role": "Manager QA & QC", "names": ["Mr. Samir P.", "Mr. Deepak K."], "chain": [
-            {"role": "QC Engineers **"},
-            {"role": "Welding Engineer", "names": ["Mr. Samir P.", "Mr. Deepak K."]},
-            {"role": "NDT Level 1 & 2 **"},
-        ]},
-        {"role": "Manager Accounts", "names": ["Mr. Vishwas Yadav"], "chain": [
-            {"role": "Asst. Accounts", "names": ["Mrs. Usha Bisht", "Mrs. Rekha Shetty"]},
-        ]},
-        {"role": "HRD Officer", "names": ["Mr. Navnath", "Ms. Ruchika"]},
-        {"role": "Purchase Incharge", "names": ["Mr. Yashwant S.", "Mr. Rajendra T."], "chain": [
-            {"role": "Purchase Engineer", "names": ["Mr. Hitesh P.", "Mr. Ganesh R."]},
-        ]},
-    ],
-    vp_columns=[
-        {"role": "Project Manager", "names": ["Mr. Mayur B.", "Mr. Dharmendra J."], "chain": [
-            {"role": "Project Engineer", "names": ["Mr. Samir G.", "Mr. Mayur D."]},
-            {"role": "Mechanical Draughtsmans / CNC Programer **"},
-            {"role": "CNC Operators **"},
-        ]},
-    ],
-    gm={"role": "General Manager", "names": ["Mr. Pramod Dubey"]},
-    gm_peer={"role": "Technical Manager", "names": ["Varghes Nadar"]},
-    gm_branches=[
-        {"role": "HSE Committee", "chain": [
-            {"role": "Stores Incharge", "names": ["Mr. Mehraj S."]},
-            {"role": "Stores Assistants", "names": ["Mr. Sandeep K.", "Mr. Edvin D."]},
-        ]},
-        {"role": "EHS Officer", "names": ["Mr. Priyesh Kumar"], "chain": [
-            {"role": "Maintenance Incharge", "names": ["Mr. Milind P."]},
-            {"role": "Maintenance Assistants **"},
-        ]},
-        {"role": "Manager Production", "names": ["1. Mr. Arun W.", "2. Mr. Chetan K."], "chain": [
-            {"role": "Production Engineers **"},
-            {"role": "Fitters, Welders, Grinders, Helpers & Others"},
-        ]},
-        {"role": "Manager Business Development", "names": ["Mr. Anthony Dsouza", "Mr. Ryan Fernandes"], "chain": [
-            {"role": "Estimation Engineers **"},
-        ]},
-    ],
-    right_columns=[
-        {"role": "Manager Engineering", "names": ["Mr. Sourabh K."], "chain": [
-            {"role": "Design Engineers", "names": ["Mr. Ankit Shetty", "Mr. Moreshwar"]},
-            {"role": "Mechanical Draughtsmans **"},
-        ]},
-    ],
-    footnote="** Refer list as per attached Annexure-1")
+# ---- 5. Organisation Chart — the original Quality Manual Annex-D2 chart,
+#          shown as its own document image (full-bleed, click to enlarge)
+#          rather than a hand-redrawn recreation. -------------------------
+site_plan("Company Overview", "Structure · Quality Manual Annex-D2, Rev. 4", "Organisation Chart",
+    "assets/images/slides/orgchart_annexd2.png")
 
 # ---- 6-8. Company Layout & Plot Overview (full-bleed, photos fill their
 #           aspect-weighted cells edge-to-edge) ------------------------------
