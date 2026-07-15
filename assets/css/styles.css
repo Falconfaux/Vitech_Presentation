@@ -446,6 +446,15 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 .side-panel.wide ul { display: block; columns: 2; column-gap: 2.5rem; }
 .side-panel.wide li { break-inside: avoid; margin-bottom: calc(var(--fit,1) * var(--fit,1) * .55rem); }
 
+/* s96 — E&I Capability: larger type, full-width intro + 2-column list so both
+   halves are filled rather than leaving a blank right column */
+#s96 .content-grid { row-gap: calc(var(--fit,1) * 1.3rem); }
+#s96 p { font-size: calc(var(--fit,1) * 1.5rem); line-height: calc(var(--fit,1) * 1.6); margin-bottom: 0; }
+#s96 .side-panel.wide { margin-top: 0; padding: calc(var(--fit,1) * 1.8rem) calc(var(--fit,1) * 2.1rem); }
+#s96 .side-panel.wide h3 { font-size: .9rem; margin-bottom: calc(var(--fit,1) * 1rem); }
+#s96 .side-panel.wide ul { columns: 2; column-gap: 3rem; }
+#s96 .side-panel.wide li { font-size: calc(var(--fit,1) * 1.08rem); line-height: calc(var(--fit,1) * 1.4); margin-bottom: calc(var(--fit,1) * .6rem); }
+
 /* ---------------------------------------------------------------------- */
 /* Template: visual (org chart / layout / location map — image forward)   */
 /* ---------------------------------------------------------------------- */
