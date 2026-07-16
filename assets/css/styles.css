@@ -1167,6 +1167,22 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .62), rgba(var(--azure-deep-rgb), 0));
 }
 
+/* stack2: two landscape photos shown full-height as a vertical stack, each
+   uncropped (object-fit: contain). Used where two wide images side-by-side
+   would crop into narrow strips (slides 8 & 26). */
+.tpl-spec.layout-showcase .showcase-canvas.stack2 {
+  display: grid; grid-template-columns: 1fr; grid-template-rows: 1fr 1fr;
+  gap: 11px; background: var(--azure-deep);
+}
+.tpl-spec.layout-showcase .showcase-canvas.stack2 .media-full {
+  object-fit: contain !important;
+  padding: calc(var(--fit,1)*.5rem) calc(var(--pad)*.12) calc(var(--fit,1)*.5rem) !important;
+}
+/* title-overlay photo slides: drop the top photo below the title scrim */
+.tpl-spec.layout-showcase.showcase-photos .showcase-canvas.stack2 .showcase-cell:first-child .media-full {
+  padding-top: calc(var(--fit,1)*4.8rem) !important;
+}
+
 .spec-list { display: grid; gap: calc(var(--fit,1) * .65rem); margin-top: calc(var(--fit,1) * 1.2rem); }
 .spec-row { display: grid; grid-template-columns: 130px 1fr; gap: calc(var(--fit,1) * .8rem); font-size: calc(var(--fit,1) * .92rem); padding: calc(var(--fit,1) * .55rem) 0; border-top: 1px solid rgba(255,255,255,.08); }
 .spec-row:first-child { border-top: none; }
