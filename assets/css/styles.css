@@ -29,6 +29,9 @@
 
   --gap: clamp(1rem, 2vw, 2rem);
   --pad: clamp(1.5rem, 5vw, 5rem);
+  /* vertical safe-area that top-aligned slide content must clear so a slide's
+     own eyebrow/title never collides with the fixed top-left brand wordmark */
+  --chrome-top: clamp(3.4rem, 6.5vh, 4.8rem);
 
   --fit: 1; /* per-slide vertical density scale, overridden inline by main.js when content overflows */
 }
@@ -39,6 +42,13 @@
 }
 
 * { box-sizing: border-box; }
+html {
+  /* Fluid base unit: stays at 16px on laptops/1080p (so existing layouts are
+     unchanged) but scales up on large / high-res displays such as a 4K 55" TV,
+     so every rem-based size — type, spacing and the --fit system — grows
+     together instead of some elements ballooning while others stay tiny. */
+  font-size: clamp(16px, 0.5vw + 0.6vh, 30px);
+}
 html, body {
   margin: 0; padding: 0;
   width: 100%; height: 100%;
@@ -100,7 +110,7 @@ h1, h2, h3, p, ul, ol { margin: 0; }
   width: 100%;
   height: 100%;
   padding: var(--pad);
-  padding-bottom: calc(var(--pad) + 64px);
+  padding-bottom: calc(var(--pad) + 4rem);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -158,18 +168,18 @@ h1, h2, h3, p, ul, ol { margin: 0; }
 #chrome > * { pointer-events: auto; }
 
 .brand-mark {
-  position: fixed; top: 22px; left: var(--pad);
+  position: fixed; top: 1.375rem; left: var(--pad);
   display: flex; align-items: center; gap: .6rem;
   z-index: 41;
   opacity: .92;
 }
 .brand-mark { transition: opacity .4s var(--ease-soft); }
-.brand-mark img { height: 26px; width: auto; filter: brightness(0) invert(1) drop-shadow(0 1px 4px rgba(0,0,0,.5)); }
+.brand-mark img { height: 1.6rem; width: auto; filter: brightness(0) invert(1) drop-shadow(0 1px 4px rgba(0,0,0,.5)); }
 body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 .brand-mark span { font-size: .72rem; letter-spacing: .12em; color: #cfe0ff; text-transform: uppercase; }
 
 .slide-counter {
-  position: fixed; top: 22px; right: var(--pad);
+  position: fixed; top: 1.375rem; right: var(--pad);
   font-size: .78rem; color: var(--steel-light); letter-spacing: .06em;
   font-variant-numeric: tabular-nums;
   z-index: 41;
@@ -182,9 +192,9 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 }
 #counter-section:not(:empty)::after { content: ""; display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--steel); margin-left: .7rem; vertical-align: middle; }
 
-.nav-arrows { position: fixed; bottom: 22px; right: var(--pad); display: flex; gap: .6rem; z-index: 41; }
+.nav-arrows { position: fixed; bottom: 1.375rem; right: var(--pad); display: flex; gap: .6rem; z-index: 41; }
 .nav-btn {
-  width: 42px; height: 42px; border-radius: 50%;
+  width: 2.625rem; height: 2.625rem; border-radius: 50%;
   border: 1px solid rgba(var(--azure-bright-rgb),.4);
   background: rgba(10,14,30,.45);
   backdrop-filter: blur(6px);
@@ -194,11 +204,11 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
   transition: background .25s, border-color .25s, transform .2s;
 }
 .nav-btn:hover { background: var(--azure); border-color: var(--azure); transform: translateY(-1px); }
-.nav-btn svg { width: 18px; height: 18px; }
+.nav-btn svg { width: 1.125rem; height: 1.125rem; }
 
 .menu-toggle {
-  position: fixed; bottom: 22px; left: var(--pad); z-index: 41;
-  width: 42px; height: 42px; border-radius: 50%;
+  position: fixed; bottom: 1.375rem; left: var(--pad); z-index: 41;
+  width: 2.625rem; height: 2.625rem; border-radius: 50%;
   border: 1px solid rgba(var(--azure-bright-rgb),.4);
   background: rgba(10,14,30,.45);
   backdrop-filter: blur(6px);
@@ -206,7 +216,7 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
 }
-.menu-toggle svg { width: 18px; height: 18px; }
+.menu-toggle svg { width: 1.125rem; height: 1.125rem; }
 
 #sections-panel {
   position: fixed; inset: 0; z-index: 60;
@@ -276,6 +286,14 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 .slide-sub {
   margin-top: calc(var(--fit,1) * .9rem); font-size: clamp(1rem, 1.4vw, 1.25rem);
   color: var(--steel-light); max-width: 60ch; line-height: 1.55;
+}
+/* sub-dark: caption sits on a light/opaque chip with black text so it stays
+   legible over bright photos (e.g. the sunlit orchard slide) */
+.slide-sub.sub-dark {
+  display: inline-block; color: #0e1116; font-weight: 600; max-width: 62ch;
+  background: rgba(255,255,255,.9); border-radius: 10px;
+  padding: calc(var(--fit,1) * .5rem) calc(var(--fit,1) * .85rem);
+  box-shadow: 0 6px 20px rgba(0,0,0,.35); text-shadow: none;
 }
 
 .client-badge {
@@ -385,7 +403,7 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 /* ---------------------------------------------------------------------- */
 
 .tpl-prose .slide-inner, .tpl-table .slide-inner {
-  justify-content: flex-start; padding-top: calc(var(--fit,1) * clamp(2rem, 6vh, 4.5rem));
+  justify-content: flex-start; padding-top: max(var(--chrome-top), calc(var(--fit,1) * clamp(2rem, 6vh, 4.5rem)));
 }
 .tpl-prose .slide-inner.centered { justify-content: center; padding-top: 0; }
 .tpl-prose .slide-inner.centered .content-grid { align-items: center; }
@@ -446,20 +464,21 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 .side-panel.wide ul { display: block; columns: 2; column-gap: 2.5rem; }
 .side-panel.wide li { break-inside: avoid; margin-bottom: calc(var(--fit,1) * var(--fit,1) * .55rem); }
 
-/* s96 — E&I Capability: larger type, full-width intro + 2-column list so both
-   halves are filled rather than leaving a blank right column */
-#s96 .content-grid { row-gap: calc(var(--fit,1) * 1.3rem); }
-#s96 p { font-size: calc(var(--fit,1) * 1.5rem); line-height: calc(var(--fit,1) * 1.6); margin-bottom: 0; }
-#s96 .side-panel.wide { margin-top: 0; padding: calc(var(--fit,1) * 1.8rem) calc(var(--fit,1) * 2.1rem); }
-#s96 .side-panel.wide h3 { font-size: .9rem; margin-bottom: calc(var(--fit,1) * 1rem); }
-#s96 .side-panel.wide ul { columns: 2; column-gap: 3rem; }
-#s96 .side-panel.wide li { font-size: calc(var(--fit,1) * 1.08rem); line-height: calc(var(--fit,1) * 1.4); margin-bottom: calc(var(--fit,1) * .6rem); }
+/* E&I Capability: larger type, full-width intro + 2-column list so both
+   halves are filled rather than leaving a blank right column. Targeted by
+   section (not #sNN) so slide renumbering never detaches these rules. */
+.tpl-prose[data-section="Electrical & Instrumentation"] .content-grid { row-gap: calc(var(--fit,1) * 1.3rem); }
+.tpl-prose[data-section="Electrical & Instrumentation"] p { font-size: calc(var(--fit,1) * 1.5rem); line-height: calc(var(--fit,1) * 1.6); margin-bottom: 0; }
+.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide { margin-top: 0; padding: calc(var(--fit,1) * 1.8rem) calc(var(--fit,1) * 2.1rem); }
+.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide h3 { font-size: .9rem; margin-bottom: calc(var(--fit,1) * 1rem); }
+.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide ul { columns: 2; column-gap: 3rem; }
+.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide li { font-size: calc(var(--fit,1) * 1.08rem); line-height: calc(var(--fit,1) * 1.4); margin-bottom: calc(var(--fit,1) * .6rem); }
 
 /* ---------------------------------------------------------------------- */
 /* Template: visual (org chart / layout / location map — image forward)   */
 /* ---------------------------------------------------------------------- */
 
-.tpl-visual .slide-inner { justify-content: flex-start; padding-top: calc(var(--fit,1) * clamp(1.5rem, 4vh, 3rem)); }
+.tpl-visual .slide-inner { justify-content: flex-start; padding-top: max(var(--chrome-top), calc(var(--fit,1) * clamp(1.5rem, 4vh, 3rem))); }
 .tpl-visual .visual-frame {
   margin-top: calc(var(--fit,1) * 1.6rem); border-radius: 16px; overflow: hidden;
   border: 1px solid var(--azure-border);
@@ -575,7 +594,7 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 /* Template: location map (hand-built schematic, replaces the scanned img) */
 /* ---------------------------------------------------------------------- */
 
-.tpl-locationmap .slide-inner { justify-content: flex-start; padding-top: clamp(2.4rem, 5.5vh, 3.4rem); }
+.tpl-locationmap .slide-inner { justify-content: flex-start; padding-top: max(var(--chrome-top), clamp(2.4rem, 5.5vh, 3.4rem)); }
 /* compact title so the map itself gets the slide's height */
 .tpl-locationmap .slide-title { font-size: calc(var(--fit,1) * clamp(1.4rem, 2vw, 1.9rem)); max-width: none; margin-bottom: .2rem; }
 .tpl-locationmap .slide-sub { margin-top: .2rem; }
@@ -765,7 +784,7 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 
 /* text-only slides: generous type so the tables own the slide (the --fit
    auto-shrinker still protects the densest ones) */
-.tpl-table .slide-inner { justify-content: center; padding-top: calc(var(--fit,1) * clamp(2rem, 5vh, 3.5rem)); }
+.tpl-table .slide-inner { justify-content: center; padding-top: max(var(--chrome-top), calc(var(--fit,1) * clamp(2rem, 5vh, 3.5rem))); }
 .tpl-table table.spec-table { font-size: calc(var(--fit,1) * 1.14rem); }
 .tpl-table table.spec-table th { font-size: calc(var(--fit,1) * .92rem); padding: calc(var(--fit,1) * var(--fit,1) * .95rem) calc(var(--fit,1) * 1.2rem); }
 .tpl-table table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .9rem) calc(var(--fit,1) * 1.2rem); }
@@ -782,7 +801,7 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 /* Template: water (rainwater harvesting + wastewater recycling)           */
 /* ---------------------------------------------------------------------- */
 
-.tpl-water .slide-inner { justify-content: center; padding-top: calc(var(--fit,1) * clamp(1.5rem, 4vh, 2.5rem)); }
+.tpl-water .slide-inner { justify-content: flex-start; padding-top: max(var(--chrome-top), calc(var(--fit,1) * clamp(1.5rem, 4vh, 2.5rem))); }
 .tpl-water .water-grid {
   display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
   gap: clamp(1.2rem, 3vw, 2.6rem); align-items: stretch;
@@ -878,7 +897,7 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 /* Template: spec card (project case studies — the workhorse template)    */
 /* ---------------------------------------------------------------------- */
 
-.tpl-spec .slide-inner { justify-content: flex-start; padding-top: calc(var(--fit,1) * clamp(1.5rem, 4vh, 3rem)); }
+.tpl-spec .slide-inner { justify-content: flex-start; padding-top: max(var(--chrome-top), calc(var(--fit,1) * clamp(1.5rem, 4vh, 3rem))); }
 .tpl-spec .spec-grid {
   display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: minmax(0, 1fr);
   gap: clamp(1.2rem, 3vw, 3rem); align-items: stretch;
@@ -958,7 +977,7 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    photo uncropped over its own blurred fill — the single-photo recipe, tiled. */
 .tpl-spec.layout-showcase .showcase-canvas.n2,
 .tpl-spec.layout-showcase .showcase-canvas.n3,
-.tpl-spec.layout-showcase .showcase-canvas.n4 { display: grid; gap: 11px; background: var(--azure-deep); }
+.tpl-spec.layout-showcase .showcase-canvas.n4 { display: grid; gap: .7rem; background: var(--azure-deep); }
 .tpl-spec.layout-showcase .showcase-canvas.n1 { display: grid; grid-template-columns: 1fr; grid-template-rows: 1fr; }
 .tpl-spec.layout-showcase .showcase-canvas.n2 { grid-template-columns: 1fr 1fr; }
 .tpl-spec.layout-showcase .showcase-canvas.n3 { grid-template-columns: 1fr 1fr 1fr; }
@@ -1042,13 +1061,22 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 .tpl-spec.layout-showcase .eyebrow { margin-bottom: calc(var(--fit,1) * .6rem); }
 .tpl-spec.layout-showcase .showcase-panel {
   width: 100%;
-  padding: calc(var(--fit,1) * 1.3rem) calc(var(--fit,1) * 1.7rem);
+  padding: calc(var(--fit,1) * 1.05rem) calc(var(--fit,1) * 1.4rem);
   border-radius: 18px;
-  background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .55), rgba(var(--azure-deep-rgb), .85));
-  border: 1px solid rgba(var(--azure-bright-rgb), .35);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 18px 50px rgba(0,0,0,.45);
+  /* frosted glass: far more transparent than before so the photo reads through,
+     with a heavier blur + text-shadow keeping the copy legible */
+  background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .28), rgba(var(--azure-deep-rgb), .52));
+  border: 1px solid rgba(var(--azure-bright-rgb), .28);
+  backdrop-filter: blur(18px) saturate(1.1);
+  -webkit-backdrop-filter: blur(18px) saturate(1.1);
+  box-shadow: 0 18px 50px rgba(0,0,0,.4);
+}
+.tpl-spec.layout-showcase .showcase-panel .eyebrow,
+.tpl-spec.layout-showcase .showcase-panel .slide-title,
+.tpl-spec.layout-showcase .showcase-panel .spec-row .k,
+.tpl-spec.layout-showcase .showcase-panel .spec-row .v,
+.tpl-spec.layout-showcase .showcase-panel .client-badge {
+  text-shadow: 0 1px 4px rgba(0,0,0,.65);
 }
 .tpl-spec.layout-showcase .showcase-head {
   display: flex; align-items: center; justify-content: space-between;
@@ -1104,10 +1132,10 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   padding-left: calc(var(--pad) * .6); padding-right: calc(var(--pad) * .6);
 }
 .tpl-spec.layout-showcase.panel-compact .showcase-panel {
-  width: fit-content; max-width: min(62%, 660px);
-  background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .42), rgba(var(--azure-deep-rgb), .72));
-  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-  padding: calc(var(--fit,1) * 1rem) calc(var(--fit,1) * 1.3rem);
+  width: fit-content; max-width: min(52%, 560px);
+  background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .26), rgba(var(--azure-deep-rgb), .5));
+  backdrop-filter: blur(20px) saturate(1.1); -webkit-backdrop-filter: blur(20px) saturate(1.1);
+  padding: calc(var(--fit,1) * .82rem) calc(var(--fit,1) * 1.05rem);
 }
 .tpl-spec.layout-showcase.panel-compact .showcase-head { display: block; }
 .tpl-spec.layout-showcase.panel-compact .client-badge { margin-top: .5rem; }
@@ -1172,7 +1200,7 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    would crop into narrow strips (slides 8 & 26). */
 .tpl-spec.layout-showcase .showcase-canvas.stack2 {
   display: grid; grid-template-columns: 1fr; grid-template-rows: 1fr 1fr;
-  gap: 11px; background: var(--azure-deep);
+  gap: .7rem; background: var(--azure-deep);
 }
 .tpl-spec.layout-showcase .showcase-canvas.stack2 .media-full {
   object-fit: contain !important;
@@ -1202,7 +1230,7 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 /* Template: gallery wall (letters / certifications / exhibitions)        */
 /* ---------------------------------------------------------------------- */
 
-.tpl-gallery .slide-inner { justify-content: flex-start; padding-top: clamp(1.5rem, 4vh, 3rem); }
+.tpl-gallery .slide-inner { justify-content: flex-start; padding-top: max(var(--chrome-top), clamp(1.5rem, 4vh, 3rem)); }
 .tpl-gallery .gallery-grid {
   margin-top: 1.6rem;
   display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));

@@ -753,7 +753,7 @@ def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, ex
                           milestone=milestone_html, table=table_html)
     add(id, section, "spec", body)
 
-def photo_showcase(section, eyebrow, title, items, sub=None, fill=False):
+def photo_showcase(section, eyebrow, title, items, sub=None, fill=False, sub_dark=False):
     """Full-bleed photo slide: 2–4 full-height cells, each photo shown whole
     over its own blurred fill (same recipe as the spec showcase), with the
     title overlaid on a top scrim and an optional caption chip pinned to the
@@ -770,7 +770,8 @@ def photo_showcase(section, eyebrow, title, items, sub=None, fill=False):
             f=src,
             cap='<div class="showcase-cap">{0}</div>'.format(nb(cap)) if cap else "")
         for src, cap in cell_items)
-    sub_html = '<p class="slide-sub">{0}</p>'.format(nb(sub)) if sub else ""
+    sub_cls = " sub-dark" if sub_dark else ""
+    sub_html = '<p class="slide-sub{1}">{0}</p>'.format(nb(sub), sub_cls) if sub else ""
     fill_cls = " photo-fill" if fill else ""
     style = fill_style([src for src, _ in cell_items], arr_cls) if fill else ""
     body = '''
@@ -825,7 +826,7 @@ def gallery(section, eyebrow, title, slide_no, caption=None, sub=None):
 
 _WATER_SVG = '''
 <svg class="water-svg" viewBox="0 0 920 640" xmlns="http://www.w3.org/2000/svg" role="img"
-     aria-label="Rainwater harvesting flow: roof runoff is piped to an underground filtration plant, stored in a 400,000 litre tank and pumped to campus uses; overflow recharges groundwater">
+     aria-label="Rainwater harvesting flow: roof runoff is piped to an underground filtration plant, stored in a 600,000 litre tank and pumped to campus uses; overflow recharges groundwater">
   <!-- below-grade band -->
   <rect class="ws-underground" x="0" y="400" width="920" height="240"/>
   <line class="ws-ground" x1="20" y1="400" x2="900" y2="400"/>
@@ -866,7 +867,7 @@ _WATER_SVG = '''
   <rect class="ws-node" x="532" y="424" width="204" height="106" rx="12"/>
   <path class="ws-water" d="M540 462 q17 -8 34 0 t34 0 t34 0 t34 0 t34 0 t17 0 v60 a10 10 0 0 1 -10 10 h-167 a10 10 0 0 1 -10 -10 z"/>
   <text class="ws-label" x="634" y="500" text-anchor="middle">STORAGE TANK</text>
-  <text class="ws-strong" x="634" y="521" text-anchor="middle">400,000 L</text>
+  <text class="ws-strong" x="634" y="521" text-anchor="middle">600,000 L</text>
   <text class="ws-label" x="634" y="556" text-anchor="middle">UNDERGROUND STORAGE</text>
 
   <!-- pump riser + distribution -->
@@ -907,7 +908,7 @@ def water_slide(section, eyebrow, title):
             <h3>Rainwater Harvesting</h3>
             <ol class="water-steps">
               <li>Rain falling on the workshop roofs is channelled through collection piping to an underground filtration plant.</li>
-              <li>The filtered water is stored in an underground tank with a <b>400,000-litre</b> capacity and pumped out for use across the campus.</li>
+              <li>The filtered water is stored in an underground tank with a <b>600,000-litre</b> capacity and pumped out for use across the campus.</li>
             </ol>
             <h3>Wastewater Recycling Plant</h3>
             <p>Wastewater is collected and treated in our on-site recycling plant; the treated water is reused for drip irrigation, garden watering and toilet flushing — cutting fresh-water demand across the campus.</p>
@@ -1111,7 +1112,9 @@ site_plan("Company Overview", "Structure · Quality Manual Annex-D2, Rev. 4", "O
 photo_showcase("Company Overview", "Facilities", "Company Layout & Plot Overview",
     [(IMG(6, 1), None)])
 photo_showcase("Company Overview", "Facilities", "Plant & Yard — Site Views",
-    [(IMG(7, 1), None), (IMG(8, 1), None)], fill=True)
+    [(IMG(7, 1), None)], fill=True)
+photo_showcase("Company Overview", "Facilities", "Plant & Yard — Site Views (cont.)",
+    [(IMG(8, 1), None)], fill=True)
 
 # ---- 9. Company Layout (annotated site plan + legend) --------------------
 site_plan("Company Overview", "Facilities · Vitech Heavy Equipments Pvt. Ltd, Shahapur", "Company Layout",
@@ -1317,16 +1320,16 @@ spec("Automation & Welding", "Automated Machines", "Welding on Automated Machine
       ("Automated GMAW system (Canadian make)", "Specialised for GMAW & FCAW in 1G, 2G & 3G positions, carbon steel & stainless steel")],
      29, layout="showcase", fill=True)
 
+# ---- 83. Divider: Oil & Petrochemical --------------------------------------
+divider("Oil, Gas, Lithium & Aerospace", "Oil &<br><span>Petrochemical</span>",
+        "Heavy towers, reflux drums and static mixers delivered for Reliance, HPCL, Cairn Energy and more.",
+        bg_img=84, index_label="IV")
+
 # ---- 82. Lithium ----------------------------------------------------------
 spec("Oil, Gas, Lithium & Aerospace", "Lithium", "Tanks and Vessels", "Lithium Nevada Thacker Pass Project (USA)",
      [("Material", "Duplex SST 2205 / SA240 Gr 316L"),
       ("Total qty / weight", "15 Nos. / 30 MT")],
      82, layout="showcase", fill=True)
-
-# ---- 83. Divider: Oil & Petrochemical --------------------------------------
-divider("Oil, Gas, Lithium & Aerospace", "Oil &<br><span>Petrochemical</span>",
-        "Heavy towers, reflux drums and static mixers delivered for Reliance, HPCL, Cairn Energy and more.",
-        bg_img=84, index_label="IV")
 
 spec("Oil, Gas, Lithium & Aerospace", "Oil & Petrochemical", "Tube Bundle for Heat Exchanger", "Reliance Industries, Nagothane",
      [("Tubesheet", "SA965-F304/304L TP304/304L"),
@@ -1718,6 +1721,7 @@ spec("Water & Desalination", "Water Treatment", "Cartridge Filter", "Saudi Aramc
 prose("Electrical & Instrumentation", "In-House Team", "Electrical & Instrumentation Capability",
       ["We have an in-house Electrical & Instrumentation team comprising technicians and engineers for supervision, "
        "capable of carrying out FAT complying with project and client specifications for skid mounted packages."],
+      bg_img=96,
       side_title="Capabilities",
       side_items=[
         "Preparation of cable tray routing drawings",
@@ -1837,8 +1841,11 @@ photo_showcase("Exhibitions & Approvals", "Industry Presence", "Vitech at Exhibi
 divider("Client Appreciation", "Appreciation<br><span>Letters</span>",
         "A selection of recognitions received from clients across our project history.", index_label="X")
 
-gallery("Client Appreciation", "Client Recognition", "Client Appreciation Letters I", [116, 117, 118, 119])
-gallery("Client Appreciation", "Client Recognition", "Client Appreciation Letters II", [120, 121, 122, 123])
+# Two letter images per slide (each manifest key is one client's 1–2 page
+# letter). Keys 116-119 & 122-123 hold 2 pages each; 120 & 121 hold 1 page,
+# so they pair up on one slide — every slide lands on exactly 2 images.
+for _grp in ([116], [117], [118], [119], [120, 121], [122], [123]):
+    gallery("Client Appreciation", "Client Recognition", "Client Appreciation Letters", _grp)
 
 # ---- 124. Divider: Certifications --------------------------------------------
 divider("Certifications", "Certifications",
@@ -1862,7 +1869,7 @@ photo_showcase("Sustainability & CSR", "Sustainable Stress-Free Environment", "V
     [(IMG(136, 1), None), (IMG(136, 2), None)], fill=True)
 
 photo_showcase("Sustainability & CSR", "Sustainable Stress-Free Environment", "Vegetable Farm & Orchards",
-    [(IMG(136, 3), None), (IMG(136, 4), None), (IMG(137, 1), None)], fill=True,
+    [(IMG(136, 3), None), (IMG(136, 4), None), (IMG(137, 1), None)], fill=True, sub_dark=True,
     sub="3,500 fruit-bearing orchard plantations line the periphery of the plot, drip-irrigated using our recycling plant.")
 
 # ---- 138. CSR -------------------------------------------------------------
