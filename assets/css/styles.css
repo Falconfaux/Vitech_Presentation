@@ -1359,9 +1359,36 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   }
   .tpl-spec.layout-stack .spec-content { width: 100%; }
   .tpl-spec.layout-stack .spec-hero { min-height: calc(var(--fit,1) * 180px); }
-  .tpl-spec.layout-showcase .showcase-canvas .media-full { padding: 3.2rem .6rem 46vh; }
-  .tpl-spec.layout-showcase.photo-fill .showcase-cell.panel-clear .media-full { padding-bottom: 46vh !important; }
-  .tpl-spec.layout-showcase .showcase-panel { padding: 1rem 1.1rem; }
+  /* Narrow / short viewports: stop floating the caption chip over the photo.
+     Stack instead — the photo fills the top, the description becomes a
+     full-width strip pinned to the very bottom so it never covers the image. */
+  .tpl-spec.layout-showcase:not(.showcase-photos):not(.panel-side) .showcase-canvas {
+    inset: 0 0 34vh 0;
+  }
+  .tpl-spec.layout-showcase:not(.showcase-photos):not(.panel-side) .showcase-canvas .media-full {
+    padding: 2.6rem .6rem .6rem;
+  }
+  .tpl-spec.layout-showcase.photo-fill:not(.showcase-photos):not(.panel-side) .showcase-canvas .media-full,
+  .tpl-spec.layout-showcase.photo-fill:not(.showcase-photos):not(.panel-side) .showcase-cell.panel-clear .media-full,
+  .tpl-spec.layout-showcase.photo-fill:not(.showcase-photos):not(.panel-side) .showcase-canvas > .media-full {
+    padding: 0 !important;
+  }
+  .tpl-spec.layout-showcase.panel-compact .slide-inner {
+    align-items: stretch; justify-content: flex-end;
+    padding: 0;
+  }
+  .tpl-spec.layout-showcase.panel-compact .showcase-panel {
+    width: 100%; max-width: none; height: 34vh; max-height: 34vh; overflow-y: auto;
+    border-radius: 16px 16px 0 0;
+    /* right/bottom room so the copy clears the fixed ☰ menu + nav arrows */
+    padding: calc(var(--fit,1) * .95rem) 4rem calc(var(--fit,1) * 3.4rem) calc(var(--fit,1) * 1.15rem);
+  }
+  .tpl-spec.layout-showcase.panel-compact .slide-title { font-size: calc(var(--fit,1) * clamp(1.15rem, 4.6vw, 1.55rem)); }
+  .tpl-spec.layout-showcase.panel-compact .eyebrow { font-size: calc(var(--fit,1) * .72rem); }
+  .tpl-spec.layout-showcase.panel-compact .client-badge { font-size: calc(var(--fit,1) * .84rem); }
+  .tpl-spec.layout-showcase.panel-compact .spec-row .k { font-size: calc(var(--fit,1) * .74rem); }
+  .tpl-spec.layout-showcase.panel-compact .spec-row .v { font-size: calc(var(--fit,1) * .86rem); }
+  .tpl-spec.layout-showcase.panel-side .showcase-panel { padding: 1rem 1.1rem; }
 }
 
 /* Loading fade-in for whole app */
