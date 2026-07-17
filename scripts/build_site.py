@@ -689,10 +689,12 @@ def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, ex
         # a spec table is too tall for the bottom strip — dock the panel on the
         # right edge instead so it never covers the photos
         side_cls = " panel-side" if table else ""
-        # short-spec showcase slides (a headline + a couple of spec pairs) get a
-        # compact panel: it shrinks to fit-content and docks bottom-left instead
-        # of stretching a full-width blurred band across the photos.
-        if not table and not extra and len(specs) <= 3:
+        # Every equipment showcase slide gets a compact caption chip: it shrinks
+        # to fit-content, is capped at ~10% of the screen and docks bottom-left
+        # so the photo stays full-bleed behind it (client: description box must
+        # never bury the image and must stay small). Only table slides — which
+        # carry a tall spec grid — keep the docked side column instead.
+        if not table:
             side_cls += " panel-compact"
         if fill:
             side_cls += " photo-fill"
@@ -799,14 +801,15 @@ def gallery_cols(n):
         return (c - n % c) % c
     return min((4, 3), key=lambda c: (empty_cells(c), -c))
 
-def gallery(section, eyebrow, title, slide_no, caption=None, sub=None):
+def gallery(section, eyebrow, title, slide_no, caption=None, sub=None, files=None):
     id = next_id()
-    if isinstance(slide_no, (list, tuple)):
-        files = []
-        for sn in slide_no:
-            files.extend(IMGS(sn))
-    else:
-        files = IMGS(slide_no)
+    if files is None:
+        if isinstance(slide_no, (list, tuple)):
+            files = []
+            for sn in slide_no:
+                files.extend(IMGS(sn))
+        else:
+            files = IMGS(slide_no)
     imgs = "".join(media_frame(f) for f in files)
     cap = '<p class="gallery-caption reveal reveal-d3">{0}</p>'.format(nb(caption)) if caption else ""
     cols = gallery_cols(len(files))
@@ -1184,8 +1187,7 @@ data_table("Workshop & Facilities", "Group Capability", "Group Infrastructure �
             ("2,000 sq.mtr", "Material Storage", "")],
            "—", "—"],
         ],
-      ],
-      note="All indications in red on the original plant plan denote provisions under construction (target completion 31 Dec 2026).")
+      ])
 
 data_table("Workshop & Facilities", "Group Capability", "Group Infrastructure — Cranes, Workforce & Capability",
       [
@@ -1302,9 +1304,13 @@ spec("Automation & Welding", "Weld Overlay", "Weld Overlay Capability", "",
         ["05", "Pipe: 2″ Sch. 80 (& above) × 1000mm lg. (max.)", "GTAW & FCAW", "SS 304/316/317L/Hastelloy C276", "3"],
      ])
 
-spec("Automation & Welding", "PLC Controlled", "Pipe Spool Bevelling, Cutting & Setup Stations", "",
+spec("Automation & Welding", "PLC Controlled", "Pipe Spool Bevelling & Cutting Station", "",
      [("Capability", "Up to 24″ NB"), ("Length", "12 mtr.")],
-     None, layout="showcase", files=[IMG(27, 1), IMG(27, 2)], fill=True)
+     None, layout="showcase", files=[IMG(27, 1)], fill=True)
+
+spec("Automation & Welding", "PLC Controlled", "Pipe Spool Setup Station", "",
+     [("Capability", "Up to 24″ NB"), ("Length", "12 mtr.")],
+     None, layout="showcase", files=[IMG(27, 2)], fill=True)
 
 spec("Automation & Welding", "PLC Controlled", "Pipe Spool Setup Station — Detail", "",
      [("Capability", "Up to 24″ NB"), ("Length", "12 mtr.")],
@@ -1324,12 +1330,6 @@ spec("Automation & Welding", "Automated Machines", "Welding on Automated Machine
 divider("Oil, Gas, Lithium & Aerospace", "Oil &<br><span>Petrochemical</span>",
         "Heavy towers, reflux drums and static mixers delivered for Reliance, HPCL, Cairn Energy and more.",
         bg_img=84, index_label="IV")
-
-# ---- 82. Lithium ----------------------------------------------------------
-spec("Oil, Gas, Lithium & Aerospace", "Lithium", "Tanks and Vessels", "Lithium Nevada Thacker Pass Project (USA)",
-     [("Material", "Duplex SST 2205 / SA240 Gr 316L"),
-      ("Total qty / weight", "15 Nos. / 30 MT")],
-     82, layout="showcase", fill=True)
 
 spec("Oil, Gas, Lithium & Aerospace", "Oil & Petrochemical", "Tube Bundle for Heat Exchanger", "Reliance Industries, Nagothane",
      [("Tubesheet", "SA965-F304/304L TP304/304L"),
@@ -1403,6 +1403,12 @@ spec("Oil, Gas, Lithium & Aerospace", "Paper & Pulp · Flue Gas Desulphurisation
       ("Duct set B", "IS2062 + Ti Gr.1 (7+2mm) — Ø 8.45 mtr — 40 tons, 1 No.")],
      95)
 
+# ---- 82. Lithium (placed at the end of the Oil & Petrochemical run) --------
+spec("Oil, Gas, Lithium & Aerospace", "Lithium", "Tanks and Vessels", "Lithium Nevada Thacker Pass Project (USA)",
+     [("Material", "Duplex SST 2205 / SA240 Gr 316L"),
+      ("Total qty / weight", "15 Nos. / 30 MT")],
+     82, layout="showcase", fill=True)
+
 # ---- 30. Divider: Food Processing -----------------------------------------
 divider("Food Processing & Oleo Chemical", "Food<br><span>Processing</span>",
         "Spiral heat exchangers, evaporators and reactors engineered for the world's leading food & agri-processing clients.",
@@ -1433,12 +1439,6 @@ spec("Food Processing & Oleo Chemical", "Oleo Chemical", "Cladded Splitter Colum
       ("Qty / Weight", "1 No. / 150 tons")],
      None, layout="showcase", fill=True, files=[IMG(34, 1), IMG(35, 1)], panel_pos="tl")
 
-spec("Food Processing & Oleo Chemical", "Oleo Chemical", "Cladded Splitter Columns — Column 2", "Adani Wilmar Ltd, India",
-     [("Material", "SA 516 Gr.70 + SA 240 Gr.317L clad, SS 317L internals"),
-      ("Size", "Ø 1.92 mtr × (50+3mm thk) × 55 mtr L"),
-      ("Qty / Weight", "2 Nos. / 150 tons each")],
-     None, layout="showcase", fill=True, files=[IMG(35, 2)], panel_pos="right")
-
 spec("Food Processing & Oleo Chemical", "Oleo Chemical", "Cladded Columns with Trays", "PTSOI, Indonesia",
      [("Material", "SA 516 Gr. 70 + SS 317L"),
       ("Size", "Ø 2.15 mtr × 55 mtr L"),
@@ -1455,7 +1455,7 @@ spec("Food Processing & Oleo Chemical", "Oleo Chemical", "Distillation Column (5
      [("Material", "SA 240 Gr. 316L/317L"),
       ("Size", "Ø 3.2/3.75 mtr × 30.148 mtr L"),
       ("Qty / Weight", "1 No. / 50 tons")],
-     38)
+     38, layout="showcase", fill=True)
 
 spec("Food Processing & Oleo Chemical", "Oleo Chemical", "Distillation Column & Dephlegmator (5-C-2 & 5-CE-2)", "Adani Wilmar Ltd, India",
      [("Material", "SS 316L & 317L"),
@@ -1487,7 +1487,7 @@ spec("Food Processing & Oleo Chemical", "Food Processing", "Heat Exchangers (U S
      [("Material", "SS 304/304L / SA 516 Gr. 70; tubesheets SS 304/304L; tubes SS 304 & 304L (19.05 & 25.04 OD)"),
       ("Sizes", "Ø 1.026×7.55m · Ø 2.272/3.4×11.36m · Ø 0.934/1.33×6.23m · Ø 1.06×7.55m · Ø 0.457×4.32m · Ø 0.9×7.43m · Ø 1.96×8.75m · Ø 0.323×3.622m · Ø 0.406×7.12m"),
       ("Total qty / weight", "9 Nos. / 120 MT")],
-     43)
+     None, layout="showcase", fill=True, files=[IMG(43, 1), IMG(43, 2)])
 
 spec("Food Processing & Oleo Chemical", "Food Processing", "Hydrogenation Reactor — U Stamp", "CHS Inc., USA",
      [("Material", "SA 516 Gr. 70"),
@@ -1651,12 +1651,12 @@ spec("Water & Desalination", "Zero Liquid Discharge", "Heat Exchanger — Twin U
 spec("Water & Desalination", "Zero Liquid Discharge", "Crystallizer", "Hindustan Zinc Ltd, Hindalco Industries Ltd, Grasim Industries Ltd (Nagda, MP), India",
      [("Material", "SA 240 Gr. 31254 (6% Moly)"),
       ("Size / Qty / Weight", "Ø 3.66 mtr × 9.75 mtr L / 1 No. / 12 tons")],
-     None, layout="showcase", fill=True, files=[IMG(71, 1)])
+     None, layout="showcase", fill=True, files=[IMG(71, 2)])
 
 spec("Water & Desalination", "Zero Liquid Discharge", "Deaerator", "Hindustan Zinc Ltd, Hindalco Industries Ltd, Grasim Industries Ltd (Nagda, MP), India",
      [("Material", "SA 240 Gr. 31254 (6% Moly)"),
       ("Size / Qty / Weight", "Ø 0.6 mtr × 4.2 mtr L / 2 Nos. / 2 tons")],
-     None, layout="showcase", fill=True, files=[IMG(71, 2)])
+     None, layout="showcase", fill=True, files=[IMG(71, 1)])
 
 spec("Water & Desalination", "Zero Liquid Discharge", "Brine Concentrator", "Grasim Industries Ltd, Nagda, MP, India",
      [("Material", "SA 240 Gr. 316L (shell & tube side); tubesheets SA 240 Gr. 316L; tubes SA 179 UNS S31803 (welded)"),
@@ -1852,14 +1852,25 @@ divider("Certifications", "Certifications",
         "ISO, ASME, Engineers India Limited, IBR, PESO and PDIL — the qualifications behind every job we ship.",
         index_label="XI")
 
-gallery("Certifications", "ISO", "ISO — QMS, EMS & OHSAS Certifications", [125, 126],
-        caption="ISO 9001:2015 QMS (VEPL, Rabale & VHEPL, Shahapur) · ISO 14001:2015 EMS (VHEPL, Shahapur) · ISO 45001:2018 OHSAS (VHEPL, Shahapur)")
-
-gallery("Certifications", "ASME & Engineers India Limited", "ASME & EIL Certifications", [127, 128, 129, 130],
-        caption="ASME U/U2/R Stamp (VHEPL, Shahapur) · EIL — Clad Pressure Vessels & Columns · EIL — Pressure Vessel (CS up to 75mm & SS 304/316 up to 18mm) · EIL — Pre-Fabricated Piping Spools")
-
-gallery("Certifications", "IBR / PESO / PDIL", "IBR, PESO & PDIL Certifications", [131, 132, 133],
-        caption="IBR — Pipe fabrication, pressure vessel & heat exchanger Class 1 (pressure up to 125 kg/cm²)")
+# Certifications: max 2 images per slide (client). Each themed group's images
+# are flattened and chunked into pairs, one gallery slide per pair.
+_CERT_GROUPS = [
+    ("ISO", "ISO — QMS, EMS & OHSAS Certifications", [125, 126],
+     "ISO 9001:2015 QMS (VEPL, Rabale & VHEPL, Shahapur) · ISO 14001:2015 EMS (VHEPL, Shahapur) · ISO 45001:2018 OHSAS (VHEPL, Shahapur)"),
+    ("ASME & Engineers India Limited", "ASME & EIL Certifications", [127, 128, 129, 130],
+     "ASME U/U2/R Stamp (VHEPL, Shahapur) · EIL — Clad Pressure Vessels & Columns · EIL — Pressure Vessel (CS up to 75mm & SS 304/316 up to 18mm) · EIL — Pre-Fabricated Piping Spools"),
+    ("IBR / PESO / PDIL", "IBR, PESO & PDIL Certifications", [131, 132, 133],
+     "IBR — Pipe fabrication, pressure vessel & heat exchanger Class 1 (pressure up to 125 kg/cm²)"),
+]
+for _eyebrow, _title, _keys, _caption in _CERT_GROUPS:
+    _imgs = []
+    for _k in _keys:
+        _imgs.extend(IMGS(_k))
+    _pairs = [_imgs[i:i + 2] for i in range(0, len(_imgs), 2)]
+    for _pi, _pair in enumerate(_pairs):
+        _t = _title if len(_pairs) == 1 else "{0} ({1}/{2})".format(_title, _pi + 1, len(_pairs))
+        gallery("Certifications", _eyebrow, _t, None,
+                caption=_caption if _pi == 0 else None, files=_pair)
 
 # ---- 134-137. Sustainability --------------------------------------------------
 water_slide("Sustainability & CSR", "Sustainable Stress-Free Environment",

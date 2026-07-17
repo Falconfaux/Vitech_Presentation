@@ -287,13 +287,17 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
   margin-top: calc(var(--fit,1) * .9rem); font-size: clamp(1rem, 1.4vw, 1.25rem);
   color: var(--steel-light); max-width: 60ch; line-height: 1.55;
 }
-/* sub-dark: caption sits on a light/opaque chip with black text so it stays
-   legible over bright photos (e.g. the sunlit orchard slide) */
+/* sub-dark: caption blends into the photo — a frosted translucent chip with
+   light text and a heavy blur, so the image still reads through it instead of
+   an opaque white block sitting over the subject (e.g. the sunlit orchard) */
 .slide-sub.sub-dark {
-  display: inline-block; color: #0e1116; font-weight: 600; max-width: 62ch;
-  background: rgba(255,255,255,.9); border-radius: 10px;
-  padding: calc(var(--fit,1) * .5rem) calc(var(--fit,1) * .85rem);
-  box-shadow: 0 6px 20px rgba(0,0,0,.35); text-shadow: none;
+  display: inline-block; color: #f4f7ff; font-weight: 600; max-width: 52ch;
+  background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .30), rgba(var(--azure-deep-rgb), .50));
+  border: 1px solid rgba(var(--azure-bright-rgb), .28); border-radius: 12px;
+  backdrop-filter: blur(20px) saturate(1.1); -webkit-backdrop-filter: blur(20px) saturate(1.1);
+  padding: calc(var(--fit,1) * .5rem) calc(var(--fit,1) * .8rem);
+  box-shadow: 0 10px 30px rgba(0,0,0,.32);
+  text-shadow: 0 1px 4px rgba(0,0,0,.6);
 }
 
 .client-badge {
@@ -796,6 +800,14 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 .tpl-table.dense table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .55rem) calc(var(--fit,1) * .9rem); line-height: calc(var(--fit,1) * var(--fit,1) * 1.38); }
 .tpl-table.dense table.spec-table th { padding: calc(var(--fit,1) * var(--fit,1) * .65rem) calc(var(--fit,1) * .9rem); font-size: .82rem; }
 .tpl-table.dense .table-note { font-size: .85rem; }
+/* 2-column dense table slides (e.g. Weld Overlay / Blasting / PWHT): larger
+   type (client) and equal-height cards — the taller table sets the row height
+   and the shorter one stretches its rows to match, so both cards bottom-align. */
+.tpl-table.dense .table-grid-2col table.spec-table { font-size: calc(var(--fit,1) * 1.08rem); }
+.tpl-table.dense .table-grid-2col table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .64rem) calc(var(--fit,1) * .95rem); }
+.tpl-table.dense .table-grid-2col table.spec-table th { font-size: .9rem; }
+.table-grid-2col .table-wrap { align-self: stretch; display: flex; flex-direction: column; }
+.table-grid-2col .table-wrap table.spec-table { height: 100%; }
 
 /* ---------------------------------------------------------------------- */
 /* Template: water (rainwater harvesting + wastewater recycling)           */
@@ -1130,22 +1142,39 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 .tpl-spec.layout-showcase.panel-compact .slide-inner {
   align-items: flex-start;
   padding-left: calc(var(--pad) * .6); padding-right: calc(var(--pad) * .6);
+  /* lift the chip clear of the fixed ☰ menu button / nav arrows in the
+     bottom corners so it never collides with them */
+  padding-bottom: calc(var(--pad) * .5 + 3.4rem);
 }
 .tpl-spec.layout-showcase.panel-compact .showcase-panel {
-  width: fit-content; max-width: min(52%, 560px);
-  background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .26), rgba(var(--azure-deep-rgb), .5));
-  backdrop-filter: blur(20px) saturate(1.1); -webkit-backdrop-filter: blur(20px) saturate(1.1);
-  padding: calc(var(--fit,1) * .82rem) calc(var(--fit,1) * 1.05rem);
+  width: fit-content; max-width: min(46%, 500px);
+  /* keep the whole chip within ~10% of the screen: cap its height and let
+     overflowing detail scroll rather than grow the box over the photo */
+  max-height: 24vh; overflow-y: auto;
+  background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .30), rgba(var(--azure-deep-rgb), .56));
+  backdrop-filter: blur(22px) saturate(1.1); -webkit-backdrop-filter: blur(22px) saturate(1.1);
+  padding: calc(var(--fit,1) * .62rem) calc(var(--fit,1) * .82rem);
+}
+.tpl-spec.layout-showcase.panel-compact .eyebrow {
+  font-size: calc(var(--fit,1) * .66rem); margin-bottom: calc(var(--fit,1) * .3rem);
+}
+.tpl-spec.layout-showcase.panel-compact .slide-title {
+  font-size: calc(var(--fit,1) * clamp(1rem, 1.5vw, 1.35rem)); line-height: 1.15;
 }
 .tpl-spec.layout-showcase.panel-compact .showcase-head { display: block; }
-.tpl-spec.layout-showcase.panel-compact .client-badge { margin-top: .5rem; }
+.tpl-spec.layout-showcase.panel-compact .client-badge { margin-top: .35rem; font-size: calc(var(--fit,1) * .78rem); }
 .tpl-spec.layout-showcase.panel-compact .spec-list {
   display: flex; flex-wrap: wrap; align-items: baseline;
-  gap: calc(var(--fit,1) * .35rem) calc(var(--fit,1) * 1.6rem);
-  margin-top: calc(var(--fit,1) * .8rem);
+  gap: calc(var(--fit,1) * .28rem) calc(var(--fit,1) * 1.2rem);
+  margin-top: calc(var(--fit,1) * .5rem);
 }
 .tpl-spec.layout-showcase.panel-compact .spec-row {
-  display: inline-flex; align-items: baseline; gap: .5rem; flex: 0 1 auto;
+  display: inline-flex; align-items: baseline; gap: .45rem; flex: 0 1 auto;
+}
+.tpl-spec.layout-showcase.panel-compact .spec-row .k { font-size: calc(var(--fit,1) * .7rem); }
+.tpl-spec.layout-showcase.panel-compact .spec-row .v { font-size: calc(var(--fit,1) * .8rem); }
+.tpl-spec.layout-showcase.panel-compact .slide-sub {
+  font-size: calc(var(--fit,1) * .78rem); margin-top: calc(var(--fit,1) * .4rem);
 }
 .tpl-spec.layout-showcase.panel-compact .spec-row .k { margin-bottom: 0; }
 .tpl-spec.layout-showcase.panel-compact .spec-row .k::after {
@@ -1168,11 +1197,12 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   padding-bottom: calc(var(--pad) * .5 + 4.5rem);
 }
 .tpl-spec.layout-showcase.panel-compact.panel-right .spec-list { justify-content: flex-end; }
-/* photo-fill compact: shrink the reserved bottom band so photos fill nearly
-   to the edge; the small frosted panel blends over the lower-left corner. */
+/* photo-fill compact: photos fill the frame edge-to-edge; the small frosted
+   caption chip (≤~10% of screen) simply floats over the lower-left corner, so
+   no bottom band is reserved and nothing shrinks the image. */
 .tpl-spec.layout-showcase.photo-fill.panel-compact .showcase-cell.panel-clear .media-full,
 .tpl-spec.layout-showcase.photo-fill.panel-compact .showcase-canvas > .media-full {
-  padding-bottom: calc(var(--fit,1) * 3rem) !important;
+  padding-bottom: 0 !important;
 }
 
 /* photo-fill: showcase variant without the blurred backdrop — each photo
