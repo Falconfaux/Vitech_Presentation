@@ -169,7 +169,7 @@
   // between activations.
   // ---------------------------------------------------------------------
   var FIT_STEP = 0.04;
-  var FIT_FLOOR = 0.72;
+  var FIT_FLOOR = 0.56;
   var FIT_TOLERANCE = 2; // px
 
   function fitSlide(inner) {

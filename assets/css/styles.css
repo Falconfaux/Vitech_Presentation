@@ -25,7 +25,7 @@
 
   --ease: cubic-bezier(.22, .61, .36, 1);
   --ease-soft: cubic-bezier(.4, 0, .2, 1);
-  --dur: 700ms;
+  --dur: 820ms;
 
   --gap: clamp(1rem, 2vw, 2rem);
   --pad: clamp(1.5rem, 5vw, 5rem);
@@ -43,11 +43,15 @@
 
 * { box-sizing: border-box; }
 html {
-  /* Fluid base unit: stays at 16px on laptops/1080p (so existing layouts are
-     unchanged) but scales up on large / high-res displays such as a 4K 55" TV,
-     so every rem-based size — type, spacing and the --fit system — grows
-     together instead of some elements ballooning while others stay tiny. */
-  font-size: clamp(16px, 0.5vw + 0.6vh, 30px);
+  /* Fluid base unit. The presentation is delivered on a 55" boardroom
+     monitor — viewers sit much farther from it than from a laptop, so even
+     a "1080p" CSS viewport needs noticeably larger absolute type than a
+     15" screen at the same resolution. Floor/preferred terms are tuned so a
+     1920×1080 viewport already renders well above the old 16px baseline,
+     scaling further on 4K displays; every rem-based size — type, spacing
+     and the --fit system — grows together instead of some elements
+     ballooning while others stay tiny. */
+  font-size: clamp(18px, 0.6vw + 0.9vh, 34px);
 }
 html, body {
   margin: 0; padding: 0;
@@ -70,6 +74,7 @@ h1, h2, h3, p, ul, ol { margin: 0; }
 
 #deck {
   position: relative;
+  perspective: 2200px;
   width: 100vw;
   height: 100vh;
   background: var(--black);
@@ -85,25 +90,33 @@ h1, h2, h3, p, ul, ol { margin: 0; }
   background: var(--black);
   opacity: 0;
   visibility: hidden;
-  transform: translateX(4%) scale(1.02);
-  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease), visibility 0s linear var(--dur);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  transform: translateX(7%) translateZ(-140px) rotateY(-8deg) scale(.96);
+  filter: blur(7px);
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease),
+              filter var(--dur) var(--ease), visibility 0s linear var(--dur);
   overflow: hidden;
   z-index: 1;
 }
 .slide.active {
   opacity: 1;
   visibility: visible;
-  transform: translateX(0) scale(1);
-  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
+  transform: translateX(0) translateZ(0) rotateY(0) scale(1);
+  filter: blur(0);
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease), filter var(--dur) var(--ease);
   z-index: 3;
 }
 .slide.prev {
-  transform: translateX(-4%) scale(1.02);
+  transform: translateX(-7%) translateZ(-140px) rotateY(8deg) scale(.96);
+  filter: blur(7px);
   z-index: 2;
 }
-/* direction-aware transition: mirror the motion when navigating backward */
-#deck.dir-back .slide:not(.active):not(.prev) { transform: translateX(-4%) scale(1.02); }
-#deck.dir-back .slide.prev { transform: translateX(4%) scale(1.02); }
+/* direction-aware transition: mirror the motion when navigating backward, so
+   the deck always reads as swinging through a shallow 3D arc toward the
+   viewer rather than a flat cut, in whichever direction you're moving */
+#deck.dir-back .slide:not(.active):not(.prev) { transform: translateX(-7%) translateZ(-140px) rotateY(8deg) scale(.96); }
+#deck.dir-back .slide.prev { transform: translateX(7%) translateZ(-140px) rotateY(-8deg) scale(.96); }
 .slide-inner {
   position: relative;
   z-index: 2;
@@ -333,7 +346,7 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 }
 .tpl-cover .eyebrow { margin-bottom: calc(var(--fit,1) * 1.2rem); }
 .tpl-cover h1 {
-  font-size: calc(var(--fit,1) * clamp(3rem, 6.6vw, 5.6rem)); font-weight: 800; letter-spacing: -.02em;
+  font-size: calc(var(--fit,1) * clamp(3.6rem, 7.8vw, 6.6rem)); font-weight: 800; letter-spacing: -.02em;
   line-height: .98;
 }
 .tpl-cover h1 span {
@@ -345,7 +358,7 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
   background: linear-gradient(90deg, var(--amber), rgba(242,169,59,0));
 }
 .tpl-cover .cover-tagline {
-  margin-top: calc(var(--fit,1) * 1.1rem); font-size: clamp(1.05rem, 1.5vw, 1.3rem); color: var(--steel-light);
+  margin-top: calc(var(--fit,1) * 1.1rem); font-size: clamp(1.25rem, 1.8vw, 1.55rem); color: var(--steel-light);
   max-width: 46ch; letter-spacing: .01em; line-height: 1.5; text-wrap: balance;
 }
 .tpl-cover .cover-statbar {
@@ -361,17 +374,17 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 }
 .tpl-cover .cover-statbar .stat { padding: calc(var(--fit,1) * 1.05rem) calc(var(--fit,1) * 1.9rem); }
 .tpl-cover .cover-statbar .stat + .stat { border-left: 1px solid rgba(255,255,255,.12); }
-.tpl-cover .cover-statbar .num { font-size: calc(var(--fit,1) * 1.55rem); font-weight: 700; letter-spacing: -.01em; color: var(--white); }
+.tpl-cover .cover-statbar .num { font-size: calc(var(--fit,1) * 1.85rem); font-weight: 700; letter-spacing: -.01em; color: var(--white); }
 .tpl-cover .cover-statbar .stat:last-child .num { color: var(--amber); }
-.tpl-cover .cover-statbar .lbl { margin-top: .32rem; font-size: .66rem; letter-spacing: .13em; text-transform: uppercase; color: var(--steel-light); }
+.tpl-cover .cover-statbar .lbl { margin-top: .32rem; font-size: .8rem; letter-spacing: .13em; text-transform: uppercase; color: var(--steel-light); }
 .tpl-cover .cover-meta {
   margin-top: calc(var(--fit,1) * 1.5rem);
   display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem;
-  font-size: .88rem; color: var(--steel-light);
+  font-size: 1.05rem; color: var(--steel-light);
 }
 .tpl-cover .cover-meta b { color: var(--white); font-weight: 600; }
 .tpl-cover .cover-meta .sep { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,.35); }
-.tpl-cover .cover-contact { margin-top: calc(var(--fit,1) * .6rem); font-size: .85rem; color: var(--amber); letter-spacing: .02em; }
+.tpl-cover .cover-contact { margin-top: calc(var(--fit,1) * .6rem); font-size: 1.02rem; color: var(--amber); letter-spacing: .02em; }
 @media (max-width: 900px) {
   .tpl-cover .cover-statbar .stat { flex: 1 1 46%; border-left: none !important; border-top: 1px solid rgba(255,255,255,.12); }
   .tpl-cover .cover-statbar .stat:first-child, .tpl-cover .cover-statbar .stat:nth-child(2) { border-top: none; }
@@ -425,6 +438,13 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 .tpl-prose .spec-row { font-size: calc(var(--fit,1) * 1.04rem); padding: calc(var(--fit,1) * .65rem) 0; }
 .tpl-prose .spec-row .k { font-size: .82rem; }
 .tpl-prose .spec-row .v { font-size: calc(var(--fit,1) * 1.04rem); }
+/* Slide 2 only: larger type requested for the company-intro slide specifically */
+#s2 .slide-title { font-size: clamp(2.3rem, 4.4vw, 3.95rem); }
+#s2 p { font-size: calc(var(--fit,1) * 1.4rem); }
+#s2 .spec-row, #s2 .spec-row .v { font-size: calc(var(--fit,1) * 1.1rem); }
+#s2 .spec-row .k { font-size: .86rem; }
+#s2 .spec-row { grid-template-columns: 180px 1fr; }
+#s2 .side-panel li { font-size: 1.05rem; }
 .tpl-prose .stat-row { display: flex; flex-wrap: wrap; gap: calc(var(--fit,1) * 1.4rem); margin: calc(var(--fit,1) * 2.2rem) 0; }
 .tpl-prose .spec-list { margin-bottom: calc(var(--fit,1) * 1.6rem); }
 .labeled-chip-group { margin-top: calc(var(--fit,1) * 1.9rem); }
@@ -531,6 +551,12 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 .tpl-siteplan.no-legend .siteplan-canvas .media-full {
   padding: calc(var(--fit,1) * 9.4rem) calc(var(--pad) * .2) calc(var(--fit,1) * 4.2rem);
 }
+/* sides: legend docks as two vertical columns on the left/right edges
+   instead of one bottom bar, so the map only needs to clear the title at
+   the top and can run almost to the bottom edge — noticeably larger. */
+.tpl-siteplan.sides .siteplan-canvas .media-full {
+  padding: calc(var(--fit,1) * 5.4rem) calc(var(--fit,1) * 15.5rem) calc(var(--fit,1) * 1.4rem);
+}
 .tpl-siteplan .siteplan-canvas::after {
   content: ""; position: absolute; left: 0; right: 0; top: 0;
   height: calc(var(--fit,1) * 7rem); pointer-events: none;
@@ -574,6 +600,27 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
    would otherwise push it past the slide's bottom edge while inactive */
 .tpl-siteplan .siteplan-legend.reveal,
 .slide.active .tpl-siteplan .siteplan-legend.reveal { transform: none; }
+/* side variant: a single vertical column per edge (stacking every group in
+   that half top-to-bottom) instead of a 5-across grid, so the reserved
+   width is small and the map keeps almost the whole frame. */
+.tpl-siteplan .siteplan-legend.side {
+  left: auto; right: auto; bottom: auto;
+  top: calc(var(--fit,1) * 6rem + var(--chrome-top) * 0);
+  width: 14.5rem;
+  grid-template-columns: 1fr;
+  display: grid; gap: calc(var(--fit,1) * .85rem);
+  max-height: calc(100% - var(--fit,1) * 7.4rem);
+}
+.tpl-siteplan .siteplan-legend.side.left { left: calc(var(--pad) * .3); border-top: none; border-left: 3px solid var(--amber); }
+.tpl-siteplan .siteplan-legend.side.right { right: calc(var(--pad) * .3); border-top: none; border-right: 3px solid var(--amber); }
+/* per-point stagger reveal: each point fades/rises in on its own inline
+   transition-delay (set at build time so the whole legend — regardless of
+   how many points it has — finishes appearing within ~3 seconds). */
+.legend-item.reveal-fast {
+  opacity: 0; transform: translateY(10px);
+  transition: opacity .4s var(--ease-soft), transform .4s var(--ease-soft);
+}
+.slide.active .legend-item.reveal-fast { opacity: 1; transform: translateY(0); }
 .site-plan-hint {
   position: absolute; right: 1rem; top: calc(var(--fit,1) * 4.4rem); margin: 0;
   padding: .3rem .6rem; border-radius: 20px;
@@ -685,8 +732,15 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
   display: flex; align-items: flex-end;
   background: var(--azure-deep);
 }
+/* Source photos vary a lot in native resolution; letting object-fit:contain
+   stretch a small photo up to fill a large tile is what reads as "blurry".
+   width/height:auto + max-width/max-height:100% + auto margins caps the
+   image at its own intrinsic size (scaling down to fit is still fine, just
+   never up), so every tile shows its photo at native sharpness. */
 .industry-tile.has-photo .industry-tile-bg {
-  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
+  position: absolute; inset: 0; margin: auto;
+  width: auto; height: auto; max-width: 100%; max-height: 100%;
+  object-fit: contain;
   z-index: 0; transition: transform .5s var(--ease-soft);
 }
 .industry-tile.has-photo:hover .industry-tile-bg { transform: scale(1.07); }
@@ -990,14 +1044,17 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    photo uncropped over its own blurred fill — the single-photo recipe, tiled. */
 .tpl-spec.layout-showcase .showcase-canvas.n2,
 .tpl-spec.layout-showcase .showcase-canvas.n3,
-.tpl-spec.layout-showcase .showcase-canvas.n4 { display: grid; gap: .7rem; background: var(--azure-deep); }
+.tpl-spec.layout-showcase .showcase-canvas.n4 { display: grid; gap: 10px; background: #fff; }
 .tpl-spec.layout-showcase .showcase-canvas.n1 { display: grid; grid-template-columns: 1fr; grid-template-rows: 1fr; }
 .tpl-spec.layout-showcase .showcase-canvas.n2 { grid-template-columns: 1fr 1fr; }
 .tpl-spec.layout-showcase .showcase-canvas.n3 { grid-template-columns: 1fr 1fr 1fr; }
 .tpl-spec.layout-showcase .showcase-canvas.n4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
-/* multi-photo showcases: a visible gutter + hairline so touching photos read
-   as distinct frames instead of blurring into one image */
-.tpl-spec.layout-showcase .showcase-cell { position: relative; overflow: hidden; min-width: 0; min-height: 0; outline: 1px solid rgba(255,255,255,.10); outline-offset: -1px; }
+/* multi-photo showcases: a white gutter (grid gap, above) plus a thick azure
+   frame per photo so touching photos read as distinct, deliberately framed
+   panels rather than blurring into one image. outline (not border) draws
+   without affecting box size/layout, and the negative offset pulls it just
+   inside each cell so it doesn't eat meaningfully into the photo. */
+.tpl-spec.layout-showcase .showcase-cell { position: relative; overflow: hidden; min-width: 0; min-height: 0; outline: 4px solid var(--azure-bright); outline-offset: -4px; }
 .tpl-spec.layout-showcase .showcase-cell .media-full {
   padding: calc(var(--pad) * .55) calc(var(--pad) * .12) calc(var(--fit,1) * 8.9rem);
 }
@@ -1029,9 +1086,9 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 /* caption chip pinned to a cell's lower edge (used by full-bleed photo slides) */
 .tpl-spec.layout-showcase .showcase-cap {
   position: absolute; left: 12px; right: 12px; bottom: 12px; z-index: 2;
-  padding: calc(var(--fit,1) * .5rem) calc(var(--fit,1) * .75rem);
+  padding: calc(var(--fit,1) * .7rem) calc(var(--fit,1) * .95rem);
   border-radius: 10px; text-align: center;
-  font-size: calc(var(--fit,1) * .8rem); font-weight: 600; line-height: 1.35; color: #eef1f8;
+  font-size: calc(var(--fit,1) * 1rem); font-weight: 600; line-height: 1.35; color: #eef1f8;
   background: rgba(var(--azure-deep-rgb), .72);
   border: 1px solid rgba(var(--azure-bright-rgb), .3);
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
@@ -1065,6 +1122,20 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 .tpl-spec.layout-showcase.showcase-photos .slide-title {
   font-size: calc(var(--fit,1) * clamp(1.5rem, 2.4vw, 2.1rem));
   max-width: none; margin: 0; text-shadow: 0 2px 18px rgba(0,0,0,.55);
+}
+/* Slides 11-14 only: the larger caption chip now reaches down into the fixed
+   menu-toggle button's corner on the first (bottom-left) cell — clear it the
+   same way the last cell is kept clear of the nav arrows above */
+#s11 .showcase-cell:first-child .showcase-cap,
+#s12 .showcase-cell:first-child .showcase-cap,
+#s13 .showcase-cell:first-child .showcase-cap,
+#s14 .showcase-cell:first-child .showcase-cap { left: 170px; }
+/* Slides 11-14 only: workshop-showcase captions/titles requested larger for TV legibility */
+#s11 .showcase-cap, #s12 .showcase-cap, #s13 .showcase-cap, #s14 .showcase-cap {
+  font-size: calc(var(--fit,1) * 1.4rem);
+}
+#s11 .slide-title, #s12 .slide-title, #s13 .slide-title, #s14 .slide-title {
+  font-size: calc(var(--fit,1) * clamp(1.9rem, 3vw, 2.6rem));
 }
 .tpl-spec.layout-showcase.showcase-photos .slide-sub { margin-top: calc(var(--fit,1) * .4rem); text-shadow: 0 2px 14px rgba(0,0,0,.55); }
 .tpl-spec.layout-showcase .slide-inner {
@@ -1140,6 +1211,12 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    pairs). The panel shrinks to fit its content and docks bottom-left so the
    photos stay visible around and behind it, instead of a full-width blurred
    band. Spec pairs collapse to one inline wrap line. */
+/* single-photo panel-compact slides don't wrap their image in a .showcase-cell
+   (only multi-photo grids do), so give the whole canvas the same thick azure
+   frame directly for a consistent framed-photo look across the section. */
+.tpl-spec.layout-showcase.panel-compact .showcase-canvas.n1 {
+  outline: 4px solid var(--azure-bright); outline-offset: -4px;
+}
 .tpl-spec.layout-showcase.panel-compact .slide-inner {
   align-items: flex-start;
   padding-left: calc(var(--pad) * .6); padding-right: calc(var(--pad) * .6);
@@ -1172,8 +1249,8 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 .tpl-spec.layout-showcase.panel-compact .spec-row {
   display: inline-flex; align-items: baseline; gap: .45rem; flex: 0 1 auto;
 }
-.tpl-spec.layout-showcase.panel-compact .spec-row .k { font-size: calc(var(--fit,1) * .7rem); }
-.tpl-spec.layout-showcase.panel-compact .spec-row .v { font-size: calc(var(--fit,1) * .8rem); }
+.tpl-spec.layout-showcase.panel-compact .spec-row .k { font-size: calc(var(--fit,1) * .78rem); }
+.tpl-spec.layout-showcase.panel-compact .spec-row .v { font-size: calc(var(--fit,1) * .9rem); }
 .tpl-spec.layout-showcase.panel-compact .slide-sub {
   font-size: calc(var(--fit,1) * .78rem); margin-top: calc(var(--fit,1) * .4rem);
 }
@@ -1198,6 +1275,14 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   padding-bottom: calc(var(--pad) * .5 + 4.5rem);
 }
 .tpl-spec.layout-showcase.panel-compact.panel-right .spec-list { justify-content: flex-end; }
+/* panel-bc: dock the compact panel bottom-CENTER instead of bottom-left —
+   used across the majority of equipment showcase slides so the caption
+   reads as anchored to the whole photo rather than hugging one corner. */
+.tpl-spec.layout-showcase.panel-compact.panel-bc .slide-inner {
+  align-items: center; text-align: center;
+  padding-left: calc(var(--pad) * .6); padding-right: calc(var(--pad) * .6);
+}
+.tpl-spec.layout-showcase.panel-compact.panel-bc .spec-list { justify-content: center; }
 /* photo-fill compact: photos fill the frame edge-to-edge; the small frosted
    caption chip (≤~10% of screen) simply floats over the lower-left corner, so
    no bottom band is reserved and nothing shrinks the image. */

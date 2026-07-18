@@ -343,12 +343,16 @@ def visual(section, eyebrow, title, sub, slide_no, images_count=1, row=False, ca
                           media=media, cap=cap, stats=stats_html)
     add(id, section, "visual", body)
 
-def site_plan(section, eyebrow, title, img_src, legend=None, stat=None, hint="Click to enlarge"):
+def site_plan(section, eyebrow, title, img_src, legend=None, stat=None, hint="Click to enlarge", legend_sides=False):
     """Full-bleed site plan: the drawing owns the whole slide (uncropped,
     letterboxed just above a slim glass legend bar docked to the bottom edge,
     so no map marker is covered). Title and plot-area stat float as compact
     frosted chips in the top corners. With no legend (e.g. a standalone
-    document image), the bottom letterbox shrinks to match the top."""
+    document image), the bottom letterbox shrinks to match the top.
+    legend_sides=True docks the legend as two vertical columns on the left
+    and right edges instead of one bottom bar, freeing much more height for
+    the map itself; every point then reveals one-by-one, all finishing
+    within ~3 seconds of the slide becoming active."""
     id = next_id()
     # split the flat legend list into groups (each starts with a ("group", …))
     groups, cur = [], None
@@ -358,22 +362,45 @@ def site_plan(section, eyebrow, title, img_src, legend=None, stat=None, hint="Cl
             groups.append(cur)
         else:
             (cur or groups.setdefault(0, {"title": "", "items": []}))["items"].append((num, txt))
-    cols = []
-    for g in groups:
-        items = "".join(
-            '<div class="legend-item"><span class="legend-num">{0}</span>'
-            '<span class="legend-txt">{1}</span></div>'.format(esc(num), nb(txt))
-            for num, txt in g["items"])
-        cols.append('<div class="legend-col"><div class="legend-group-header">{0}</div>{1}</div>'.format(
-            esc(g["title"]), items))
-    legend_html = "".join(cols)
+    total_items = sum(len(g["items"]) for g in groups)
+    STAGGER_BUDGET_MS = 2600  # + ~.4s item fade = all points settled by ~3s
+    _counter = {"i": 0}
+    def render_group(g, staggered):
+        cells = []
+        for num, txt in g["items"]:
+            if staggered and total_items > 1:
+                delay = round(_counter["i"] * (STAGGER_BUDGET_MS / (total_items - 1)))
+                cells.append(
+                    '<div class="legend-item reveal-fast" style="transition-delay:{d}ms">'
+                    '<span class="legend-num">{n}</span><span class="legend-txt">{t}</span></div>'.format(
+                        d=delay, n=esc(num), t=nb(txt)))
+            else:
+                cells.append(
+                    '<div class="legend-item"><span class="legend-num">{0}</span>'
+                    '<span class="legend-txt">{1}</span></div>'.format(esc(num), nb(txt)))
+            _counter["i"] += 1
+        return '<div class="legend-col"><div class="legend-group-header">{0}</div>{1}</div>'.format(esc(g["title"]), "".join(cells))
     stat_html = ""
     if stat:
         v, l = stat
         stat_html = '<div class="siteplan-stat reveal reveal-d1">{0} <span>{1}</span></div>'.format(esc(v), esc(l))
-    modifier = " no-legend" if not legend else ""
     hint_html = '<p class="site-plan-hint">{0}</p>'.format(esc(hint)) if hint else ""
-    legend_aside = '<aside class="siteplan-legend reveal reveal-d2">{0}</aside>'.format(legend_html) if legend else ""
+    if legend and legend_sides:
+        half = -(-len(groups) // 2)  # ceil split
+        left_html = "".join(render_group(g, True) for g in groups[:half])
+        right_html = "".join(render_group(g, True) for g in groups[half:])
+        legend_aside = (
+            '<aside class="siteplan-legend side left reveal reveal-d2">{0}</aside>'
+            '<aside class="siteplan-legend side right reveal reveal-d2">{1}</aside>'
+        ).format(left_html, right_html)
+        modifier = " sides"
+    elif legend:
+        legend_html = "".join(render_group(g, False) for g in groups)
+        legend_aside = '<aside class="siteplan-legend reveal reveal-d2">{0}</aside>'.format(legend_html)
+        modifier = ""
+    else:
+        legend_aside = ""
+        modifier = " no-legend"
     body = '''
     <section class="slide tpl-siteplan{modifier}" id="s{id}" data-section="{section}">
       <div class="siteplan-canvas site-plan-map">
@@ -629,7 +656,7 @@ def data_table(section, eyebrow, title, tables, note=None, sub=None, columns=1, 
                           tables=tables_html, note=note_html)
     add(id, section, "table", body)
 
-def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, extra=None, table=None, milestone=None, media_layout=None, layout=None, files=None, fill=False, panel_pos=None, emphasis=False):
+def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, extra=None, table=None, milestone=None, media_layout=None, layout=None, files=None, fill=False, panel_pos=None, emphasis=False, captions=None):
     id = next_id()
     if files is None:
         files = media_files(slide_no, images_count)
@@ -670,10 +697,17 @@ def spec(section, eyebrow, title, client, specs, slide_no, images_count=None, ex
             cell_items, arr_cls = arrange_showcase([(f, "") for f in shown])
             if fill:
                 clear = _panel_clear_cells(len(shown), arr_cls) if not table else set()
+                # Per-photo caption chip: only when the caller supplies distinct
+                # copy per image (each photo shows a different fabrication
+                # stage/subject, so one shared title panel isn't enough).
+                caps = captions if captions and len(captions) == len(cell_items) else None
                 canvas = "".join(
                     '<div class="showcase-cell{pc}">'
                     '<img class="media-full" data-src="{f}" alt="">'
-                    '</div>'.format(f=f, pc=" panel-clear" if i in clear else "")
+                    '{cap}'
+                    '</div>'.format(
+                        f=f, pc=" panel-clear" if i in clear else "",
+                        cap='<div class="showcase-cap">{0}</div>'.format(nb(caps[i])) if caps else "")
                     for i, (f, _) in enumerate(cell_items))
                 style = fill_style([f for f, _ in cell_items], arr_cls)
                 # emphasis: give the first (main) photo the lion's share of the row
@@ -1011,8 +1045,8 @@ prose("Company Overview", "Since 1992", "Company Introduction",
                    "Titanium (SB 265 Gr.1 & 2)", "Hastelloy C-276"]},
       ],
       fact_rows=[
-        ("Certifications", "ISO 9001:2015 · ISO 14001:2015 · ISO 45001:2018"),
-        ("Approvals & Stamps", "ASME U, U2, NB, R Stamp · EIL-Approved Pressure Vessels (CS up to 75 mm, SS up to 18 mm) · "
+        ("Certifications", "ISO 9001:2015 · ISO 14001:2015 · ISO 45001:2018 · IBR · PDIL"),
+        ("Approvals & Stamps", "ASME U, U2, NB, R Stamp · "
                                 "IBR Certified Class 1 (pressure up to 125 kg/cm²)"),
         ("Cladded Capability", "CS + Austenitic SS Clad (304/304L/316/316L/317/317L/321/347) — vessels & columns up to 25 mm"),
         ("Piping Spool Capability", "CS up to 10″ (12.7mm) & 12–24″ (6.35mm) · SS up to 24″ (6.35mm)"),
@@ -1047,8 +1081,8 @@ prose("Company Overview", "Design & Engineering", "Engineering Capability",
 _industry_icons = {
   "Oil & Gas": '<rect x="6" y="4" width="12" height="17" rx="2"/><path d="M6 10h12M6 15h12"/>',
   "Paper & Pulp": '<path d="M6 3h9l3 3v15H6z"/><path d="M15 3v3h3"/><path d="M9 12h6M9 15h6M9 9h3"/>',
-  "Pharmaceutical": '<rect x="9" y="3" width="6" height="18" rx="3"/><path d="M9 12h6"/>',
-  "Fertilizer & Petrochemicals": '<path d="M4 21V10l5-4 5 4v11"/><path d="M14 21v-7l4-3 3 3v7"/><path d="M4 21h17"/>',
+  "Petrochemical": '<rect x="8" y="2" width="8" height="20" rx="1"/><path d="M8 8h8M8 13h8M8 18h8"/>',
+  "Fertilizer": '<path d="M4 21V10l5-4 5 4v11"/><path d="M14 21v-7l4-3 3 3v7"/><path d="M4 21h17"/>',
   "Water & Desalination": '<path d="M12 3s6 7 6 11a6 6 0 1 1-12 0c0-4 6-11 6-11z"/>',
   "Chemical": '<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/><path d="M8 15h8"/>',
   "Edible Oil & Food": '<path d="M4 3s0 5 4 5 4-5 4-5M8 8v13M15 3c-2 0-3 2-3 4s1 4 3 4 3-2 3-4-1-4-3-4z"/><path d="M15 11v10"/>',
@@ -1060,8 +1094,8 @@ _industry_icons = {
 _industry_photos = {
   "Oil & Gas": "assets/images/slides/slide086_img02.jpg",
   "Paper & Pulp": "assets/images/slides/slide094_img02.jpg",
-  "Pharmaceutical": "assets/images/slides/slide033_img02.jpg",
-  "Fertilizer & Petrochemicals": "assets/images/slides/slide046_img02.jpg",
+  "Petrochemical": "assets/images/slides/slide092_img02.jpg",
+  "Fertilizer": "assets/images/slides/slide046_img02.jpg",
   "Water & Desalination": "assets/images/slides/slide068_img02.jpg",
   "Chemical": "assets/images/slides/slide036_img02.jpg",
   "Edible Oil & Food": "assets/images/slides/slide031_img02.jpg",
@@ -1098,15 +1132,15 @@ def industries_slide(title, keys):
 # in styles.css) — wide, short cells so each landscape equipment photo (with
 # object-fit:contain) fills most of its tile instead of a thin cropped band.
 industries_slide("Industries We Cater To",
-    ["Oil & Gas", "Water & Desalination", "Fertilizer & Petrochemicals", "Edible Oil & Food", "Chemical"])
+    ["Oil & Gas", "Fertilizer", "Water & Desalination", "Edible Oil & Food", "Chemical"])
 industries_slide("Industries We Cater To — cont.",
-    ["Paper & Pulp", "Pharmaceutical", "Power", "Zero Liquid Discharge", "Lithium"])
+    ["Paper & Pulp", "Petrochemical", "Power", "Zero Liquid Discharge", "Lithium"])
 
 # ---- 5. Organisation Chart — the original Quality Manual Annex-D2 chart,
 #          shown as its own document image (full-bleed, click to enlarge)
 #          rather than a hand-redrawn recreation. -------------------------
 site_plan("Company Overview", "Structure · Quality Manual Annex-D2, Rev. 4", "Organisation Chart",
-    "assets/images/slides/orgchart_annexd2.png")
+    "assets/images/slides/orgchart_annexd2_notitle.png")
 
 # ---- 6-8. Company Layout & Plot Overview (full-bleed, photos fill their
 #           aspect-weighted cells edge-to-edge) ------------------------------
@@ -1114,9 +1148,9 @@ site_plan("Company Overview", "Structure · Quality Manual Annex-D2, Rev. 4", "O
 # bay tables & dimensions stay readable; the two site photos share the next.
 photo_showcase("Company Overview", "Facilities", "Company Layout & Plot Overview",
     [(IMG(6, 1), None)])
-photo_showcase("Company Overview", "Facilities", "Plant & Yard — Site Views",
+photo_showcase("Company Overview", "Facilities", "Vitech Heavy Equipments (Shahpur) - Top Front view",
     [(IMG(7, 1), None)], fill=True)
-photo_showcase("Company Overview", "Facilities", "Plant & Yard — Site Views (cont.)",
+photo_showcase("Company Overview", "Facilities", "Vitech Heavy Equipments (Shahpur) - Top Rear view",
     [(IMG(8, 1), None)], fill=True)
 
 # ---- 9. Company Layout (annotated site plan + legend) --------------------
@@ -1146,7 +1180,7 @@ site_plan("Company Overview", "Facilities · Vitech Heavy Equipments Pvt. Ltd, S
         ("group", "Safety"),
         ("17", "Emergency Evacuation Area"),
     ],
-    stat=("104,000", "Total Plot Area (sq. mtr.)"))
+    stat=("104,000", "Total Plot Area (sq. mtr.)"), legend_sides=True)
 
 # ---- 10-15. Workshop Overview (three full-bleed slides, groupings and
 #             captions follow the original deck's slides 10-12) -------------
@@ -1238,8 +1272,7 @@ data_table("Workshop & Facilities", "Machinery", "Workshop Facilities — Materi
         ["Forming & Bending", "VHEPL", "VEPL", "VFPL"],
         ["Hydraulic Power Press", "200T / 1000T", "—", "300T"],
         ["Plate Bending M/C (3000mm width)", "FACCIN Italy – 125mm; Himalaya – 25mm; Himalaya – 16mm", "Himalaya – 25mm", "Himalaya – 10mm"],
-      ]],
-      note="All indications in red on the original machinery list denote future provisions.")
+      ]])
 
 data_table("Workshop & Facilities", "Machinery", "Workshop Facilities — Automated Welding Systems",
       [[
@@ -1289,7 +1322,8 @@ divider("Automation & Welding", "Automation<br><span>Systems</span>",
 # ---- 24-29. Automated welding / overlay / pipe systems --------------------
 spec("Automation & Welding", "Automated Welding", "Tube-to-Tube Sheet Welding on Automated Welding Head", "",
      [("Process", "Titanium Gr.1 tube to Titanium Gr.2 tubesheet — GTAW welding in process")],
-     24, layout="showcase", fill=True)
+     24, layout="showcase", fill=True,
+     captions=["Automated welding head — GTAW arc on tube-to-tubesheet joint", "Completed tube-to-tubesheet welds — close-up finish detail"])
 
 spec("Automation & Welding", "Weld Overlay", "Weld Overlay Capability", "",
      [("Overlay A", "SA 516 Gr. 70 + SA 240 Gr. 317L overlay"),
@@ -1306,25 +1340,27 @@ spec("Automation & Welding", "Weld Overlay", "Weld Overlay Capability", "",
 
 spec("Automation & Welding", "PLC Controlled", "Pipe Spool Bevelling & Cutting Station", "",
      [("Capability", "Up to 24″ NB"), ("Length", "12 mtr.")],
-     None, layout="showcase", files=[IMG(27, 1)], fill=True)
+     None, layout="showcase", files=[IMG(27, 1)], fill=True, panel_pos="bc")
 
 spec("Automation & Welding", "PLC Controlled", "Pipe Spool Setup Station", "",
      [("Capability", "Up to 24″ NB"), ("Length", "12 mtr.")],
-     None, layout="showcase", files=[IMG(27, 2)], fill=True)
+     None, layout="showcase", files=[IMG(27, 2)], fill=True, panel_pos="bc")
 
 spec("Automation & Welding", "PLC Controlled", "Pipe Spool Setup Station — Detail", "",
      [("Capability", "Up to 24″ NB"), ("Length", "12 mtr.")],
-     None, layout="showcase", files=[IMG(27, 3)])
+     None, layout="showcase", files=[IMG(27, 3)], panel_pos="bc")
 
 spec("Automation & Welding", "Automated Systems", "Pipe Welding on Automated System / Orbital Pipe Machine", "",
      [("Automated system", "3″ NB to 20″ NB pipe, length 12 mtr."),
       ("Orbital pipe machine", "19mm OD – 77mm OD")],
-     28, layout="showcase", fill=True)
+     28, layout="showcase", fill=True,
+     captions=["Automated system — 3″ NB to 20″ NB pipe, length 12 mtr.", "Orbital pipe machine — 19mm OD – 77mm OD"])
 
 spec("Automation & Welding", "Automated Machines", "Welding on Automated Machines", "",
      [("Force TIG (German make)", "Square butt joint welding up to 10mm in single pass"),
       ("Automated GMAW system (Canadian make)", "Specialised for GMAW & FCAW in 1G, 2G & 3G positions, carbon steel & stainless steel")],
-     29, layout="showcase", fill=True)
+     29, layout="showcase", fill=True,
+     captions=["Force TIG (German make) — square butt joint welding up to 10mm in single pass", "Automated GMAW system (Canadian make) — GMAW & FCAW in 1G, 2G & 3G positions"])
 
 # ---- 83. Divider: Oil & Petrochemical --------------------------------------
 divider("Oil, Gas, Lithium & Aerospace", "Oil &<br><span>Petrochemical</span>",
@@ -1336,78 +1372,78 @@ spec("Oil, Gas, Lithium & Aerospace", "Oil & Petrochemical", "Tube Bundle for He
       ("Tube material", "SA213 TP304/304L"),
       ("Size", "Ø 1350/1917mm × 10258mm overall length"),
       ("Qty / Weight", "4 / 105 MT")],
-     84)
+     84, panel_pos="bc")
 
 spec("Oil, Gas, Lithium & Aerospace", "Oil & Petrochemical", "Ethane Tower Heat Pump Compressor Reflux Drum", "Reliance Industries, Nagothane",
      [("Material", "SA 240 Gr. 304/304L dual certified"),
       ("Size", "Ø 4000mm ID × 13,809mm L × 52mm thk"),
       ("Total qty / weight", "1 No. / 97 MT")],
-     85, layout="showcase", fill=True)
+     85, layout="showcase", fill=True, panel_pos="bc")
 
 spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Demethanizer Prestripper No.2 — New SS Tower", "Reliance Industries — Nagothane Refinery",
      [("Material", "SA 240 Gr. 304/304L dual certified"),
       ("Size", "Ø 1600/2500mm ID × 46,000mm L"),
       ("Total qty / weight", "1 No. / 82.5 MT")],
-     86)
+     86, panel_pos="bc")
 
 spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Produced Water Skids", "Cairn Energy, Rajasthan, India",
      [("Material", "Carbon Steel / Duplex"),
       ("Qty", "22 Nos."),
       ("Scope", "Procurement + fabrication of piping spools + structure + assembly + E&I procurement & installation + heat tracing + insulation + FAT")],
-     87, layout="showcase", fill=True)
+     87, layout="showcase", fill=True, panel_pos="bc")
 
 spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Produced Water Skids — Fabrication Progress", "Cairn Energy, Rajasthan, India",
      [("Material", "Carbon Steel / Duplex"),
       ("Qty", "22 Nos."),
       ("Scope", "Procurement + fabrication of piping spools + structure + assembly + E&I procurement & installation + heat tracing + insulation + FAT")],
-     88, layout="showcase", fill=True, files=[IMG(88, 1), IMG(88, 3)])
+     88, layout="showcase", fill=True, files=[IMG(88, 1), IMG(88, 3)], panel_pos="bc")
 
 spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Static Mixer (ASME U Stamp — EIL)", "HPCL Visakhapatnam (EIL)",
      [("Material", "Carbon steel body (SA 106 Gr.B) with SS 316 steam tracing tubes"),
       ("Thickness", "Sch. 160"),
       ("Total qty", "1 No.")],
-     89)
+     89, panel_pos="bc")
 
 spec("Oil, Gas, Lithium & Aerospace", "Oil & Petrochemical", "Inlet & Outlet Distributors", "L&T, India",
      [("Material", "Inconel 601 (UNS06601)"),
       ("Size", "Ø 2.1 mtr × 2.08 mtr L"),
       ("Qty / Weight", "10 sets / 2 tons")],
-     90, layout="showcase", fill=True)
+     90, layout="showcase", fill=True, panel_pos="bc")
 
 spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Storage Tank — Insulation + Sacrificial Anode + Internal Glass Flake Lining", "Cairn Energy, India",
      [("Material", "SA 516 Gr.70 NACE"),
       ("Size", "Ø 5.55 mtr × 9.5 mtr length"),
       ("Qty / Weight", "2 Nos. / 28 tons")],
-     91)
+     91, panel_pos="bc")
 
 spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas / Petrochemical", "Static Mixers (ASME U Stamp) with Grayloc Connectors", "NRL Expansion Project, Sulzer Chemtech India Pvt Ltd",
      [("Mixer A", "SA 182 F347 & SA 182 F321 — Ø 466.7 & 482.7mm OD × 4000mm lg. × 50mm thk — 8 tons, 1 No."),
       ("Mixer B", "SA 183 F321 — Ø 457.2mm OD × 4000mm lg. × 50mm thk — 7 tons, 1 No.")],
-     92, layout="showcase", fill=True)
+     92, layout="showcase", fill=True, panel_pos="bc")
 
 spec("Oil, Gas, Lithium & Aerospace", "Aerospace", "Exhaust Collector — U Stamp", "Pratt & Whitney, Canada",
      [("Material", "SS 321"),
       ("Size", "Ø 1.176 mtr × 32mm thk × 1 mtr L"),
       ("Qty / Weight", "1 No. / 5 tons")],
-     93, layout="showcase", fill=True)
+     93, layout="showcase", fill=True, panel_pos="bc")
 
 spec("Oil, Gas, Lithium & Aerospace", "Paper & Pulp", "Evaporator — Effect 7", "APL, India",
      [("Material", "SA 240 Gr. 304 & SA 516 Gr. 70; tubesheets SA 240 Gr. 304L; tubes SA 249 TP 304L"),
       ("Size", "Ø 3.7/4.4 mtr × 20.2 mtr L"),
       ("Tubes", "50.8mm OD × 1.2mm min. thk × 11.5 mtr L — qty 2,199 Nos."),
       ("Qty / Weight", "1 No. / 100 tons")],
-     94)
+     94, panel_pos="bc")
 
 spec("Oil, Gas, Lithium & Aerospace", "Paper & Pulp · Flue Gas Desulphurisation", "Titanium Clad Ducts", "NTPC Ltd (GE Power) — Sipat & Simhadri, India",
      [("Duct set A", "IS2062 + Ti Gr.1 (7+2mm) — Ø 9.8 mtr — 50 tons each, 2 Nos."),
       ("Duct set B", "IS2062 + Ti Gr.1 (7+2mm) — Ø 8.45 mtr — 40 tons, 1 No.")],
-     95)
+     95, panel_pos="bc")
 
 # ---- 82. Lithium (placed at the end of the Oil & Petrochemical run) --------
 spec("Oil, Gas, Lithium & Aerospace", "Lithium", "Tanks and Vessels", "Lithium Nevada Thacker Pass Project (USA)",
      [("Material", "Duplex SST 2205 / SA240 Gr 316L"),
       ("Total qty / weight", "15 Nos. / 30 MT")],
-     82, layout="showcase", fill=True)
+     82, layout="showcase", fill=True, panel_pos="bc")
 
 # ---- 30. Divider: Food Processing -----------------------------------------
 divider("Food Processing & Oleo Chemical", "Food<br><span>Processing</span>",
@@ -1420,18 +1456,18 @@ spec("Food Processing & Oleo Chemical", "Food Processing", "Spiral Heat Exchange
       ("Quantity", "150+ such jobs manufactured to date"),
       ("Weight", "60 – 120 tons")],
      None, layout="showcase", fill=True, files=[IMG(31, 1)],
-     extra="For Europe, Russia, South America, USA, Africa, Asia")
+     extra="For Europe, Russia, South America, USA, Africa, Asia", panel_pos="bc")
 
 spec("Food Processing & Oleo Chemical", "Food Processing", "Spiral Heat Exchangers — Coil Detail", "",
      [("High pressure", "Steam coils"), ("Low pressure", "Clamping coils")],
-     None, layout="showcase", fill=True, files=[IMG(32, 1), IMG(32, 2)])
+     None, layout="showcase", fill=True, files=[IMG(32, 1), IMG(32, 2)], panel_pos="bc")
 
 spec("Food Processing & Oleo Chemical", "Food Processing", "Soft Flex U-Tube Heat Exchanger", "For a project in India",
      [("Material", "SA 240 Gr. 304; tubesheets SA 240 Gr. 304; tubes SA 213 TP 304"),
       ("Size", "Ø 1.8 mtr × 20.3 mtr L"),
       ("U-tubes", "30mm OD × 2mm thk."),
       ("Qty / Weight", "1 No. / 35 tons")],
-     None, layout="showcase", fill=True, files=[IMG(33, 3), IMG(33, 2)], emphasis=True)
+     None, layout="showcase", fill=True, files=[IMG(33, 3), IMG(33, 2)], emphasis=True, panel_pos="bc")
 
 spec("Food Processing & Oleo Chemical", "Oleo Chemical", "Cladded Splitter Columns — Column 1", "Adani Wilmar Ltd, India",
      [("Material", "SA 516 Gr. 70 + SS 317L clad"),
@@ -1443,58 +1479,58 @@ spec("Food Processing & Oleo Chemical", "Oleo Chemical", "Cladded Columns with T
      [("Material", "SA 516 Gr. 70 + SS 317L"),
       ("Size", "Ø 2.15 mtr × 55 mtr L"),
       ("Qty / Weight", "1 No. / 200 MT")],
-     36)
+     36, panel_pos="bc")
 
 spec("Food Processing & Oleo Chemical", "Oleo Chemical", "Dephlegmator of 5-C-1 (5-CE-1)", "Adani Wilmar Ltd, India",
      [("Material", "SA 240 Gr. 317L & SS 317L (shell & tubes)"),
       ("Size", "Ø 3.750/4.100 mtr × 4.75 mtr L"),
       ("Qty / Weight", "1 No. / 28 tons")],
-     37)
+     37, panel_pos="bc")
 
 spec("Food Processing & Oleo Chemical", "Oleo Chemical", "Distillation Column (5-C-1)", "Adani Wilmar Ltd, India",
      [("Material", "SA 240 Gr. 316L/317L"),
       ("Size", "Ø 3.2/3.75 mtr × 30.148 mtr L"),
       ("Qty / Weight", "1 No. / 50 tons")],
-     38, layout="showcase", fill=True)
+     38, layout="showcase", fill=True, panel_pos="bc")
 
 spec("Food Processing & Oleo Chemical", "Oleo Chemical", "Distillation Column & Dephlegmator (5-C-2 & 5-CE-2)", "Adani Wilmar Ltd, India",
      [("Material", "SS 316L & 317L"),
       ("Size", "Ø 3.3/3.920 mtr × 26.78 mtr L"),
       ("Qty / Weight", "1 No. / 56 tons")],
-     39)
+     39, panel_pos="bc")
 
 spec("Food Processing & Oleo Chemical", "Food Processing", "First Stage Evaporator", "CHS Inc., USA",
      [("Material", "SA 240 Gr. 304/304L & IS 2062 Gr.B"),
       ("Size", "Ø 2.305/3.426 mtr × 18.39 mtr L"),
       ("Tubes", "OD 31.75 × 1.25 thk. — qty 2,196 Nos."),
       ("Qty / Weight", "1 No. / 56 tons")],
-     None, layout="showcase", fill=True, files=[IMG(40, 2)])
+     None, layout="showcase", fill=True, files=[IMG(40, 2)], panel_pos="bc")
 
 spec("Food Processing & Oleo Chemical", "Food Processing", "Vacuum Condenser", "CHS Inc., USA",
      [("Material", "SA 516 Gr. 70"),
       ("Size", "Ø 2.272/3.372 mtr × 11.32 mtr L"),
       ("Tubes", "OD 19.05 × 1.05 thk. — qty 6,317 Nos."),
       ("Qty / Weight", "1 No. / 50 tons")],
-     41)
+     41, panel_pos="bc")
 
 spec("Food Processing & Oleo Chemical", "Food Processing", "Second Stage Evaporator — U Stamp", "CHS Inc., USA",
      [("Material", "SA 240 Gr. 304 / SA 516 Gr. 70"),
       ("Size", "Ø 0.930 mtr × 7.805 mtr L; tube 25.4 OD × 1.24mm thk. — qty 607 Nos."),
       ("Qty / Weight", "1 No. / 10 tons")],
-     42)
+     42, panel_pos="bc")
 
 spec("Food Processing & Oleo Chemical", "Food Processing", "Heat Exchangers (U Stamp) — 9 Vessel Program", "Budest 5, USA",
      [("Material", "SS 304/304L / SA 516 Gr. 70; tubesheets SS 304/304L; tubes SS 304 & 304L (19.05 & 25.04 OD)"),
       ("Sizes", "Ø 1.026×7.55m · Ø 2.272/3.4×11.36m · Ø 0.934/1.33×6.23m · Ø 1.06×7.55m · Ø 0.457×4.32m · Ø 0.9×7.43m · Ø 1.96×8.75m · Ø 0.323×3.622m · Ø 0.406×7.12m"),
       ("Total qty / weight", "9 Nos. / 120 MT")],
-     None, layout="showcase", fill=True, files=[IMG(43, 1), IMG(43, 2)])
+     None, layout="showcase", fill=True, files=[IMG(43, 1), IMG(43, 2)], panel_pos="bc")
 
 spec("Food Processing & Oleo Chemical", "Food Processing", "Hydrogenation Reactor — U Stamp", "CHS Inc., USA",
      [("Material", "SA 516 Gr. 70"),
       ("Size", "Ø 2.3 mtr × 7 mtr L"),
       ("Coil pipes", "Duplex SA 790 S32205 — 4″ NB × 40S × 330 mtr L"),
       ("Qty / Weight", "2 Nos. / 20 tons & 12 tons")],
-     44)
+     44, panel_pos="bc")
 
 # ---- 45. Divider: Fertilizer ------------------------------------------
 divider("Fertilizer", "Fertilizer",
@@ -1507,27 +1543,27 @@ spec("Fertilizer", "Coromandel International Ltd", "Acid Cooler", "",
       ("Tubes", "ASTM A-249 TP316L with Hastelloy cathodic protection"),
       ("Size", "Ø 1346mm × 11,812mm overall length"),
       ("Qty / Weight", "1 No. / 24 MT")],
-     46, layout="showcase", fill=True)
+     46, layout="showcase", fill=True, panel_pos="bc")
 
 spec("Fertilizer", "Fertilizer", "Tail Gas Stack", "Chambal Fertilizer & Chemicals Ltd., Rajasthan",
      [("Material", "SA 240 Gr 304"),
       ("Size", "Ø 1220mm × 56 mtr (dispatched in 2 pieces)"),
       ("Qty / Weight", "1 No. / 20 tons")],
-     47)
+     47, panel_pos="bc")
 
 spec("Fertilizer", "Fertilizer · Shop Fabrication", "Prill Tower — Fabrication: Skirt & Top Plenum", "Chambal Fertilizer & Chemicals Ltd., Rajasthan",
      [("Material", "SA 240 Gr. 304L"),
       ("Size", "Ø 5.3/7.1/8.9 × 68.17 mtr length"),
       ("Qty / Weight", "1 No. / 305.25 MT"),
       ("Stage", "Skirt & top plenum sections fabricated")],
-     48, layout="showcase", fill=True, files=[IMG(48, 1), IMG(48, 2)])
+     48, layout="showcase", fill=True, files=[IMG(48, 2), IMG(48, 1)], panel_pos="bc")
 
-spec("Fertilizer", "Fertilizer · Shop Fabrication", "Prill Tower — Fabrication: Hopper & Shell Rolling", "Chambal Fertilizer & Chemicals Ltd., Rajasthan",
+spec("Fertilizer", "Fertilizer · Shop Fabrication", "Prill Tower — Fabrication: Hopper", "Chambal Fertilizer & Chemicals Ltd., Rajasthan",
      [("Material", "SA 240 Gr. 304L"),
       ("Size", "Ø 5.3/7.1/8.9 × 68.17 mtr length"),
       ("Qty / Weight", "1 No. / 305.25 MT"),
-      ("Stages", "Hopper (polished to 0.4Ra finish) · Shell rolling")],
-     49, layout="showcase", fill=True, files=[IMG(49, 1), IMG(50, 1)])
+      ("Stage", "Hopper (polished to 0.4Ra finish)")],
+     49, layout="showcase", fill=True, files=[IMG(49, 1)], panel_pos="bc")
 
 spec("Fertilizer", "Site Installation", "Prill Tower — Installation at Site", "Chambal Fertilizer & Chemicals Ltd., Rajasthan",
      [("Stage", "Tower sections delivered — top plenum lifted into the supporting structure")],
@@ -1565,7 +1601,7 @@ spec("Fertilizer", "Fertilizer · Shop + Site Fabricated", "Converter", "IFFCO, 
      [("Material", "SA 240 Gr. 304H"),
       ("Size", "Ø 12 mtr × 20 mtr L"),
       ("Qty / Weight", "1 No. / 330 tons")],
-     [56, 57], layout="showcase", fill=True, milestone="After Insulation at Site — insulated and erected at IFFCO site")
+     [56, 57], layout="showcase", fill=True, milestone="After Insulation at Site — insulated and erected at IFFCO site", panel_pos="bc")
 
 gallery("Fertilizer", "Client Recognition", "IFFCO Project-Specific Approval Letter", 58)
 
@@ -1573,33 +1609,33 @@ spec("Fertilizer", "Fertilizer", "Ducts", "Ma’aden (Saudi Arabia) — Phosphat
      [("Material", "SS 304, SS304L, SS304H, SS316L, IS2062 Gr B"),
       ("Size", "~2,700mm each"),
       ("Total qty / weight", "23 Nos. / 520 MT")],
-     59, layout="showcase", fill=True)
+     59, layout="showcase", fill=True, panel_pos="bc")
 
 spec("Fertilizer", "Fertilizer", "K-COT Converter — Regenerator Support Structure", "K-COT Converter (KBR Inc.), USA",
      [("Material", "SA 240 Gr. 304H"),
       ("Size", "3450×17250×100mm ×4 pcs & Ø 1975×100mm ×4 Nos."),
       ("Qty", "8 Nos. (7 tons each)"),
       ("Weight", "30 MT")],
-     60, layout="showcase", fill=True)
+     60, layout="showcase", fill=True, panel_pos="bc")
 
 spec("Fertilizer", "Fertilizer", "Partition Plates for Ammonia Converter Baskets", "KBR Inc., USA",
      [("Material", "SA 240 Gr. 304"),
       ("Size", "Up to 3 mtr dia."),
       ("Qty / Weight", "32 Nos. / 10 MT")],
-     61, layout="showcase", fill=True)
+     61, layout="showcase", fill=True, panel_pos="bc")
 
 spec("Fertilizer", "Fertilizer", "KBR Distributor Grids — Ammonia Basket Converter Internals", "Talcher Fertilizers Ltd., Odisha, India (KBR Inc.)",
      [("Material", "SA 240 Gr. 304"),
       ("Size", "2.6 mtr × 9.35 mtr L"),
       ("Qty / Weight", "8 Nos. / 65 tons")],
-     62, layout="showcase", fill=True)
+     62, layout="showcase", fill=True, panel_pos="bc")
 
 spec("Fertilizer", "Sulphuric Acid Plant", "ZECOR Z — Piping Spools & Pipe Fittings (Shop + Site)", "Hindalco Industries Ltd, India",
      [("Material", "ZECOR Z"),
       ("Size", "2″ NB to 30″ NB"),
       ("Qty", "7,500 inch-dia & 5,000 inch-mtr"),
       ("Weight", "30 tons")],
-     63, layout="showcase", fill=True)
+     63, layout="showcase", fill=True, panel_pos="bc")
 
 # ---- 64. Divider: Water & Desalination ------------------------------------
 divider("Water & Desalination", "Water &<br><span>Desalination</span>",
@@ -1610,13 +1646,13 @@ spec("Water & Desalination", "Water & Desalination", "Evaporator (2×3000 T/D, 5
      [("Material", "SS 316L with Titanium Gr.2 tubes; Duplex UNS S32205 with Titanium Gr.2 tubes"),
       ("Size", "Ø 4.4 mtr × 30 mtr L"),
       ("Qty / Weight", "2 Nos. / 125 tons each")],
-     65)
+     65, panel_pos="bc")
 
 spec("Water & Desalination", "Zero Liquid Discharge", "Dual Media Filter (Rubber Lined)", "Saudi Aramco, Zuluf Water Treatment Plant",
      [("Material", "SA 516 Gr. 70N"),
       ("Size", "Ø 3000mm × 13,000mm TL-TL"),
       ("Total qty / weight", "15 Nos. / 418 MT")],
-     66)
+     66, panel_pos="bc")
 
 spec("Water & Desalination", "Zero Liquid Discharge", "Flash / Distillate Tank & Hotwell for FCHX + Vapour Condenser", "Qatar Fertilizer Company (QAFCO)",
      [("Tank material", "SA 240 UNS S32205 & SS 316L"),
@@ -1624,21 +1660,21 @@ spec("Water & Desalination", "Zero Liquid Discharge", "Flash / Distillate Tank &
       ("Condenser material", "SA 240 UNS S32205 (shell) & SA 240 UNS S32750 (channel)"),
       ("Condenser tubes", "SB 338 Gr.2, 25.4mm OD × 0.72mm — qty 212 Nos."),
       ("Condenser size / qty", "640mm OD × 3172mm to tubesheet face / 1 No.")],
-     67, layout="showcase", fill=True)
+     67, layout="showcase", fill=True, panel_pos="bc")
 
 spec("Water & Desalination", "Zero Liquid Discharge", "Forced Circulation Heat Exchanger (FCHX)", "Qatar Fertilizer Company (QAFCO)",
      [("Material", "SA 240 UNS S32205 (shell & channel side)"),
       ("Tubes", "SB 338 Gr.2, 31.8mm OD × 0.711mm — qty 306 Nos."),
       ("Size", "940mm OD × 3172mm to tubesheet face"),
       ("Qty", "3 Nos. each")],
-     68)
+     68, panel_pos="bc")
 
 spec("Water & Desalination", "Zero Liquid Discharge", "Heat Exchanger", "Grasim Industries Ltd, Nagda, MP, India",
      [("Material", "SA 516 Gr.70 (shell) & SA 240 UNS S31254 (tube); tubesheets SA 516 Gr.70 + Ti.Gr.1 explosion bonded; tubes Titanium Gr.2 (welded)"),
       ("Size", "Ø 1.85/2.1 mtr × 8mm thk × 14 mtr L"),
       ("Tubes", "38.1mm OD × 0.711mm thk × 10.7 mtr L — qty 1,100 Nos."),
       ("Qty / Weight", "1 No. / 25 tons")],
-     69, layout="showcase", fill=True)
+     69, layout="showcase", fill=True, panel_pos="bc")
 
 spec("Water & Desalination", "Zero Liquid Discharge", "Heat Exchanger — Twin Units", "Hindustan Zinc Ltd & Hindalco Industries Ltd, India",
      [("Material", "SA 516 Gr.70 (shell) & SA 240 UNS S31254 (tube); tubesheets SA 516 Gr.70 + Ti.Gr.1 explosion bonded; tubes Titanium Gr.2 (welded)"),
@@ -1646,76 +1682,76 @@ spec("Water & Desalination", "Zero Liquid Discharge", "Heat Exchanger — Twin U
       ("Size B", "Ø 1.8 mtr × 10mm thk × 11.2 mtr L"),
       ("Tubes", "31.75mm OD × 0.711mm thk × 7.5m (qty 1,350) and ×8m (qty 1,600) Nos."),
       ("Qty / Weight", "1 No. each — A) 18 tons  B) 20 tons")],
-     70, layout="showcase", fill=True)
+     70, layout="showcase", fill=True, panel_pos="bc")
 
 spec("Water & Desalination", "Zero Liquid Discharge", "Crystallizer", "Hindustan Zinc Ltd, Hindalco Industries Ltd, Grasim Industries Ltd (Nagda, MP), India",
      [("Material", "SA 240 Gr. 31254 (6% Moly)"),
       ("Size / Qty / Weight", "Ø 3.66 mtr × 9.75 mtr L / 1 No. / 12 tons")],
-     None, layout="showcase", fill=True, files=[IMG(71, 2)])
+     None, layout="showcase", fill=True, files=[IMG(71, 2)], panel_pos="bc")
 
 spec("Water & Desalination", "Zero Liquid Discharge", "Deaerator", "Hindustan Zinc Ltd, Hindalco Industries Ltd, Grasim Industries Ltd (Nagda, MP), India",
      [("Material", "SA 240 Gr. 31254 (6% Moly)"),
       ("Size / Qty / Weight", "Ø 0.6 mtr × 4.2 mtr L / 2 Nos. / 2 tons")],
-     None, layout="showcase", fill=True, files=[IMG(71, 1)])
+     None, layout="showcase", fill=True, files=[IMG(71, 1)], panel_pos="bc")
 
 spec("Water & Desalination", "Zero Liquid Discharge", "Brine Concentrator", "Grasim Industries Ltd, Nagda, MP, India",
      [("Material", "SA 240 Gr. 316L (shell & tube side); tubesheets SA 240 Gr. 316L; tubes SA 179 UNS S31803 (welded)"),
       ("Size", "Ø 1.85/2.1 mtr × 8mm thk × 24 mtr L"),
       ("Tubes", "50.8mm OD × 1mm thk × 9.4 mtr L — qty 616 Nos."),
       ("Qty / Weight", "1 No. / 25 tons")],
-     72)
+     72, panel_pos="bc")
 
 spec("Water & Desalination", "Water & Desalination", "Piping Spools — PDO", "Petroleum Development Oman",
      [("Material", "SS 316L & Super Duplex 32750"),
       ("Size", "1″ to 6″ × 12 mtr length"),
       ("Qty", "12,500 inch-dia.")],
-     73, layout="showcase", fill=True)
+     73, layout="showcase", fill=True, panel_pos="bc")
 
 spec("Water & Desalination", "Water & Desalination", "Piping Spools — KOC", "Kuwait Oil Company",
      [("Material", "Duplex 32205 / Super Duplex 32750"),
       ("Size", "2″ to 10″ × 12 mtr length")],
-     None, layout="showcase", fill=True, files=[IMG(74, 1), IMG(74, 2)])
+     None, layout="showcase", fill=True, files=[IMG(74, 1), IMG(74, 2)], panel_pos="bc")
 
 spec("Water & Desalination", "Water & Desalination", "Piping Spools — KOC — Fabrication", "Kuwait Oil Company",
      [("Qty", "40,000 inch-dia.")],
-     None, layout="showcase", fill=True, files=[IMG(74, 3)])
+     None, layout="showcase", fill=True, files=[IMG(74, 3)], panel_pos="bc")
 
 spec("Water & Desalination", "Water & Desalination", "Pre-Fabricated Piping Spools", "Pertamina, Indonesia",
      [("Material", "SS 316L / UNS S32750 / CS"),
       ("Size", "2″ to 20″ NB"),
       ("Qty", "80,000 inch-dia.")],
-     75)
+     75, panel_pos="bc")
 
 spec("Water & Desalination", "Water Treatment", "Skid Mounted Packages", "H2 Green Steel, Sweden",
      [("Scope", "Procurement + fabrication of piping spools + structure + assembly + E&I procurement & installation + heat tracing + insulation + FAT"),
       ("Material", "SA 106 Gr.B (rubber lining) & SA 312 TP 316L"),
       ("Size", "6.6m L × 4.1m W × 3.75m H"),
       ("Qty / Wt.", "10 Nos. / 110 tons")],
-     77, layout="showcase", fill=True, files=[IMG(77, 1), IMG(77, 2)])
+     77, layout="showcase", fill=True, files=[IMG(77, 1), IMG(77, 2)], panel_pos="bc")
 
 spec("Water & Desalination", "Water Treatment", "ZLD Softeners (Rubber Lined), PED + CE Marking", "H2 Green Steel, Sweden",
      [("Material", "SA 516 Gr. 70N"),
       ("Size", "Ø 3000mm × 3,353mm TL-TL"),
       ("Total qty / weight", "3 Nos. / 25 MT")],
-     78, layout="showcase", fill=True)
+     78, layout="showcase", fill=True, panel_pos="bc")
 
 spec("Water & Desalination", "Water Treatment", "Rapid Mix & Flocculation Tank", "H2 Green Steel, Sweden",
      [("Material", "SA 240 Gr. 304"),
       ("Size", "3,848mm L × 2,311mm W × 3,912mm H"),
       ("Total qty / weight", "2 Nos. / 5 MT")],
-     79)
+     79, panel_pos="bc")
 
 spec("Water & Desalination", "Water Treatment", "Multimedia Filter (Internal Coating)", "H2 Green Steel, Sweden",
      [("Material", "SA 516 Gr. 70N"),
       ("Size", "Ø 3000mm × 10,102mm TL-TL"),
       ("Total qty / weight", "7 Nos. / 108 MT")],
-     80, layout="showcase", fill=True)
+     80, layout="showcase", fill=True, panel_pos="bc")
 
 spec("Water & Desalination", "Water Treatment", "Cartridge Filter", "Saudi Aramco, Zuluf Water Treatment Plant",
      [("Material", "SA 516 Gr 70; tubesheet Super Duplex S32750 (30mm thk.)"),
       ("Size", "Ø 1460mm ID × 1750mm TS-TS"),
       ("Total qty / weight", "12 Nos. / 3.8 MT each")],
-     81, layout="showcase", fill=True)
+     81, layout="showcase", fill=True, panel_pos="bc")
 
 # ---- 96. Electrical & Instrumentation ---------------------------------------
 prose("Electrical & Instrumentation", "In-House Team", "Electrical & Instrumentation Capability",
