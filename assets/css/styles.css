@@ -605,7 +605,7 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
    width is small and the map keeps almost the whole frame. */
 .tpl-siteplan .siteplan-legend.side {
   left: auto; right: auto; bottom: auto;
-  top: calc(var(--fit,1) * 6rem + var(--chrome-top) * 0);
+  top: calc(var(--fit,1) * 6rem);
   width: 14.5rem;
   grid-template-columns: 1fr;
   display: grid; gap: calc(var(--fit,1) * .85rem);
@@ -613,6 +613,12 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 }
 .tpl-siteplan .siteplan-legend.side.left { left: calc(var(--pad) * .3); border-top: none; border-left: 3px solid var(--amber); }
 .tpl-siteplan .siteplan-legend.side.right { right: calc(var(--pad) * .3); border-top: none; border-right: 3px solid var(--amber); }
+/* the side columns have far more room per point than the old 5-across grid
+   — use it for legibility instead of packing tighter */
+.tpl-siteplan .siteplan-legend.side .legend-col { gap: calc(var(--fit,1) * .3rem); }
+.tpl-siteplan .siteplan-legend.side .legend-group-header { font-size: calc(var(--fit,1) * .82rem); }
+.tpl-siteplan .siteplan-legend.side .legend-txt { font-size: calc(var(--fit,1) * .96rem); }
+.tpl-siteplan .siteplan-legend.side .legend-num { width: calc(var(--fit,1) * 24px); height: calc(var(--fit,1) * 24px); font-size: calc(var(--fit,1) * .74rem); }
 /* per-point stagger reveal: each point fades/rises in on its own inline
    transition-delay (set at build time so the whole legend — regardless of
    how many points it has — finishes appearing within ~3 seconds). */
@@ -726,6 +732,13 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 }
 .industry-tile:hover { transform: translateY(-4px); border-color: var(--azure-bright); background: rgba(20,64,224,.12); }
 .industry-tile span { font-size: .82rem; font-weight: 600; color: #eef1f8; line-height: 1.3; display: block; }
+.industry-tile svg { width: 28px; height: 28px; margin: 0 auto .5rem; color: var(--amber); }
+/* has-photo tiles show the equipment photo, not the generic line icon — the
+   markup still includes the <svg> for the icon-only fallback variant, but an
+   unstyled/unsized SVG left in flow behind an absolutely-positioned photo
+   paints on top wherever object-fit leaves a letterboxed gap (e.g. a square
+   photo in a wide tile), showing a stray icon glyph. Hide it outright here. */
+.industry-tile.has-photo svg { display: none; }
 
 .industry-tile.has-photo {
   position: relative; overflow: hidden; padding: 0; height: 100%; min-height: 0;
@@ -734,13 +747,13 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 }
 /* Source photos vary a lot in native resolution; letting object-fit:contain
    stretch a small photo up to fill a large tile is what reads as "blurry".
-   width/height:auto + max-width/max-height:100% + auto margins caps the
-   image at its own intrinsic size (scaling down to fit is still fine, just
-   never up), so every tile shows its photo at native sharpness. */
+   object-fit:scale-down behaves like contain but never upscales past the
+   photo's own intrinsic size — and unlike a width/height:auto approach, the
+   element keeps its full-box dimensions immediately (no collapse to a
+   default/broken-image size while the photo is still decoding). */
 .industry-tile.has-photo .industry-tile-bg {
-  position: absolute; inset: 0; margin: auto;
-  width: auto; height: auto; max-width: 100%; max-height: 100%;
-  object-fit: contain;
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: scale-down;
   z-index: 0; transition: transform .5s var(--ease-soft);
 }
 .industry-tile.has-photo:hover .industry-tile-bg { transform: scale(1.07); }
@@ -1051,10 +1064,14 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 .tpl-spec.layout-showcase .showcase-canvas.n4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
 /* multi-photo showcases: a white gutter (grid gap, above) plus a thick azure
    frame per photo so touching photos read as distinct, deliberately framed
-   panels rather than blurring into one image. outline (not border) draws
-   without affecting box size/layout, and the negative offset pulls it just
-   inside each cell so it doesn't eat meaningfully into the photo. */
-.tpl-spec.layout-showcase .showcase-cell { position: relative; overflow: hidden; min-width: 0; min-height: 0; outline: 4px solid var(--azure-bright); outline-offset: -4px; }
+   panels rather than blurring into one image. the frame is an on-top ::after
+   border (not outline): the photos are full-bleed (media-full is absolute
+   inset:0), so an inset outline paints *under* the image and never shows — the
+   ::after sits above the image on all four edges and stays visible. */
+.tpl-spec.layout-showcase .showcase-cell { position: relative; overflow: hidden; min-width: 0; min-height: 0; }
+.tpl-spec.layout-showcase .showcase-canvas.n2 .showcase-cell::after,
+.tpl-spec.layout-showcase .showcase-canvas.n3 .showcase-cell::after,
+.tpl-spec.layout-showcase .showcase-canvas.n4 .showcase-cell::after { content: ""; position: absolute; inset: 0; border: 6px solid var(--azure); pointer-events: none; z-index: 2; }
 .tpl-spec.layout-showcase .showcase-cell .media-full {
   padding: calc(var(--pad) * .55) calc(var(--pad) * .12) calc(var(--fit,1) * 8.9rem);
 }
@@ -1279,10 +1296,15 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    used across the majority of equipment showcase slides so the caption
    reads as anchored to the whole photo rather than hugging one corner. */
 .tpl-spec.layout-showcase.panel-compact.panel-bc .slide-inner {
-  align-items: center; text-align: center;
+  align-items: center;          /* keep the card horizontally centered */
+  text-align: left;             /* but its copy reads left-to-right */
   padding-left: calc(var(--pad) * .6); padding-right: calc(var(--pad) * .6);
+  /* drop the card to the bottom: undo the +3.4rem chrome-clearance lift the
+     base .panel-compact .slide-inner adds (safe here — a centered ~46%-wide
+     card never reaches the corner ☰ menu / nav arrows) */
+  padding-bottom: calc(var(--pad) * .5);
 }
-.tpl-spec.layout-showcase.panel-compact.panel-bc .spec-list { justify-content: center; }
+.tpl-spec.layout-showcase.panel-compact.panel-bc .spec-list { justify-content: flex-start; }
 /* photo-fill compact: photos fill the frame edge-to-edge; the small frosted
    caption chip (≤~10% of screen) simply floats over the lower-left corner, so
    no bottom band is reserved and nothing shrinks the image. */
@@ -1462,6 +1484,9 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
     align-items: stretch; justify-content: flex-end;
     padding: 0;
   }
+  /* the desktop panel-bc rule sets a padding-bottom that is more specific than
+     the reset above — re-flush the mobile bottom bar to the screen edge */
+  .tpl-spec.layout-showcase.panel-compact.panel-bc .slide-inner { padding-bottom: 0; }
   .tpl-spec.layout-showcase.panel-compact .showcase-panel {
     width: 100%; max-width: none; height: 34vh; max-height: 34vh; overflow-y: auto;
     border-radius: 16px 16px 0 0;
