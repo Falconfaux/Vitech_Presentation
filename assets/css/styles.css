@@ -458,6 +458,17 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 #s2 .spec-row .k { font-size: .86rem; }
 #s2 .spec-row { grid-template-columns: 180px 1fr; }
 #s2 .side-panel li { font-size: 1.05rem; }
+/* Slide 2 is the deck's densest text slide (2 paragraphs + 4-row spec list +
+   13-chip group + 7-item side panel). With the larger TV/base type it can
+   overflow even at the --fit floor, so tighten its vertical rhythm here; this
+   lets the fit engine settle at a higher, more legible scale instead of
+   bottoming out. Scoped to #s2 so other prose slides keep their airier rhythm. */
+#s2 p { margin-bottom: calc(var(--fit,1) * .9rem); }
+#s2 .spec-row { padding: calc(var(--fit,1) * .38rem) 0; }
+#s2 .spec-list { margin-bottom: calc(var(--fit,1) * .85rem); }
+#s2 .labeled-chip-group { margin-top: calc(var(--fit,1) * .95rem); }
+#s2 .labeled-chip-group h4 { margin-bottom: calc(var(--fit,1) * .5rem); }
+#s2 .chip-row { margin-top: calc(var(--fit,1) * .6rem); }
 .tpl-prose .stat-row { display: flex; flex-wrap: wrap; gap: calc(var(--fit,1) * 1.4rem); margin: calc(var(--fit,1) * 2.2rem) 0; }
 .tpl-prose .spec-list { margin-bottom: calc(var(--fit,1) * 1.6rem); }
 .labeled-chip-group { margin-top: calc(var(--fit,1) * 1.9rem); }
