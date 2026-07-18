@@ -14,7 +14,9 @@ const INDEX = "file://" + path.join(ROOT, "index.html");
 const TOLERANCE = 3; // px
 
 const VIEWPORTS = [
-  { width: 1920, height: 1080 },
+  { width: 1920, height: 1080 }, // 55" boardroom TV (1080p) — also the min-width:1900 TV breakpoint
+  { width: 1728, height: 1117 }, // 16" MacBook Pro (16:10) default scaling
+  { width: 1512, height: 982 },  // 16" MacBook Pro (16:10) more-space scaling / small 16"
   { width: 1600, height: 900 },
   { width: 1366, height: 768 },
   { width: 1280, height: 800 },
