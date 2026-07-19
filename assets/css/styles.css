@@ -1310,7 +1310,7 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   padding-bottom: calc(var(--pad) * .5 + 3.4rem);
 }
 .tpl-spec.layout-showcase.panel-compact .showcase-panel {
-  width: fit-content; max-width: min(46%, 500px);
+  width: fit-content; max-width: min(58%, 680px);
   /* size the chip to its content so it never clips or shows a scrollbar on
      large TV/monitor aspect ratios (the copy is intrinsically short) */
   max-height: none; overflow: visible;
@@ -1327,12 +1327,15 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 .tpl-spec.layout-showcase.panel-compact .showcase-head { display: block; }
 .tpl-spec.layout-showcase.panel-compact .client-badge { margin-top: .35rem; font-size: calc(var(--fit,1) * .78rem); }
 .tpl-spec.layout-showcase.panel-compact .spec-list {
-  display: flex; flex-wrap: wrap; align-items: baseline;
-  gap: calc(var(--fit,1) * .28rem) calc(var(--fit,1) * 1.2rem);
-  margin-top: calc(var(--fit,1) * .5rem);
+  display: grid;
+  grid-template-columns: max-content 1fr;   /* label col | value col */
+  column-gap: calc(var(--fit,1) * 1rem);
+  row-gap: calc(var(--fit,1) * .42rem);      /* uniform vertical rhythm */
+  align-items: baseline;
+  margin-top: calc(var(--fit,1) * .55rem);
 }
 .tpl-spec.layout-showcase.panel-compact .spec-row {
-  display: inline-flex; align-items: baseline; gap: .45rem; flex: 0 1 auto;
+  display: contents;   /* promote .k and .v to direct grid items */
 }
 .tpl-spec.layout-showcase.panel-compact .spec-row .k { font-size: calc(var(--fit,1) * .78rem); }
 .tpl-spec.layout-showcase.panel-compact .spec-row .v { font-size: calc(var(--fit,1) * .9rem); }
