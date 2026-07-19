@@ -26,7 +26,28 @@
         img.src = img.getAttribute("data-src");
         img.removeAttribute("data-src");
       });
+      var vids = s.querySelectorAll("video[data-src]");
+      vids.forEach(function (v) {
+        v.src = v.getAttribute("data-src");
+        v.removeAttribute("data-src");
+        v.load();
+      });
     }
+  }
+
+  // play the active slide's video(s) from the start; pause every other slide's
+  function syncVideos(index) {
+    slides.forEach(function (s, i) {
+      s.querySelectorAll("video").forEach(function (v) {
+        if (i === index) {
+          try { v.currentTime = 0; } catch (e) {}
+          var p = v.play();
+          if (p && p.catch) p.catch(function () {});
+        } else {
+          v.pause();
+        }
+      });
+    });
   }
 
   function goTo(index, pushHash) {
@@ -45,6 +66,7 @@
     progress.style.width = ((index + 1) / total * 100) + "%";
     if (counterSection) counterSection.textContent = slides[index].getAttribute("data-section") || "";
     lazyLoadNear(index);
+    syncVideos(index);
     if (pushHash !== false) {
       history.replaceState(null, "", "#" + (index + 1));
     }
