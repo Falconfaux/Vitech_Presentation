@@ -1354,13 +1354,13 @@ spec("Automation & Welding", "Automated Systems", "Pipe Welding on Automated Sys
      [("Automated system", "3″ NB to 20″ NB pipe, length 12 mtr."),
       ("Orbital pipe machine", "19mm OD – 77mm OD")],
      28, layout="showcase", fill=True,
-     captions=["Automated system — 3″ NB to 20″ NB pipe, length 12 mtr.", "Orbital pipe machine — 19mm OD – 77mm OD"])
+     captions=["Automated welding system — pipe on powered rotator, root run in progress", "Orbital pipe machine welding under programmable control"])
 
 spec("Automation & Welding", "Automated Machines", "Welding on Automated Machines", "",
      [("Force TIG (German make)", "Square butt joint welding up to 10mm in single pass"),
       ("Automated GMAW system (Canadian make)", "Specialised for GMAW & FCAW in 1G, 2G & 3G positions, carbon steel & stainless steel")],
      29, layout="showcase", fill=True,
-     captions=["Force TIG (German make) — square butt joint welding up to 10mm in single pass", "Automated GMAW system (Canadian make) — GMAW & FCAW in 1G, 2G & 3G positions"])
+     captions=["Force TIG (German make) — dual-operator automated welding station", "Automated GMAW system (Canadian make) — carriage weld with live monitoring"])
 
 # ---- 83. Divider: Oil & Petrochemical --------------------------------------
 divider("Oil, Gas, Lithium & Aerospace", "Oil &<br><span>Petrochemical</span>",

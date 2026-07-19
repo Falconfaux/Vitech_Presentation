@@ -637,6 +637,11 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 }
 .tpl-siteplan .siteplan-legend.side.left { left: calc(var(--pad) * .3); border-top: none; border-left: 3px solid var(--amber); }
 .tpl-siteplan .siteplan-legend.side.right { right: calc(var(--pad) * .3); border-top: none; border-right: 3px solid var(--amber); }
+/* with the legend on both edges, the title/stat can no longer live top-left
+   (they'd sit under the left column) — center them in the clear gap between
+   the two columns instead. */
+.tpl-siteplan.sides .siteplan-titlebar { align-self: center; text-align: center; border-left: none; border-bottom: 3px solid var(--amber); }
+.tpl-siteplan.sides .siteplan-stat { align-self: center; text-align: center; border-left: none; border-bottom: 3px solid var(--amber); }
 /* the side columns have far more room per point than the old 5-across grid
    — use it for legibility instead of packing tighter */
 .tpl-siteplan .siteplan-legend.side .legend-col { gap: calc(var(--fit,1) * .24rem); }
@@ -1153,6 +1158,12 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   border: 1px solid rgba(var(--azure-bright-rgb), .3);
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
 }
+/* per-image caption chips on panel-compact spec slides (the 2-image slides
+   that also carry a bottom-left spec panel): keep the bottom-corner captions
+   clear of the fixed ☰ menu button (bottom-left) and nav arrows (bottom-right)
+   so neither piece of chrome ever lands on top of the caption text. */
+.tpl-spec.layout-showcase.panel-compact .showcase-cell:first-child .showcase-cap { left: 185px; }
+.tpl-spec.layout-showcase.panel-compact .showcase-cell:last-child .showcase-cap { right: 285px; }
 /* showcase-photos: full-bleed photo slides (no spec panel) — title overlays
    the top on a scrim, captions sit on the photos, coverage is maximised. */
 .tpl-spec.layout-showcase.showcase-photos .showcase-canvas::after {
