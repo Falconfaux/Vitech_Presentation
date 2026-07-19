@@ -469,6 +469,22 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 #s2 .labeled-chip-group { margin-top: calc(var(--fit,1) * .95rem); }
 #s2 .labeled-chip-group h4 { margin-bottom: calc(var(--fit,1) * .5rem); }
 #s2 .chip-row { margin-top: calc(var(--fit,1) * .6rem); }
+/* Eyebrow removed on this slide — let the big title sit higher and open the deck cleaner */
+#s2 .slide-inner { padding-top: max(var(--chrome-top), calc(var(--fit,1) * clamp(1.5rem, 4vh, 3rem))); }
+/* Opening sentence reads as a lead: larger, lighter, amber key figures */
+#s2 .lead { font-size: calc(var(--fit,1) * 1.72rem); line-height: calc(var(--fit,1) * 1.4); color: #eef1f8; margin-bottom: calc(var(--fit,1) * 1.15rem); }
+#s2 .lead strong { color: var(--amber); font-weight: 700; }
+/* Right column now stacks two matching cards — balance the previously empty space */
+#s2 .content-grid > div:last-child { display: flex; flex-direction: column; gap: calc(var(--fit,1) * 1.4rem); }
+#s2 .s2-materials h3 { margin-bottom: calc(var(--fit,1) * .9rem); }
+#s2 .s2-materials .chip-row { margin-top: 0; }
+/* breathing room between the big title and the lead sentence */
+#s2 .content-grid { margin-top: calc(var(--fit,1) * 1.15rem); }
+/* credential stat band anchors the bottom of the left column */
+#s2 .stat-row { margin: calc(var(--fit,1) * 1.5rem) 0 0; gap: calc(var(--fit,1) * 1rem); }
+#s2 .stat-tile { flex: 1; min-width: 0; }
+#s2 .stat-tile .num { font-size: calc(var(--fit,1) * 2.05rem); }
+#s2 .stat-tile .num span { font-size: .62em; }
 .tpl-prose .stat-row { display: flex; flex-wrap: wrap; gap: calc(var(--fit,1) * 1.4rem); margin: calc(var(--fit,1) * 2.2rem) 0; }
 .tpl-prose .spec-list { margin-bottom: calc(var(--fit,1) * 1.6rem); }
 .labeled-chip-group { margin-top: calc(var(--fit,1) * 1.9rem); }
