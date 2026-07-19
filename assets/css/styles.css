@@ -1114,7 +1114,7 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    bottom cell reserves clearance for the text-panel strip. */
 .tpl-spec.layout-showcase .showcase-canvas.n2.stack-v { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
 .tpl-spec.layout-showcase .showcase-canvas.n2.stack-v .showcase-cell:first-child .media-full { padding: calc(var(--pad)*.5) calc(var(--pad)*.12) calc(var(--fit,1)*.35rem); }
-.tpl-spec.layout-showcase .showcase-canvas.n2.stack-v .showcase-cell:last-child .media-full { padding: calc(var(--fit,1)*.35rem) calc(var(--pad)*.12) calc(var(--fit,1)*1.4rem); }
+.tpl-spec.layout-showcase .showcase-canvas.n2.stack-v .showcase-cell:last-child .media-full { padding: calc(var(--fit,1)*.35rem) calc(var(--pad)*.12) calc(var(--fit,1)*1.4rem) calc(var(--pad)*.6 + min(58%, 680px) + var(--fit,1)*1rem); }
 /* Multi-photo showcase: the canvas tiles into 2–4 full-height cells, each
    photo uncropped over its own blurred fill — the single-photo recipe, tiled. */
 .tpl-spec.layout-showcase .showcase-canvas.n2,
