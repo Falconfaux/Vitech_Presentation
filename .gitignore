@@ -3,3 +3,5 @@ node_modules/
 old-ppt/
 .vercel/
 .vercel
+audit-scratch/
+scratch-*/

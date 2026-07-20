@@ -3,6 +3,25 @@
    Design system: Azure Blue / Black / White, steel-gray + amber accent
    ========================================================================== */
 
+/* Self-hosted webfonts (latin, variable) — bundled so the deck renders with the
+   correct typography fully offline in the boardroom, with no Google CDN call.
+   Headings: Archivo (industrial grotesque). Body: IBM Plex Sans (engineered,
+   highly legible at TV-viewing distance). Both SIL OFL. */
+@font-face {
+  font-family: "Archivo";
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url("../fonts/archivo-latin-var.woff2") format("woff2");
+}
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 100 700;
+  font-display: swap;
+  src: url("../fonts/ibmplexsans-latin-var.woff2") format("woff2");
+}
+
 :root {
   --azure: #0038a8;
   --azure-bright: #2f5bff;
@@ -21,7 +40,9 @@
   --azure-deep-rgb: 5, 11, 43;
   --azure-border: rgba(var(--azure-bright-rgb), .55);
 
-  --font: -apple-system, "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", -apple-system, "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-head: "Archivo", var(--font-body);
+  --font: var(--font-body); /* back-compat alias — body & SVG map text stay on the body font */
 
   --ease: cubic-bezier(.22, .61, .36, 1);
   --ease-soft: cubic-bezier(.4, 0, .2, 1);
@@ -283,6 +304,20 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 /* Typography primitives                                                   */
 /* ---------------------------------------------------------------------- */
 
+/* Headings, eyebrows and numeric display use the Archivo display face;
+   body copy inherits --font-body from <body>. Keeps a clear head/body split. */
+.eyebrow,
+.slide-title,
+.tpl-cover h1,
+.tpl-divider h2,
+.tpl-closer h1,
+.side-panel h3,
+.stat-tile .num,
+.cover-statbar .num,
+.tpl-siteplan .siteplan-stat {
+  font-family: var(--font-head);
+}
+
 .eyebrow {
   display: inline-flex; align-items: center; gap: .5rem;
   font-size: .78rem; letter-spacing: .18em; text-transform: uppercase;
@@ -450,7 +485,7 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 .tpl-prose .spec-row .v { font-size: calc(var(--fit,1) * 1.04rem); }
 /* Slide 2 only: larger type requested for the company-intro slide specifically */
 #s2 .slide-title { font-size: clamp(2.3rem, 4.4vw, 3.95rem); }
-#s2 p { font-size: calc(var(--fit,1) * 1.4rem); }
+#s2 p { font-size: calc(var(--fit,1) * 1.4rem); line-height: calc(var(--fit,1) * 1.5); }
 #s2 .spec-row, #s2 .spec-row .v { font-size: calc(var(--fit,1) * 1.1rem); }
 #s2 .spec-row .k { font-size: .86rem; }
 #s2 .spec-row { grid-template-columns: 180px 1fr; }
@@ -1355,6 +1390,32 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 .tpl-spec.layout-showcase.panel-compact .spec-row .k::after {
   content: "·"; color: var(--steel); margin-left: .5rem; font-weight: 400;
 }
+/* panel-wide: cards carrying many or long spec rows stack tall and bury the
+   photo. This variant lets the compact card grow wider and flows the spec pairs
+   into two balanced columns so it stays short. Images are untouched. */
+.tpl-spec.layout-showcase.panel-compact.panel-wide .showcase-panel {
+  max-width: min(80%, 960px);
+}
+.tpl-spec.layout-showcase.panel-compact.panel-wide .spec-list {
+  display: block;
+  columns: 2;
+  column-gap: calc(var(--fit,1) * 2.2rem);
+  margin-top: calc(var(--fit,1) * .5rem);
+}
+.tpl-spec.layout-showcase.panel-compact.panel-wide .spec-row {
+  display: block;              /* revert display:contents so multicol can flow it */
+  break-inside: avoid;         /* never split a label/value across columns */
+  padding: calc(var(--fit,1) * .16rem) 0;
+}
+.tpl-spec.layout-showcase.panel-compact.panel-wide .spec-row .k,
+.tpl-spec.layout-showcase.panel-compact.panel-wide .spec-row .v {
+  display: inline;             /* "MATERIAL · value" reads inline; keeps the
+                                  existing .k::after "·" separator */
+}
+/* s57 (9-Vessel program) has one huge multi-dimension "Sizes" value that would
+   strand the other column empty; keep its wide card single-column so the long
+   value wraps across the full width and the card stays balanced and short. */
+#s57 .spec-list { columns: 1; }
 /* panel-tl: dock the compact panel to the TOP-left so a tall vessel below it
    stays fully visible (used on the cladded column slides) */
 .tpl-spec.layout-showcase.panel-compact.panel-tl .slide-inner { justify-content: flex-start; }
