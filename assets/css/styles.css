@@ -96,7 +96,7 @@ html, body {
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
 }
-img { max-width: 100%; display: block; }
+img { max-width: 100%; display: block; image-rendering: -webkit-optimize-contrast; }
 a { color: inherit; }
 button { font-family: inherit; }
 

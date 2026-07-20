@@ -1140,7 +1140,7 @@ industries_slide("Industries We Cater To — cont.",
 #          shown as its own document image (full-bleed, click to enlarge)
 #          rather than a hand-redrawn recreation. -------------------------
 site_plan("Company Overview", "Structure · Quality Manual Annex-D2, Rev. 4", "Organisation Chart",
-    "assets/images/slides/orgchart_annexd2_notitle.png")
+    "assets/images/slides/orgchart_annexd2_notitle.jpg")
 
 # ---- 6-8. Company Layout & Plot Overview (full-bleed, photos fill their
 #           aspect-weighted cells edge-to-edge) ------------------------------
@@ -1344,7 +1344,7 @@ spec("Automation & Welding", "PLC Controlled", "Pipe Spool Bevelling & Cutting S
 
 spec("Automation & Welding", "PLC Controlled", "Pipe Spool Setup Station", "",
      [("Capability", "Up to 24″ NB"), ("Length", "12 mtr.")],
-     None, layout="showcase", files=[IMG(27, 2)], fill=True, panel_pos="bc")
+     None, layout="showcase", files=[IMG(27, 2)], panel_pos="bc")
 
 spec("Automation & Welding", "PLC Controlled", "Pipe Spool Setup Station — Detail", "",
      [("Capability", "Up to 24″ NB"), ("Length", "12 mtr.")],
@@ -1523,7 +1523,7 @@ spec("Food Processing & Oleo Chemical", "Food Processing", "Heat Exchangers (U S
      [("Material", "SS 304/304L / SA 516 Gr. 70; tubesheets SS 304/304L; tubes SS 304 & 304L (19.05 & 25.04 OD)"),
       ("Sizes", "Ø 1.026×7.55m · Ø 2.272/3.4×11.36m · Ø 0.934/1.33×6.23m · Ø 1.06×7.55m · Ø 0.457×4.32m · Ø 0.9×7.43m · Ø 1.96×8.75m · Ø 0.323×3.622m · Ø 0.406×7.12m"),
       ("Total qty / weight", "9 Nos. / 120 MT")],
-     None, layout="showcase", fill=True, files=[IMG(43, 1), IMG(43, 2)], panel_pos="bc")
+     43, images_count=1, panel_pos="bc")
 
 spec("Food Processing & Oleo Chemical", "Food Processing", "Hydrogenation Reactor — U Stamp", "CHS Inc., USA",
      [("Material", "SA 516 Gr. 70"),
