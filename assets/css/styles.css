@@ -205,7 +205,7 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 .brand-mark span { font-size: .72rem; letter-spacing: .12em; color: #cfe0ff; text-transform: uppercase; }
 
 .slide-counter {
-  position: fixed; top: 1.375rem; right: var(--pad);
+  position: fixed; top: 1.375rem; right: calc(var(--pad) + 3.2rem);
   font-size: .78rem; color: var(--steel-light); letter-spacing: .06em;
   font-variant-numeric: tabular-nums;
   z-index: 41;
@@ -218,8 +218,8 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 }
 #counter-section:not(:empty)::after { content: ""; display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--steel); margin-left: .7rem; vertical-align: middle; }
 
-.nav-arrows { position: fixed; bottom: 1.375rem; right: var(--pad); display: flex; gap: .6rem; z-index: 41; }
-.nav-btn {
+.menu-toggle {
+  position: fixed; top: 1.05rem; right: var(--pad); z-index: 41;
   width: 2.625rem; height: 2.625rem; border-radius: 50%;
   border: 1px solid rgba(var(--azure-bright-rgb),.4);
   background: rgba(10,14,30,.45);
@@ -229,19 +229,7 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
   cursor: pointer;
   transition: background .25s, border-color .25s, transform .2s;
 }
-.nav-btn:hover { background: var(--azure); border-color: var(--azure); transform: translateY(-1px); }
-.nav-btn svg { width: 1.125rem; height: 1.125rem; }
-
-.menu-toggle {
-  position: fixed; bottom: 1.375rem; left: var(--pad); z-index: 41;
-  width: 2.625rem; height: 2.625rem; border-radius: 50%;
-  border: 1px solid rgba(var(--azure-bright-rgb),.4);
-  background: rgba(10,14,30,.45);
-  backdrop-filter: blur(6px);
-  color: var(--white);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-}
+.menu-toggle:hover { background: var(--azure); border-color: var(--azure); transform: translateY(-1px); }
 .menu-toggle svg { width: 1.125rem; height: 1.125rem; }
 
 #sections-panel {
@@ -841,24 +829,6 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 .tpl-visual.industry-slide .industry-tile:nth-child(4) { grid-column: 1 / 4; grid-row: 2; }
 .tpl-visual.industry-slide .industry-tile:nth-child(5) { grid-column: 4 / 7; grid-row: 2; }
 .tpl-visual.industry-slide .industry-tile.has-photo span { font-size: 1.05rem; padding: 0 .9rem .85rem; }
-/* Slide 4 only: Oil & Gas is the flagship — give it a large hero cell (tall
-   left column) with the remaining four industries in a 2x2 to the right.
-   Slide 5 keeps the even 3-over-2 pyramid above. */
-#s4 .industry-grid {
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-}
-#s4 .industry-tile:nth-child(1) { grid-column: 1 / 3; grid-row: 1 / 3; } /* Oil & Gas hero */
-#s4 .industry-tile:nth-child(2) { grid-column: 3; grid-row: 1; }
-#s4 .industry-tile:nth-child(3) { grid-column: 4; grid-row: 1; }
-#s4 .industry-tile:nth-child(4) { grid-column: 3; grid-row: 2; }
-#s4 .industry-tile:nth-child(5) { grid-column: 4; grid-row: 2; }
-#s4 .industry-tile:nth-child(1).has-photo span { font-size: 1.5rem; }
-/* Slide 4: show the full Oil & Gas hero (and its 2x2 industries) uncropped —
-   revert to scale-down (behaves like contain but never upscales). The tall
-   hero cell under object-fit:cover was clipping the vessel top/sides. Slide 5
-   keeps the uniform cover framing. */
-#s4 .industry-tile.has-photo .industry-tile-bg { object-fit: scale-down; }
 @media (max-width: 860px) {
   .industry-grid { grid-template-columns: repeat(2, 1fr); }
   .tpl-visual.industry-slide .industry-grid { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); }
@@ -867,18 +837,6 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
   .tpl-visual.industry-slide .industry-tile:nth-child(3) { grid-column: 1; grid-row: 2; }
   .tpl-visual.industry-slide .industry-tile:nth-child(4) { grid-column: 2; grid-row: 2; }
   .tpl-visual.industry-slide .industry-tile:nth-child(5) { grid-column: 1 / 3; grid-row: 3; }
-  /* Slide 4 hero collapses: Oil & Gas spans the top row full width, the other
-     four industries form a 2x2 below. */
-  #s4 .industry-grid { grid-template-columns: repeat(2, 1fr); grid-template-rows: auto repeat(2, 1fr); }
-  /* the hero row is auto-height; with the photo now object-fit:scale-down (see
-     the #s4 override above) it would collapse to the label, so give the tile
-     the photo's native ~3:2 aspect-ratio — the full image then fills it edge
-     to edge, uncropped and at a proper size. */
-  #s4 .industry-tile:nth-child(1) { grid-column: 1 / 3; grid-row: 1; aspect-ratio: 1920 / 1264; }
-  #s4 .industry-tile:nth-child(2) { grid-column: 1; grid-row: 2; }
-  #s4 .industry-tile:nth-child(3) { grid-column: 2; grid-row: 2; }
-  #s4 .industry-tile:nth-child(4) { grid-column: 1; grid-row: 3; }
-  #s4 .industry-tile:nth-child(5) { grid-column: 2; grid-row: 3; }
 }
 
 /* ---------------------------------------------------------------------- */

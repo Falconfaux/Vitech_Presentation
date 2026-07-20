@@ -84,9 +84,6 @@
     _goTo(index, pushHash);
   };
 
-  document.getElementById("btn-next").addEventListener("click", next);
-  document.getElementById("btn-prev").addEventListener("click", prev);
-
   document.addEventListener("keydown", function (e) {
     if (lightbox.classList.contains("open")) {
       if (e.key === "Escape") closeLightbox();
