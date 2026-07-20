@@ -1132,7 +1132,7 @@ def industries_slide(title, keys):
 # in styles.css) — wide, short cells so each landscape equipment photo (with
 # object-fit:contain) fills most of its tile instead of a thin cropped band.
 industries_slide("Industries We Cater To",
-    ["Oil & Gas", "Fertilizer", "Water & Desalination", "Edible Oil & Food", "Chemical"])
+    ["Chemical", "Fertilizer", "Water & Desalination", "Edible Oil & Food", "Oil & Gas"])
 industries_slide("Industries We Cater To — cont.",
     ["Paper & Pulp", "Petrochemical", "Power", "Zero Liquid Discharge", "Lithium"])
 
@@ -1563,7 +1563,7 @@ spec("Fertilizer", "Fertilizer · Shop Fabrication", "Prill Tower — Fabricatio
       ("Size", "Ø 5.3/7.1/8.9 × 68.17 mtr length"),
       ("Qty / Weight", "1 No. / 305.25 MT"),
       ("Stage", "Hopper (polished to 0.4Ra finish)")],
-     49, layout="showcase", fill=True, files=[IMG(49, 1)], panel_pos="bc")
+     49, layout="showcase", files=[IMG(49, 1)], panel_pos="bc")
 
 spec("Fertilizer", "Site Installation", "Prill Tower — Installation at Site", "Chambal Fertilizer & Chemicals Ltd., Rajasthan",
      [("Stage", "Tower sections delivered — top plenum lifted into the supporting structure")],
