@@ -1,0 +1,9 @@
+node_modules/
+.git/
+audit-scratch/
+scratchpad-shots/
+old-ppt/
+Videos/
+Photos/
+scripts/
+.DS_Store
