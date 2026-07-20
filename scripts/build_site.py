@@ -1140,7 +1140,7 @@ industries_slide("Industries We Cater To — cont.",
 #          shown as its own document image (full-bleed, click to enlarge)
 #          rather than a hand-redrawn recreation. -------------------------
 site_plan("Company Overview", "Structure · Quality Manual Annex-D2, Rev. 4", "Organisation Chart",
-    "assets/images/slides/orgchart_annexd2_notitle.jpg")
+    "assets/images/slides/orgchart_annexd2_notitle.png")
 
 # ---- 6-8. Company Layout & Plot Overview (full-bleed, photos fill their
 #           aspect-weighted cells edge-to-edge) ------------------------------
