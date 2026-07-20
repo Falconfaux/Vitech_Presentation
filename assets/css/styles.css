@@ -682,11 +682,13 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
    width is small and the map keeps almost the whole frame. */
 .tpl-siteplan .siteplan-legend.side {
   left: auto; right: auto; bottom: auto;
-  top: calc(var(--fit,1) * 6rem);
+  /* pushed down from the top chrome so the columns sit against the map body
+     (which letterboxes lower on taller viewports) rather than up in the scrim */
+  top: calc(var(--fit,1) * 11rem);
   width: 11.75rem;
   grid-template-columns: 1fr;
   display: grid; gap: calc(var(--fit,1) * .6rem);
-  max-height: calc(100% - var(--fit,1) * 7rem);
+  max-height: calc(100% - var(--fit,1) * 12rem);
 }
 .tpl-siteplan .siteplan-legend.side.left { left: calc(var(--pad) * .3); border-top: none; border-left: 3px solid var(--amber); }
 .tpl-siteplan .siteplan-legend.side.right { right: calc(var(--pad) * .3); border-top: none; border-right: 3px solid var(--amber); }
