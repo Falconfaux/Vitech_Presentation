@@ -583,7 +583,7 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
    instead of one bottom bar, so the map only needs to clear the title at
    the top and can run almost to the bottom edge — noticeably larger. */
 .tpl-siteplan.sides .siteplan-canvas .media-full {
-  padding: calc(var(--fit,1) * 5rem) calc(var(--fit,1) * 12.8rem) calc(var(--fit,1) * 1rem);
+  padding: calc(var(--fit,1) * 2.5rem) calc(var(--fit,1) * 12.2rem) calc(var(--fit,1) * .5rem);
 }
 .tpl-siteplan .siteplan-canvas::after {
   content: ""; position: absolute; left: 0; right: 0; top: 0;
@@ -643,7 +643,8 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 .tpl-siteplan .siteplan-legend.side.right { right: calc(var(--pad) * .3); border-top: none; border-right: 3px solid var(--amber); }
 /* with the legend on both edges, the title/stat can no longer live top-left
    (they'd sit under the left column) — center them in the clear gap between
-   the two columns instead. */
+   the two columns, and drop the group to the vertical middle of that gap. */
+.tpl-siteplan.sides .slide-inner { justify-content: center; }
 .tpl-siteplan.sides .siteplan-titlebar { align-self: center; text-align: center; border-left: none; border-bottom: 3px solid var(--amber); }
 .tpl-siteplan.sides .siteplan-stat { align-self: center; text-align: center; border-left: none; border-bottom: 3px solid var(--amber); }
 /* the side columns have far more room per point than the old 5-across grid
