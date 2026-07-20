@@ -385,9 +385,10 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 }
 .tpl-cover.active .slide-bg-img { animation: kenburns 20s ease-out forwards; }
 .tpl-cover .cover-logo {
-  height: 50px; width: auto; margin-bottom: calc(var(--fit,1) * 2rem);
-  filter: brightness(0) invert(1) drop-shadow(0 2px 8px rgba(0,0,0,.35));
-  opacity: .95;
+  height: calc(var(--fit,1) * clamp(90px, 11vw, 140px)); width: auto;
+  margin-bottom: calc(var(--fit,1) * 1.4rem);
+  filter: brightness(0) invert(1) drop-shadow(0 3px 12px rgba(0,0,0,.45));
+  opacity: .97;
 }
 .tpl-cover .eyebrow { margin-bottom: calc(var(--fit,1) * 1.2rem); }
 .tpl-cover h1 {
@@ -423,13 +424,17 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 .tpl-cover .cover-statbar .stat:last-child .num { color: var(--amber); }
 .tpl-cover .cover-statbar .lbl { margin-top: .32rem; font-size: .8rem; letter-spacing: .13em; text-transform: uppercase; color: var(--steel-light); }
 .tpl-cover .cover-meta {
-  margin-top: calc(var(--fit,1) * 1.5rem);
-  display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem;
+  margin-top: calc(var(--fit,1) * 1.6rem);
+  display: flex; flex-wrap: wrap; align-items: flex-start;
+  gap: calc(var(--fit,1) * 1.2rem) calc(var(--fit,1) * 2.8rem);
   font-size: 1.05rem; color: var(--steel-light);
 }
-.tpl-cover .cover-meta b { color: var(--white); font-weight: 600; }
-.tpl-cover .cover-meta .sep { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,.35); }
-.tpl-cover .cover-contact { margin-top: calc(var(--fit,1) * .6rem); font-size: 1.02rem; color: var(--amber); letter-spacing: .02em; }
+.tpl-cover .cover-meta .unit { display: flex; flex-direction: column; gap: .18rem; }
+.tpl-cover .cover-meta .unit b {
+  color: #8fb0ff; font-weight: 700; letter-spacing: .01em;
+  font-size: calc(var(--fit,1) * 1.12rem);
+}
+.tpl-cover .cover-meta .unit span { color: var(--steel-light); }
 @media (max-width: 900px) {
   .tpl-cover .cover-statbar .stat { flex: 1 1 46%; border-left: none !important; border-top: 1px solid rgba(255,255,255,.12); }
   .tpl-cover .cover-statbar .stat:first-child, .tpl-cover .cover-statbar .stat:nth-child(2) { border-top: none; }
@@ -686,9 +691,9 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 .tpl-siteplan .siteplan-legend.side.left { left: calc(var(--pad) * .3); border-top: none; border-left: 3px solid var(--amber); }
 .tpl-siteplan .siteplan-legend.side.right { right: calc(var(--pad) * .3); border-top: none; border-right: 3px solid var(--amber); }
 /* with the legend on both edges, the title/stat can no longer live top-left
-   (they'd sit under the left column) — center them in the clear gap between
-   the two columns, and drop the group to the vertical middle of that gap. */
-.tpl-siteplan.sides .slide-inner { justify-content: center; }
+   (they'd sit under the left column) — center them horizontally in the clear
+   top-center gap between the two columns instead. */
+.tpl-siteplan.sides .slide-inner { justify-content: flex-start; }
 .tpl-siteplan.sides .siteplan-titlebar { align-self: center; text-align: center; border-left: none; border-bottom: 3px solid var(--amber); }
 .tpl-siteplan.sides .siteplan-stat { align-self: center; text-align: center; border-left: none; border-bottom: 3px solid var(--amber); }
 /* the side columns have far more room per point than the old 5-across grid
@@ -817,6 +822,10 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
    paints on top wherever object-fit leaves a letterboxed gap (e.g. a square
    photo in a wide tile), showing a stray icon glyph. Hide it outright here. */
 .industry-tile.has-photo svg { display: none; }
+
+/* Slides 4 & 5 (Industries): skip the deck-wide transition blur so the photo
+   tile grids stay sharp through the swipe instead of reading as a soft blur. */
+#s4, #s4.prev, #s5, #s5.prev { filter: none; }
 
 .industry-tile.has-photo {
   position: relative; overflow: hidden; padding: 0; height: 100%; min-height: 0;
@@ -1462,7 +1471,11 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 .tpl-spec.layout-showcase.photo-fill .showcase-canvas .media-full {
   object-fit: cover; padding: 0 !important;
 }
-.tpl-spec.layout-showcase.photo-fill:not(.panel-side):not(.showcase-photos) .showcase-canvas > .media-full,
+/* :not(.panel-compact) — a single full-bleed photo under a small floating
+   caption chip must reach the bottom edge. Without this exclusion the higher-
+   specificity 8.9rem reservation here overrides the panel-compact rule above
+   that zeroes it, leaving a flat navy band under every single-photo chip slide. */
+.tpl-spec.layout-showcase.photo-fill:not(.panel-side):not(.showcase-photos):not(.panel-compact) .showcase-canvas > .media-full,
 .tpl-spec.layout-showcase.photo-fill .showcase-cell.panel-clear .media-full {
   padding-bottom: calc(var(--fit,1) * 8.9rem) !important;
 }
