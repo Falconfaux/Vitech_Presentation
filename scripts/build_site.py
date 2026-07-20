@@ -1134,7 +1134,7 @@ def industries_slide(title, keys):
 industries_slide("Industries We Cater To",
     ["Chemical", "Fertilizer", "Water & Desalination", "Edible Oil & Food", "Oil & Gas"])
 industries_slide("Industries We Cater To — cont.",
-    ["Paper & Pulp", "Petrochemical", "Power", "Zero Liquid Discharge", "Lithium"])
+    ["Lithium", "Petrochemical", "Power", "Zero Liquid Discharge", "Paper & Pulp"])
 
 # ---- 5. Organisation Chart — the original Quality Manual Annex-D2 chart,
 #          shown as its own document image (full-bleed, click to enlarge)
