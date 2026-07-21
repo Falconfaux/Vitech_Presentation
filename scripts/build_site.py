@@ -1683,7 +1683,7 @@ spec("Water & Desalination", "Zero Liquid Discharge", "Heat Exchanger", "Grasim 
       ("Size", "Ø 1.85/2.1 mtr × 8mm thk × 14 mtr L"),
       ("Tubes", "38.1mm OD × 0.711mm thk × 10.7 mtr L — qty 1,100 Nos."),
       ("Qty / Weight", "1 No. / 25 tons")],
-     69, layout="showcase", fill=True, panel_pos="bc")
+     69, layout="showcase", panel_pos="tl")
 
 spec("Water & Desalination", "Zero Liquid Discharge", "Heat Exchanger — Twin Units", "Hindustan Zinc Ltd & Hindalco Industries Ltd, India",
      [("Material", "SA 516 Gr.70 (shell) & SA 240 UNS S31254 (tube); tubesheets SA 516 Gr.70 + Ti.Gr.1 explosion bonded; tubes Titanium Gr.2 (welded)"),
@@ -1691,7 +1691,7 @@ spec("Water & Desalination", "Zero Liquid Discharge", "Heat Exchanger — Twin U
       ("Size B", "Ø 1.8 mtr × 10mm thk × 11.2 mtr L"),
       ("Tubes", "31.75mm OD × 0.711mm thk × 7.5m (qty 1,350) and ×8m (qty 1,600) Nos."),
       ("Qty / Weight", "1 No. each — A) 18 tons  B) 20 tons")],
-     70, layout="showcase", fill=True, panel_pos="bc")
+     70, layout="showcase", panel_pos="tl")
 
 spec("Water & Desalination", "Zero Liquid Discharge", "Crystallizer", "Hindustan Zinc Ltd, Hindalco Industries Ltd, Grasim Industries Ltd (Nagda, MP), India",
      [("Material", "SA 240 Gr. 31254 (6% Moly)"),
