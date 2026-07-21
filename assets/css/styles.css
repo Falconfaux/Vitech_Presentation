@@ -1254,10 +1254,13 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   font-size: calc(var(--fit,1) * 1.4rem);
 }
 /* Slides 12-13 only: their captions are long enough that 1.4rem wraps to two
-   lines in the narrower two-photo layout — sized down just enough to keep
-   every caption on one line down to a 1280x800 viewport. */
+   lines in the narrower two-photo layout — sized down and given tighter
+   side padding (plus the s13 column rebalance below) to keep every caption
+   on one line down to a 1280x800 viewport while staying as large as possible. */
 #s12 .showcase-cap, #s13 .showcase-cap {
-  font-size: calc(var(--fit,1) * .85rem);
+  font-size: calc(var(--fit,1) * 1rem);
+  padding-left: calc(var(--fit,1) * .4rem);
+  padding-right: calc(var(--fit,1) * .4rem);
 }
 #s11 .slide-title, #s12 .slide-title, #s13 .slide-title, #s14 .slide-title {
   font-size: calc(var(--fit,1) * clamp(1.9rem, 3vw, 2.6rem));
