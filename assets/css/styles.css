@@ -1473,6 +1473,13 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 .tpl-spec.layout-showcase.photo-fill.panel-compact .showcase-canvas > .media-full {
   padding-bottom: 0 !important;
 }
+/* s26b: "Weld Finishing" video slide — stays object-fit: contain (no crop),
+   but with much smaller reserves than the generic layout-showcase padding so
+   the video reads far larger; the old flat 9rem bottom reserve was the
+   dominant constraint. */
+#s26b .showcase-canvas .media-full {
+  padding: calc(var(--pad) * .2) calc(var(--pad) * .15) calc(var(--fit,1) * 2.2rem);
+}
 
 /* photo-fill: showcase variant without the blurred backdrop — each photo
    fills its cell edge-to-edge (object-fit: cover). Column widths are set
