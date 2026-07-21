@@ -1454,6 +1454,15 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 .tpl-spec.layout-showcase.photo-fill.panel-compact.panel-tl .showcase-canvas > .media-full {
   padding-top: 0 !important; padding-bottom: 0 !important;
 }
+/* s83/s84 (Heat Exchanger slides): two-photo showcase under a panel-tl card.
+   Push the left photo down clear of the panel (its own text card is taller
+   than the standard chrome allowance), and let the right photo — which has
+   no panel over it — grow to fill its cell since nothing docks at the
+   bottom of this layout anymore. */
+#s83 .showcase-cell:first-child .media-full { padding: calc(var(--fit,1) * 15rem) calc(var(--pad) * .3) calc(var(--fit,1) * 1rem); }
+#s84 .showcase-cell:first-child .media-full { padding: calc(var(--fit,1) * 19rem) calc(var(--pad) * .3) calc(var(--fit,1) * 1rem); }
+#s83 .showcase-cell:last-child .media-full,
+#s84 .showcase-cell:last-child .media-full { padding: calc(var(--fit,1) * 1rem) calc(var(--pad) * .3); }
 /* panel-right: push the compact panel to the RIGHT so the subject on the left
    of the frame reads clearly. The base showcase slide-inner only reserves
    half of --pad at the bottom (no +64px chrome allowance like the default
