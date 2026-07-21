@@ -839,11 +839,7 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 .industry-tile.has-photo:hover .industry-tile-bg { transform: scale(1.07); }
 .industry-tile.has-photo .industry-tile-scrim {
   position: absolute; inset: 0; z-index: 1;
-  background: linear-gradient(180deg,
-    rgba(var(--azure-deep-rgb), .05) 0%,
-    rgba(var(--azure-deep-rgb), .1) 45%,
-    rgba(var(--azure-deep-rgb), .85) 82%,
-    rgba(var(--azure-deep-rgb), .97) 100%);
+  background: none;
 }
 .industry-tile.has-photo span {
   position: relative; z-index: 2; text-align: left; width: 100%;
