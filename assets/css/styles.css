@@ -1415,7 +1415,7 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    photo. This variant lets the compact card grow wider and flows the spec pairs
    into two balanced columns so it stays short. Images are untouched. */
 .tpl-spec.layout-showcase.panel-compact.panel-wide .showcase-panel {
-  max-width: min(80%, 960px);
+  max-width: 80%;
 }
 .tpl-spec.layout-showcase.panel-compact.panel-wide .spec-list {
   display: block;
@@ -1549,6 +1549,13 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 .tpl-gallery .gallery-grid .media-frame:hover { transform: translateY(-4px); border-color: var(--azure-bright); }
 .tpl-gallery .gallery-caption { text-align: center; font-size: .8rem; color: var(--steel-light); margin-top: 1rem; }
 
+/* Toolbox Talks — let the photo grow much larger by reclaiming the
+   template's default bottom breathing room and tightening the
+   caption's spacing */
+#s100 .slide-inner { padding-bottom: var(--pad); }
+#s100 .gallery-grid { margin-top: 1rem; }
+#s100 .gallery-caption { margin-top: .5rem; }
+
 /* ---------------------------------------------------------------------- */
 /* Template: closer                                                        */
 /* ---------------------------------------------------------------------- */
@@ -1653,7 +1660,8 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   /* the desktop panel-bc rule sets a padding-bottom that is more specific than
      the reset above — re-flush the mobile bottom bar to the screen edge */
   .tpl-spec.layout-showcase.panel-compact.panel-bc .slide-inner { padding-bottom: 0; }
-  .tpl-spec.layout-showcase.panel-compact .showcase-panel {
+  .tpl-spec.layout-showcase.panel-compact .showcase-panel,
+  .tpl-spec.layout-showcase.panel-compact.panel-wide .showcase-panel {
     width: 100%; max-width: none; height: auto; max-height: none; overflow: visible;
     border-radius: 16px 16px 0 0;
     /* right/bottom room so the copy clears the fixed ☰ menu + nav arrows */
