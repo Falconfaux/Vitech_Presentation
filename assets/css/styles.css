@@ -483,6 +483,7 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
   display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(1.75rem, 4.5vw, 4.5rem); align-items: start;
 }
 .tpl-prose p { color: #d7dcea; font-size: calc(var(--fit,1) * 1.32rem); line-height: calc(var(--fit,1) * 1.64); margin-bottom: calc(var(--fit,1) * 1.4rem); }
+.tpl-prose p strong { color: var(--amber); font-weight: 700; }
 /* prose fact rows read as body copy, not fine print */
 .tpl-prose .spec-row { font-size: calc(var(--fit,1) * 1.04rem); padding: calc(var(--fit,1) * .65rem) 0; }
 .tpl-prose .spec-row .k { font-size: .82rem; }

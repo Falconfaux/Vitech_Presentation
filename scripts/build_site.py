@@ -5,7 +5,7 @@ Reads structured slide content (transcribed from the converted .pptx) and
 renders a single static index.html. Re-run with `python3 scripts/build_site.py`
 whenever slide content changes.
 """
-import json, os, html, functools
+import json, os, html, functools, re
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -27,6 +27,11 @@ def esc(s):
 
 def nb(s):
     return esc(s).replace("\n", "<br>")
+
+# Lightweight **bold** markup for prose paragraphs, applied after escaping
+# so it can't be used to smuggle raw HTML through paragraph text.
+def strongify(s):
+    return re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", s)
 
 SLIDES = []  # list of dicts: id, section, tpl, html
 
@@ -293,7 +298,7 @@ def prose(section, eyebrow, title, paragraphs, stats=None, side_title=None, side
         chips_html = '<div class="chip-row reveal reveal-d3">{0}</div>'.format(
             "".join('<span class="chip{0}">{1}</span>'.format(" on" if c.get("on") else "", esc(c["t"])) for c in chips)
         )
-    p_html = "".join('<p>{0}</p>'.format(nb(p)) for p in paragraphs)
+    p_html = "".join('<p>{0}</p>'.format(strongify(nb(p))) for p in paragraphs)
     eyebrow_html = '<div class="eyebrow reveal">{0}</div>'.format(esc(eyebrow)) if eyebrow else ""
     body = '''
     <section class="slide tpl-prose" id="s{id}" data-section="{section}">
@@ -1042,10 +1047,10 @@ cover("Cover",
 # ---- 2. Company Introduction -------------------------------------------
 prose("Company Overview", None, "Company Introduction",
       [
-        "VITECH GROUP was established in the year 1992 and is a professionally managed engineering company.",
+        "VITECH GROUP was established in the year **1992** and is a professionally managed engineering company.",
         "VITECH is specialized in mechanical design & fabrication of equipment catering to Oil/Gas, Water & "
         "Desalination, Petrochemical, Paper & Pulp, Fertilizer, Edible Oil, Pharmaceutical, Dairy & other industries, "
-        "across all grades of materials — for the last 33 years, adapting to change and working with total dedication.",
+        "across all grades of materials — for the last **33 years**, adapting to change and working with total dedication.",
       ],
       labeled_chips=[
         {"label": "Material Grades We Fabricate",
