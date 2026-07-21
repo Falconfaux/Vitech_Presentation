@@ -959,10 +959,10 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    its peers, so give the cells larger type than the shared .tpl-table rules.
    16 stays below 23's bump since it carries two dense tables (more rows). */
 #s16 .slide-title { font-size: clamp(1.7rem, 2.6vw, 2.3rem); max-width: 34ch; }
-#s16 table.spec-table { font-size: calc(var(--fit,1) * 1.32rem); }
-#s16 table.spec-table th { font-size: calc(var(--fit,1) * 1.05rem); padding: calc(var(--fit,1) * var(--fit,1) * .85rem) calc(var(--fit,1) * 1.1rem); }
-#s16 table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .78rem) calc(var(--fit,1) * 1.1rem); line-height: calc(var(--fit,1) * var(--fit,1) * 1.45); }
-#s16 .table-note { font-size: calc(var(--fit,1) * 1.1rem); }
+#s16 table.spec-table { font-size: calc(var(--fit,1) * 1.38rem); }
+#s16 table.spec-table th { font-size: calc(var(--fit,1) * 1.08rem); padding: calc(var(--fit,1) * var(--fit,1) * .88rem) calc(var(--fit,1) * 1.15rem); }
+#s16 table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .82rem) calc(var(--fit,1) * 1.15rem); line-height: calc(var(--fit,1) * var(--fit,1) * 1.48); }
+#s16 .table-note { font-size: calc(var(--fit,1) * 1.15rem); }
 
 #s23 table.spec-table { font-size: calc(var(--fit,1) * 1.32rem); table-layout: fixed; }
 #s23 table.spec-table th { font-size: calc(var(--fit,1) * 1.02rem); padding: calc(var(--fit,1) * var(--fit,1) * 1.1rem) calc(var(--fit,1) * 1.35rem); }
