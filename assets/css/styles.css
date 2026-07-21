@@ -503,25 +503,18 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 #s2 p { margin-bottom: calc(var(--fit,1) * .9rem); }
 #s2 .spec-row { padding: calc(var(--fit,1) * .38rem) 0; }
 #s2 .spec-list { margin-bottom: calc(var(--fit,1) * .85rem); }
-#s2 .labeled-chip-group { margin-top: calc(var(--fit,1) * .95rem); }
-#s2 .labeled-chip-group h4 { margin-bottom: calc(var(--fit,1) * .5rem); }
-#s2 .chip-row { margin-top: calc(var(--fit,1) * .6rem); }
-/* Eyebrow removed on this slide — let the big title sit higher and open the deck cleaner */
+/* No eyebrow on this slide — let the big title sit higher and open the deck cleaner */
 #s2 .slide-inner { padding-top: max(var(--chrome-top), calc(var(--fit,1) * clamp(1.5rem, 4vh, 3rem))); }
-/* Opening sentence reads as a lead: larger, lighter, amber key figures */
-#s2 .lead { font-size: calc(var(--fit,1) * 1.72rem); line-height: calc(var(--fit,1) * 1.4); color: #eef1f8; margin-bottom: calc(var(--fit,1) * 1.15rem); }
-#s2 .lead strong { color: var(--amber); font-weight: 700; }
-/* Right column now stacks two matching cards — balance the previously empty space */
-#s2 .content-grid > div:last-child { display: flex; flex-direction: column; gap: calc(var(--fit,1) * 1.4rem); }
-#s2 .s2-materials h3 { margin-bottom: calc(var(--fit,1) * .9rem); }
-#s2 .s2-materials .chip-row { margin-top: 0; }
-/* breathing room between the big title and the lead sentence */
-#s2 .content-grid { margin-top: calc(var(--fit,1) * 1.15rem); }
-/* credential stat band anchors the bottom of the left column */
-#s2 .stat-row { margin: calc(var(--fit,1) * 1.5rem) 0 0; gap: calc(var(--fit,1) * 1rem); }
-#s2 .stat-tile { flex: 1; min-width: 0; }
-#s2 .stat-tile .num { font-size: calc(var(--fit,1) * 2.05rem); }
-#s2 .stat-tile .num span { font-size: .62em; }
+/* Right column stacks two matching cards ("We specialize in" + material
+   grades); tighten card padding/chip size so both fit without the fit
+   engine bottoming out on this already-dense slide. */
+#s2 .content-grid-right { display: flex; flex-direction: column; gap: calc(var(--fit,1) * .8rem); }
+#s2 .content-grid-right .side-panel { padding: calc(var(--fit,1) * .95rem) calc(var(--fit,1) * 1.2rem); }
+#s2 .content-grid-right .side-panel h3 { margin-bottom: calc(var(--fit,1) * .5rem); }
+#s2 .content-grid-right .side-panel ul { gap: calc(var(--fit,1) * .4rem); }
+#s2 .content-grid-right .side-panel li { line-height: calc(var(--fit,1) * 1.22); }
+#s2 .content-grid-right .chip-row { margin-top: calc(var(--fit,1) * .45rem); gap: calc(var(--fit,1) * .4rem); }
+#s2 .content-grid-right .chip { font-size: .78rem; padding: calc(var(--fit,1) * .3rem) calc(var(--fit,1) * .62rem); }
 .tpl-prose .stat-row { display: flex; flex-wrap: wrap; gap: calc(var(--fit,1) * 1.4rem); margin: calc(var(--fit,1) * 2.2rem) 0; }
 .tpl-prose .spec-list { margin-bottom: calc(var(--fit,1) * 1.6rem); }
 .labeled-chip-group { margin-top: calc(var(--fit,1) * 1.9rem); }
@@ -1259,6 +1252,12 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 /* Slides 11-14 only: workshop-showcase captions/titles requested larger for TV legibility */
 #s11 .showcase-cap, #s12 .showcase-cap, #s13 .showcase-cap, #s14 .showcase-cap {
   font-size: calc(var(--fit,1) * 1.4rem);
+}
+/* Slides 12-13 only: their captions are long enough that 1.4rem wraps to two
+   lines in the narrower two-photo layout — sized down just enough to keep
+   every caption on one line down to a 1280x800 viewport. */
+#s12 .showcase-cap, #s13 .showcase-cap {
+  font-size: calc(var(--fit,1) * .85rem);
 }
 #s11 .slide-title, #s12 .slide-title, #s13 .slide-title, #s14 .slide-title {
   font-size: calc(var(--fit,1) * clamp(1.9rem, 3vw, 2.6rem));

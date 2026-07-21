@@ -266,38 +266,47 @@ def prose(section, eyebrow, title, paragraphs, stats=None, side_title=None, side
             for k, v in fact_rows
         )
         fact_rows_html = '<div class="spec-list reveal reveal-d2">{0}</div>'.format(rows)
+    side_html = ""
+    if side_items:
+        items = "".join('<li>{0}</li>'.format(nb(i)) for i in side_items)
+        wide_cls = " wide" if len(side_items) > 10 else ""
+        side_html = '''<div class="side-panel{2} reveal reveal-d2"><h3>{0}</h3><ul>{1}</ul></div>'''.format(esc(side_title or ""), items, wide_cls)
+    # When there's already a side panel, render labeled_chips as a matching
+    # card stacked with it in the right column instead of tacking them onto
+    # the (often already dense) left column.
     labeled_chips_html = ""
     if labeled_chips:
+        put_in_side = bool(side_html)
+        cls, tag = ("side-panel", "h3") if put_in_side else ("labeled-chip-group", "h4")
         groups = "".join(
-            '<div class="labeled-chip-group"><h4>{0}</h4><div class="chip-row">{1}</div></div>'.format(
-                esc(g["label"]),
-                "".join('<span class="chip">{0}</span>'.format(esc(t)) for t in g["items"])
+            '<div class="{cls} reveal reveal-d2"><{tag}>{label}</{tag}><div class="chip-row">{chips}</div></div>'.format(
+                cls=cls, tag=tag, label=esc(g["label"]),
+                chips="".join('<span class="chip">{0}</span>'.format(esc(t)) for t in g["items"])
             ) for g in labeled_chips
         )
-        labeled_chips_html = '<div class="reveal reveal-d3">{0}</div>'.format(groups)
+        if put_in_side:
+            side_html = '<div class="content-grid-right">{0}{1}</div>'.format(side_html, groups)
+        else:
+            labeled_chips_html = '<div class="reveal reveal-d3">{0}</div>'.format(groups)
     chips_html = ""
     if chips:
         chips_html = '<div class="chip-row reveal reveal-d3">{0}</div>'.format(
             "".join('<span class="chip{0}">{1}</span>'.format(" on" if c.get("on") else "", esc(c["t"])) for c in chips)
         )
     p_html = "".join('<p>{0}</p>'.format(nb(p)) for p in paragraphs)
-    side_html = ""
-    if side_items:
-        items = "".join('<li>{0}</li>'.format(nb(i)) for i in side_items)
-        wide_cls = " wide" if len(side_items) > 10 else ""
-        side_html = '''<div class="side-panel{2} reveal reveal-d2"><h3>{0}</h3><ul>{1}</ul></div>'''.format(esc(side_title or ""), items, wide_cls)
+    eyebrow_html = '<div class="eyebrow reveal">{0}</div>'.format(esc(eyebrow)) if eyebrow else ""
     body = '''
     <section class="slide tpl-prose" id="s{id}" data-section="{section}">
       {bg}
       <div class="slide-inner{centercls}">
-        <div class="eyebrow reveal">{eyebrow}</div>
+        {eyebrow}
         <h2 class="slide-title reveal reveal-d1">{title}</h2>
         <div class="content-grid">
           <div class="reveal reveal-d2">{paras}{facts}{stats}{labchips}{chips}</div>
           {side}
         </div>
       </div>
-    </section>'''.format(id=id, section=esc(section), bg=lazybg(bg_img) if bg_img else "", eyebrow=esc(eyebrow),
+    </section>'''.format(id=id, section=esc(section), bg=lazybg(bg_img) if bg_img else "", eyebrow=eyebrow_html,
                           centercls=" centered" if center else "",
                           title=title, paras=p_html, facts=fact_rows_html, stats=stats_html,
                           labchips=labeled_chips_html, chips=chips_html, side=side_html)
@@ -1031,7 +1040,7 @@ cover("Cover",
       ])
 
 # ---- 2. Company Introduction -------------------------------------------
-prose("Company Overview", "Since 1992", "Company Introduction",
+prose("Company Overview", None, "Company Introduction",
       [
         "VITECH GROUP was established in the year 1992 and is a professionally managed engineering company.",
         "VITECH is specialized in mechanical design & fabrication of equipment catering to Oil/Gas, Water & "
