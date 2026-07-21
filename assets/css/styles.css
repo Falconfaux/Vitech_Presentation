@@ -500,6 +500,9 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 #s2 .content-grid-right .side-panel li { line-height: calc(var(--fit,1) * 1.22); }
 #s2 .content-grid-right .chip-row { margin-top: calc(var(--fit,1) * .45rem); gap: calc(var(--fit,1) * .4rem); }
 #s2 .content-grid-right .chip { font-size: .78rem; padding: calc(var(--fit,1) * .3rem) calc(var(--fit,1) * .62rem); }
+/* Slide 3: nudge the centered heading+body down from dead-center, clearing
+   the fixed brand-mark/eyebrow row it was overlapping before */
+#s3 .slide-inner.centered { padding-top: clamp(2.5rem, 6vh, 4.5rem); }
 .tpl-prose .stat-row { display: flex; flex-wrap: wrap; gap: calc(var(--fit,1) * 1.4rem); margin: calc(var(--fit,1) * 2.2rem) 0; }
 .tpl-prose .spec-list { margin-bottom: calc(var(--fit,1) * 1.6rem); }
 .labeled-chip-group { margin-top: calc(var(--fit,1) * 1.9rem); }
@@ -547,11 +550,11 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
    halves are filled rather than leaving a blank right column. Targeted by
    section (not #sNN) so slide renumbering never detaches these rules. */
 .tpl-prose[data-section="Electrical & Instrumentation"] .content-grid { row-gap: calc(var(--fit,1) * 1.3rem); }
-.tpl-prose[data-section="Electrical & Instrumentation"] p { font-size: calc(var(--fit,1) * 1.65rem); line-height: calc(var(--fit,1) * 1.55); margin-bottom: 0; }
+.tpl-prose[data-section="Electrical & Instrumentation"] p { font-size: calc(var(--fit,1) * 1.72rem); line-height: calc(var(--fit,1) * 1.52); margin-bottom: 0; }
 .tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide { margin-top: 0; padding: calc(var(--fit,1) * 1.8rem) calc(var(--fit,1) * 2.1rem); }
-.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide h3 { font-size: .9rem; margin-bottom: calc(var(--fit,1) * 1rem); }
+.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide h3 { font-size: .95rem; margin-bottom: calc(var(--fit,1) * 1rem); }
 .tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide ul { columns: 2; column-gap: 3rem; }
-.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide li { font-size: calc(var(--fit,1) * 1.22rem); line-height: calc(var(--fit,1) * 1.42); margin-bottom: calc(var(--fit,1) * .68rem); }
+.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide li { font-size: calc(var(--fit,1) * 1.28rem); line-height: calc(var(--fit,1) * 1.4); margin-bottom: calc(var(--fit,1) * .68rem); }
 
 /* ---------------------------------------------------------------------- */
 /* Template: visual (org chart / layout / location map — image forward)   */
@@ -953,14 +956,30 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s23 table.spec-table th:nth-child(4), #s23 table.spec-table td:nth-child(4) { width: 16%; }
 
 /* Slide 20: same issue as #s23 above — two independent tables must share
-   identical column widths so their VHEPL/VEPL/VFPL boundaries line up. */
+   identical column widths so their VHEPL/VEPL/VFPL boundaries line up.
+   Column 2 widened (and column 1 narrowed to compensate) so the 3-line
+   Plate Bending M/C cell isn't cramped against its single-line neighbors. */
 #s20 table.spec-table { table-layout: fixed; }
-#s20 table.spec-table th:nth-child(1), #s20 table.spec-table td:nth-child(1) { width: 42%; }
-#s20 table.spec-table th:nth-child(2), #s20 table.spec-table td:nth-child(2) { width: 32%; }
+#s20 table.spec-table th:nth-child(1), #s20 table.spec-table td:nth-child(1) { width: 38%; }
+#s20 table.spec-table th:nth-child(2), #s20 table.spec-table td:nth-child(2) { width: 36%; }
 #s20 table.spec-table th:nth-child(3), #s20 table.spec-table td:nth-child(3) { width: 13%; }
 #s20 table.spec-table th:nth-child(4), #s20 table.spec-table td:nth-child(4) { width: 13%; }
+/* the Plate Bending M/C row's line-broken cell (3 lines) adds row height —
+   tighten line-height/padding on this table only so it doesn't overflow */
+#s20 table.spec-table td { line-height: 1.28; padding-top: calc(var(--fit,1) * var(--fit,1) * .7rem); padding-bottom: calc(var(--fit,1) * var(--fit,1) * .7rem); }
 .table-grid-2col .table-wrap { align-self: stretch; display: flex; flex-direction: column; }
 .table-grid-2col .table-wrap table.spec-table { height: 100%; }
+
+/* Slide 106: two independent stacked tables (Heat Exchanger / Crystallizer)
+   each auto-size their own label column, so the two tables' left edges
+   don't line up. Force a shared label-column width on both. */
+#s106 table.spec-table { table-layout: fixed; }
+#s106 table.spec-table th:first-child, #s106 table.spec-table td:first-child { width: 34%; }
+
+/* Slide 108: .table-grid-2col is a 2-column grid, but this slide has 3
+   stacked tables — the 3rd wraps alone to its own row, leaving a gap next
+   to it. Give this slide its own 3-column row instead. */
+#s108 .table-grid-2col { grid-template-columns: repeat(3, 1fr); }
 
 /* ---------------------------------------------------------------------- */
 /* Template: water (rainwater harvesting + wastewater recycling)           */
@@ -1260,12 +1279,12 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   width: 100%;
   padding: calc(var(--fit,1) * 1.05rem) calc(var(--fit,1) * 1.4rem);
   border-radius: 18px;
-  /* frosted glass: far more transparent than before so the photo reads through,
-     with a heavier blur + text-shadow keeping the copy legible */
-  background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .28), rgba(var(--azure-deep-rgb), .52));
+  /* frosted glass: ~15-20% opacity so the photo reads clearly through the
+     card, with a heavier blur + text-shadow keeping the copy legible */
+  background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .15), rgba(var(--azure-deep-rgb), .28));
   border: 1px solid rgba(var(--azure-bright-rgb), .28);
-  backdrop-filter: blur(18px) saturate(1.1);
-  -webkit-backdrop-filter: blur(18px) saturate(1.1);
+  backdrop-filter: blur(22px) saturate(1.1);
+  -webkit-backdrop-filter: blur(22px) saturate(1.1);
   box-shadow: 0 18px 50px rgba(0,0,0,.4);
 }
 .tpl-spec.layout-showcase .showcase-panel .eyebrow,
@@ -1342,7 +1361,7 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s51 .showcase-canvas::before, #s52 .showcase-canvas::before, #s53 .showcase-canvas::before,
 #s54 .showcase-canvas::before, #s55 .showcase-canvas::before, #s56 .showcase-canvas::before,
 #s57 .showcase-canvas::before, #s59 .showcase-canvas::before, #s62 .showcase-canvas::before,
-#s64 .showcase-canvas::before, #s67 .showcase-canvas::before, #s69 .showcase-canvas::before,
+#s64 .showcase-canvas::before, #s65 .showcase-canvas::before, #s67 .showcase-canvas::before, #s69 .showcase-canvas::before,
 #s79 .showcase-canvas::before, #s85 .showcase-canvas::before, #s86 .showcase-canvas::before,
 #s90 .showcase-canvas::before {
   content: ""; position: absolute; inset: 0; z-index: 4; pointer-events: none;
@@ -1367,8 +1386,8 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   /* size the chip to its content so it never clips or shows a scrollbar on
      large TV/monitor aspect ratios (the copy is intrinsically short) */
   max-height: none; overflow: visible;
-  background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .30), rgba(var(--azure-deep-rgb), .56));
-  backdrop-filter: blur(22px) saturate(1.1); -webkit-backdrop-filter: blur(22px) saturate(1.1);
+  background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .16), rgba(var(--azure-deep-rgb), .30));
+  backdrop-filter: blur(26px) saturate(1.1); -webkit-backdrop-filter: blur(26px) saturate(1.1);
   padding: calc(var(--fit,1) * .62rem) calc(var(--fit,1) * .82rem);
 }
 .tpl-spec.layout-showcase.panel-compact .eyebrow {
@@ -1457,6 +1476,10 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   padding-bottom: calc(var(--pad) * .5 + 4.5rem);
 }
 .tpl-spec.layout-showcase.panel-compact.panel-right .spec-list { justify-content: flex-end; }
+/* s46: only 2 spec-rows means the fit-content panel width stays narrow,
+   wrapping the long Material value awkwardly mid-word against the
+   right-aligned text — give this one a bit more width to breathe. */
+#s46 .showcase-panel { max-width: min(66%, 760px); }
 /* panel-bc: dock the compact panel bottom-CENTER instead of bottom-left —
    used across the majority of equipment showcase slides so the caption
    reads as anchored to the whole photo rather than hugging one corner. */
@@ -1470,6 +1493,24 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   padding-bottom: calc(var(--pad) * .5);
 }
 .tpl-spec.layout-showcase.panel-compact.panel-bc .spec-list { justify-content: flex-start; }
+/* panel-tc: dock the compact panel top-CENTER — same horizontal centering as
+   panel-bc, but anchored to the top of the frame instead of the bottom. */
+.tpl-spec.layout-showcase.panel-compact.panel-tc .slide-inner {
+  justify-content: flex-start;
+  align-items: center; text-align: left;
+  padding-left: calc(var(--pad) * .6); padding-right: calc(var(--pad) * .6);
+}
+.tpl-spec.layout-showcase.panel-compact.panel-tc .spec-list { justify-content: flex-start; }
+/* panel-deep: push a bottom-docked panel (default left or panel-right)
+   closer to the true bottom edge by dropping the standard chrome-clearance
+   reserve (+3.4rem / +4.5rem) those docking modes normally add — landing at
+   the same padding-bottom panel-bc already uses safely (going any lower
+   pushes the card past the frame's bottom edge). Same selector specificity
+   as those docking rules, defined after them so it wins the tie-break
+   regardless of which horizontal-docking modifier it's combined with. */
+.tpl-spec.layout-showcase.panel-compact.panel-deep .slide-inner {
+  padding-bottom: calc(var(--pad) * .5);
+}
 /* photo-fill compact: photos fill the frame edge-to-edge; the small frosted
    caption chip (≤~10% of screen) simply floats over the lower-left corner, so
    no bottom band is reserved and nothing shrinks the image. */
@@ -1565,6 +1606,23 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s101 .slide-inner { padding-bottom: var(--pad); }
 #s101 .gallery-grid { margin-top: 1rem; }
 #s101 .gallery-caption { margin-top: .5rem; }
+
+/* Client Appreciation Letters (s112-118) &amp; Certifications (s120-128) —
+   same reclaim as #s101: shrink the title so it stays a single line and
+   takes less vertical room, and drop the template's default bottom
+   breathing room so the photos grow taller and reach the bottom edge. */
+.tpl-gallery[data-section="Client Appreciation"] .slide-inner,
+.tpl-gallery[data-section="Certifications"] .slide-inner {
+  padding-bottom: var(--pad);
+}
+.tpl-gallery[data-section="Client Appreciation"] .slide-title,
+.tpl-gallery[data-section="Certifications"] .slide-title {
+  font-size: clamp(1.7rem, 3vw, 2.6rem);
+}
+.tpl-gallery[data-section="Client Appreciation"] .gallery-grid,
+.tpl-gallery[data-section="Certifications"] .gallery-grid {
+  margin-top: 1rem;
+}
 
 /* ---------------------------------------------------------------------- */
 /* Template: closer                                                        */
