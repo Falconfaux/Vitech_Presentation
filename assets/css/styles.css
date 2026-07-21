@@ -1441,6 +1441,12 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s84 .showcase-cell:first-child .media-full { padding: calc(var(--fit,1) * 19rem) calc(var(--pad) * .3) calc(var(--fit,1) * 1rem); }
 #s83 .showcase-cell:last-child .media-full,
 #s84 .showcase-cell:last-child .media-full { padding: calc(var(--fit,1) * 1rem) calc(var(--pad) * .3); }
+/* s68 & s70 (Hot/Cold Interpass Heat Exchanger — Site Erection): the caption
+   panel docks bottom-left over the first cell only, but the standard n2
+   recipe reserves the same 8.9rem caption band on the second cell too, even
+   though nothing floats over it there — let that photo grow down to fill it. */
+#s68 .showcase-cell:last-child .media-full,
+#s70 .showcase-cell:last-child .media-full { padding: calc(var(--pad) * .55) calc(var(--pad) * .12) calc(var(--fit,1) * 1rem); }
 /* panel-right: push the compact panel to the RIGHT so the subject on the left
    of the frame reads clearly. The base showcase slide-inner only reserves
    half of --pad at the bottom (no +64px chrome allowance like the default
