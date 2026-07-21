@@ -1336,23 +1336,23 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    already carries the photo-fill top scrim, so the frame goes on the free
    ::before. box-sizing:border-box keeps the azure border inside the canvas;
    the inset box-shadow paints the white ring just inside it. */
-#s27 .showcase-canvas::before, #s28 .showcase-canvas::before, #s32 .showcase-canvas::before,
-#s34 .showcase-canvas::before, #s37 .showcase-canvas::before, #s39 .showcase-canvas::before,
-#s42 .showcase-canvas::before, #s43 .showcase-canvas::before, #s46 .showcase-canvas::before,
-#s50 .showcase-canvas::before, #s51 .showcase-canvas::before, #s52 .showcase-canvas::before,
-#s53 .showcase-canvas::before, #s54 .showcase-canvas::before, #s55 .showcase-canvas::before,
-#s56 .showcase-canvas::before, #s58 .showcase-canvas::before, #s61 .showcase-canvas::before,
-#s63 .showcase-canvas::before, #s66 .showcase-canvas::before, #s68 .showcase-canvas::before,
-#s78 .showcase-canvas::before, #s84 .showcase-canvas::before, #s85 .showcase-canvas::before,
-#s89 .showcase-canvas::before {
+#s28 .showcase-canvas::before, #s29 .showcase-canvas::before, #s33 .showcase-canvas::before,
+#s35 .showcase-canvas::before, #s38 .showcase-canvas::before, #s40 .showcase-canvas::before,
+#s43 .showcase-canvas::before, #s44 .showcase-canvas::before, #s47 .showcase-canvas::before,
+#s51 .showcase-canvas::before, #s52 .showcase-canvas::before, #s53 .showcase-canvas::before,
+#s54 .showcase-canvas::before, #s55 .showcase-canvas::before, #s56 .showcase-canvas::before,
+#s57 .showcase-canvas::before, #s59 .showcase-canvas::before, #s62 .showcase-canvas::before,
+#s64 .showcase-canvas::before, #s67 .showcase-canvas::before, #s69 .showcase-canvas::before,
+#s79 .showcase-canvas::before, #s85 .showcase-canvas::before, #s86 .showcase-canvas::before,
+#s90 .showcase-canvas::before {
   content: ""; position: absolute; inset: 0; z-index: 4; pointer-events: none;
   border: 6px solid var(--azure);
   box-shadow: inset 0 0 0 3px var(--white);
 }
 /* the 5 listed multi-photo slides already have per-cell azure borders + a white
    grid gap; add the matching white inner ring to each photo. */
-#s79 .showcase-cell::after, #s81 .showcase-cell::after, #s86 .showcase-cell::after,
-#s90 .showcase-cell::after, #s93 .showcase-cell::after {
+#s80 .showcase-cell::after, #s82 .showcase-cell::after, #s87 .showcase-cell::after,
+#s91 .showcase-cell::after, #s94 .showcase-cell::after {
   box-shadow: inset 0 0 0 3px var(--white);
 }
 .tpl-spec.layout-showcase.panel-compact .slide-inner {
@@ -1424,7 +1424,7 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 /* s57 (9-Vessel program) has one huge multi-dimension "Sizes" value that would
    strand the other column empty; keep its wide card single-column so the long
    value wraps across the full width and the card stays balanced and short. */
-#s57 .spec-list { columns: 1; }
+#s58 .spec-list { columns: 1; }
 /* panel-tl: dock the compact panel to the TOP-left so a tall vessel below it
    stays fully visible (used on the cladded column slides) */
 .tpl-spec.layout-showcase.panel-compact.panel-tl .slide-inner { justify-content: flex-start; }
@@ -1437,16 +1437,16 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    than the standard chrome allowance), and let the right photo — which has
    no panel over it — grow to fill its cell since nothing docks at the
    bottom of this layout anymore. */
-#s83 .showcase-cell:first-child .media-full { padding: calc(var(--fit,1) * 15rem) calc(var(--pad) * .3) calc(var(--fit,1) * 1rem); }
-#s84 .showcase-cell:first-child .media-full { padding: calc(var(--fit,1) * 19rem) calc(var(--pad) * .3) calc(var(--fit,1) * 1rem); }
-#s83 .showcase-cell:last-child .media-full,
-#s84 .showcase-cell:last-child .media-full { padding: calc(var(--fit,1) * 1rem) calc(var(--pad) * .3); }
+#s84 .showcase-cell:first-child .media-full { padding: calc(var(--fit,1) * 15rem) calc(var(--pad) * .3) calc(var(--fit,1) * 1rem); }
+#s85 .showcase-cell:first-child .media-full { padding: calc(var(--fit,1) * 19rem) calc(var(--pad) * .3) calc(var(--fit,1) * 1rem); }
+#s84 .showcase-cell:last-child .media-full,
+#s85 .showcase-cell:last-child .media-full { padding: calc(var(--fit,1) * 1rem) calc(var(--pad) * .3); }
 /* s68 & s70 (Hot/Cold Interpass Heat Exchanger — Site Erection): the caption
    panel docks bottom-left over the first cell only, but the standard n2
    recipe reserves the same 8.9rem caption band on the second cell too, even
    though nothing floats over it there — let that photo grow down to fill it. */
-#s68 .showcase-cell:last-child .media-full,
-#s70 .showcase-cell:last-child .media-full { padding: calc(var(--pad) * .55) calc(var(--pad) * .12) calc(var(--fit,1) * 1rem); }
+#s69 .showcase-cell:last-child .media-full,
+#s71 .showcase-cell:last-child .media-full { padding: calc(var(--pad) * .55) calc(var(--pad) * .12) calc(var(--fit,1) * 1rem); }
 /* panel-right: push the compact panel to the RIGHT so the subject on the left
    of the frame reads clearly. The base showcase slide-inner only reserves
    half of --pad at the bottom (no +64px chrome allowance like the default
@@ -1477,11 +1477,11 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 .tpl-spec.layout-showcase.photo-fill.panel-compact .showcase-canvas > .media-full {
   padding-bottom: 0 !important;
 }
-/* s26b: "Weld Finishing" video slide — stays object-fit: contain (no crop),
+/* s27: "Weld Finishing" video slide — stays object-fit: contain (no crop),
    but with much smaller reserves than the generic layout-showcase padding so
    the video reads far larger; the old flat 9rem bottom reserve was the
    dominant constraint. */
-#s26b .showcase-canvas .media-full {
+#s27 .showcase-canvas .media-full {
   padding: calc(var(--pad) * .2) calc(var(--pad) * .15) calc(var(--fit,1) * 2.2rem);
 }
 
@@ -1562,9 +1562,9 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 /* Toolbox Talks — let the photo grow much larger by reclaiming the
    template's default bottom breathing room and tightening the
    caption's spacing */
-#s100 .slide-inner { padding-bottom: var(--pad); }
-#s100 .gallery-grid { margin-top: 1rem; }
-#s100 .gallery-caption { margin-top: .5rem; }
+#s101 .slide-inner { padding-bottom: var(--pad); }
+#s101 .gallery-grid { margin-top: 1rem; }
+#s101 .gallery-caption { margin-top: .5rem; }
 
 /* ---------------------------------------------------------------------- */
 /* Template: closer                                                        */
@@ -1663,12 +1663,6 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   .tpl-spec.layout-showcase.photo-fill:not(.showcase-photos):not(.panel-side) .showcase-canvas > .media-full {
     padding: 0 !important;
   }
-  /* s69 & s71 (Cold Interpass Heat Exchanger / Converter): let these two
-     tall equipment photos run the full slide height instead of stopping at
-     the reserved 34vh caption band — the caption panel already floats over
-     the photo as frosted glass, so it reads fine docked over the extra
-     photo height too. */
-  #s69 .showcase-canvas, #s71 .showcase-canvas { inset: 0; }
   .tpl-spec.layout-showcase.panel-compact .slide-inner {
     align-items: stretch; justify-content: flex-end;
     padding: 0;
