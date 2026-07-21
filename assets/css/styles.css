@@ -963,9 +963,16 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s16 table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .7rem) calc(var(--fit,1) * 1.05rem); line-height: calc(var(--fit,1) * var(--fit,1) * 1.42); }
 #s16 .table-note { font-size: calc(var(--fit,1) * 1.05rem); }
 
-#s23 table.spec-table { font-size: calc(var(--fit,1) * 1.32rem); }
+#s23 table.spec-table { font-size: calc(var(--fit,1) * 1.32rem); table-layout: fixed; }
 #s23 table.spec-table th { font-size: calc(var(--fit,1) * 1.02rem); padding: calc(var(--fit,1) * var(--fit,1) * 1.1rem) calc(var(--fit,1) * 1.35rem); }
 #s23 table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * 1.05rem) calc(var(--fit,1) * 1.35rem); }
+/* Two independent tables on this slide must share identical column
+   widths so their VHEPL/VEPL/VFPL boundaries line up (table-layout:auto
+   would size each table's columns from its own content only). */
+#s23 table.spec-table th:nth-child(1), #s23 table.spec-table td:nth-child(1) { width: 32%; }
+#s23 table.spec-table th:nth-child(2), #s23 table.spec-table td:nth-child(2) { width: 30%; }
+#s23 table.spec-table th:nth-child(3), #s23 table.spec-table td:nth-child(3) { width: 22%; }
+#s23 table.spec-table th:nth-child(4), #s23 table.spec-table td:nth-child(4) { width: 16%; }
 .table-grid-2col .table-wrap { align-self: stretch; display: flex; flex-direction: column; }
 .table-grid-2col .table-wrap table.spec-table { height: 100%; }
 
