@@ -1381,7 +1381,7 @@ spec("Oil, Gas, Lithium & Aerospace", "Oil & Petrochemical", "Tube Bundle for He
       ("Tube material", "SA213 TP304/304L"),
       ("Size", "Ø 1350/1917mm × 10258mm overall length"),
       ("Qty / Weight", "4 / 105 MT")],
-     84, panel_pos="bc")
+     84, fill=True)
 
 spec("Oil, Gas, Lithium & Aerospace", "Oil & Petrochemical", "Ethane Tower Heat Pump Compressor Reflux Drum", "Reliance Industries, Nagothane",
      [("Material", "SA 240 Gr. 304/304L dual certified"),
@@ -1393,7 +1393,7 @@ spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Demethanizer Prestripper No.
      [("Material", "SA 240 Gr. 304/304L dual certified"),
       ("Size", "Ø 1600/2500mm ID × 46,000mm L"),
       ("Total qty / weight", "1 No. / 82.5 MT")],
-     86, panel_pos="bc")
+     86, fill=True)
 
 spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Produced Water Skids", "Cairn Energy, Rajasthan, India",
      [("Material", "Carbon Steel / Duplex"),
@@ -1423,7 +1423,7 @@ spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas", "Storage Tank — Insulation 
      [("Material", "SA 516 Gr.70 NACE"),
       ("Size", "Ø 5.55 mtr × 9.5 mtr length"),
       ("Qty / Weight", "2 Nos. / 28 tons")],
-     91, panel_pos="bc")
+     91, fill=True)
 
 spec("Oil, Gas, Lithium & Aerospace", "Oil & Gas / Petrochemical", "Static Mixers (ASME U Stamp) with Grayloc Connectors", "NRL Expansion Project, Sulzer Chemtech India Pvt Ltd",
      [("Mixer A", "SA 182 F347 & SA 182 F321 — Ø 466.7 & 482.7mm OD × 4000mm lg. × 50mm thk — 8 tons, 1 No."),
@@ -1539,7 +1539,7 @@ spec("Food Processing & Oleo Chemical", "Food Processing", "Hydrogenation Reacto
       ("Size", "Ø 2.3 mtr × 7 mtr L"),
       ("Coil pipes", "Duplex SA 790 S32205 — 4″ NB × 40S × 330 mtr L"),
       ("Qty / Weight", "2 Nos. / 20 tons & 12 tons")],
-     44, panel_pos="bc")
+     44, fill=True, panel_pos="wide")
 
 # ---- 45. Divider: Fertilizer ------------------------------------------
 divider("Fertilizer", "Fertilizer",
@@ -1708,7 +1708,7 @@ spec("Water & Desalination", "Zero Liquid Discharge", "Brine Concentrator", "Gra
       ("Size", "Ø 1.85/2.1 mtr × 8mm thk × 24 mtr L"),
       ("Tubes", "50.8mm OD × 1mm thk × 9.4 mtr L — qty 616 Nos."),
       ("Qty / Weight", "1 No. / 25 tons")],
-     72, panel_pos="bc")
+     72, fill=True, panel_pos="right")
 
 spec("Water & Desalination", "Water & Desalination", "Piping Spools — PDO", "Petroleum Development Oman",
      [("Material", "SS 316L & Super Duplex 32750"),
