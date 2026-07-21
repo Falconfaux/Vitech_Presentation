@@ -562,11 +562,11 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
    halves are filled rather than leaving a blank right column. Targeted by
    section (not #sNN) so slide renumbering never detaches these rules. */
 .tpl-prose[data-section="Electrical & Instrumentation"] .content-grid { row-gap: calc(var(--fit,1) * 1.3rem); }
-.tpl-prose[data-section="Electrical & Instrumentation"] p { font-size: calc(var(--fit,1) * 1.5rem); line-height: calc(var(--fit,1) * 1.6); margin-bottom: 0; }
+.tpl-prose[data-section="Electrical & Instrumentation"] p { font-size: calc(var(--fit,1) * 1.65rem); line-height: calc(var(--fit,1) * 1.55); margin-bottom: 0; }
 .tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide { margin-top: 0; padding: calc(var(--fit,1) * 1.8rem) calc(var(--fit,1) * 2.1rem); }
 .tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide h3 { font-size: .9rem; margin-bottom: calc(var(--fit,1) * 1rem); }
 .tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide ul { columns: 2; column-gap: 3rem; }
-.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide li { font-size: calc(var(--fit,1) * 1.08rem); line-height: calc(var(--fit,1) * 1.4); margin-bottom: calc(var(--fit,1) * .6rem); }
+.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide li { font-size: calc(var(--fit,1) * 1.22rem); line-height: calc(var(--fit,1) * 1.42); margin-bottom: calc(var(--fit,1) * .68rem); }
 
 /* ---------------------------------------------------------------------- */
 /* Template: visual (org chart / layout / location map — image forward)   */
