@@ -973,6 +973,14 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s23 table.spec-table th:nth-child(2), #s23 table.spec-table td:nth-child(2) { width: 30%; }
 #s23 table.spec-table th:nth-child(3), #s23 table.spec-table td:nth-child(3) { width: 22%; }
 #s23 table.spec-table th:nth-child(4), #s23 table.spec-table td:nth-child(4) { width: 16%; }
+
+/* Slide 20: same issue as #s23 above — two independent tables must share
+   identical column widths so their VHEPL/VEPL/VFPL boundaries line up. */
+#s20 table.spec-table { table-layout: fixed; }
+#s20 table.spec-table th:nth-child(1), #s20 table.spec-table td:nth-child(1) { width: 42%; }
+#s20 table.spec-table th:nth-child(2), #s20 table.spec-table td:nth-child(2) { width: 32%; }
+#s20 table.spec-table th:nth-child(3), #s20 table.spec-table td:nth-child(3) { width: 13%; }
+#s20 table.spec-table th:nth-child(4), #s20 table.spec-table td:nth-child(4) { width: 13%; }
 .table-grid-2col .table-wrap { align-self: stretch; display: flex; flex-direction: column; }
 .table-grid-2col .table-wrap table.spec-table { height: 100%; }
 
