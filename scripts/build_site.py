@@ -1591,7 +1591,7 @@ spec("Fertilizer", "Fertilizer · Shop Fabrication", "Hot Interpass Heat Exchang
 
 spec("Fertilizer", "Fertilizer · Site Assembly", "Hot Interpass Heat Exchanger — Site Erection", "IFFCO, Paradip, Odisha",
      [("Transport", "3 pieces — (1st) Ø 6.9×6.1m, (2nd) Ø 5.6×3.85m, (3rd) Ø 5.6×3m; all large nozzles shipped loose")],
-     None, layout="showcase", files=[IMG(52, 1), IMG(53, 1)], fill=True,
+     None, layout="showcase", files=[IMG(52, 1), IMG(53, 1)],
      milestone="Site Assembly — erected at IFFCO site")
 
 spec("Fertilizer", "Fertilizer · Shop Fabrication", "Cold Interpass Heat Exchanger", "IFFCO, Paradip, Odisha",
@@ -1603,7 +1603,7 @@ spec("Fertilizer", "Fertilizer · Shop Fabrication", "Cold Interpass Heat Exchan
 
 spec("Fertilizer", "Fertilizer · Site Assembly", "Cold Interpass Heat Exchanger — Site Erection", "IFFCO, Paradip, Odisha",
      [("Transport", "3 pieces — (1st) Ø 5.4×10.5m, (2nd & 3rd) Ø 5.4×2.5m, bustle Ø 6.9m ×2 dispatched in halves; large nozzles shipped loose")],
-     None, layout="showcase", files=[IMG(54, 1), IMG(55, 1)], fill=True,
+     None, layout="showcase", files=[IMG(54, 1), IMG(55, 1)],
      milestone="Site Assembly — erected at IFFCO site")
 
 spec("Fertilizer", "Fertilizer · Shop + Site Fabricated", "Converter", "IFFCO, Paradip, Odisha",
