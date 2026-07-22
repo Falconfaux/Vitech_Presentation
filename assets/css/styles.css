@@ -1284,12 +1284,10 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   width: 100%;
   padding: calc(var(--fit,1) * 1.05rem) calc(var(--fit,1) * 1.4rem);
   border-radius: 18px;
-  /* frosted glass: ~15-20% opacity so the photo reads clearly through the
-     card, with a heavier blur + text-shadow keeping the copy legible */
-  background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .15), rgba(var(--azure-deep-rgb), .28));
-  border: 1px solid rgba(var(--azure-bright-rgb), .28);
-  backdrop-filter: blur(22px) saturate(1.1);
-  -webkit-backdrop-filter: blur(22px) saturate(1.1);
+  /* clear glass: transparent tint (no blur) so the photo reads sharply
+     through the card, framed by an azure border + text-shadow for legibility */
+  background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .32), rgba(var(--azure-deep-rgb), .52));
+  border: 1px solid var(--azure-border);
   box-shadow: 0 18px 50px rgba(0,0,0,.4);
 }
 .tpl-spec.layout-showcase .showcase-panel .eyebrow,
@@ -1308,11 +1306,11 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   max-width: none; margin: 0;
 }
 /* description-box title/body color scheme: title reads in the deck's accent
-   blue, body values in dark gray-black — scoped to showcase description
+   blue, body values in light near-white — scoped to showcase description
    boxes only (not table/divider/prose titles or the one prose slide that
    reuses .spec-row in a different, non-glass-panel context). */
 .tpl-spec.layout-showcase .showcase-panel .slide-title { color: var(--azure-bright); }
-.tpl-spec.layout-showcase .spec-row .v { color: var(--ink); }
+.tpl-spec.layout-showcase .spec-row .v { color: #eef1f8; }
 .tpl-spec.layout-showcase .client-badge { margin-top: 0; flex-shrink: 0; }
 .tpl-spec.layout-showcase .spec-list {
   display: flex; flex-wrap: wrap; gap: calc(var(--fit,1) * .4rem) calc(var(--fit,1) * 2.4rem);
@@ -1398,8 +1396,7 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   /* size the chip to its content so it never clips or shows a scrollbar on
      large TV/monitor aspect ratios (the copy is intrinsically short) */
   max-height: none; overflow: visible;
-  background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .16), rgba(var(--azure-deep-rgb), .30));
-  backdrop-filter: blur(26px) saturate(1.1); -webkit-backdrop-filter: blur(26px) saturate(1.1);
+  background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .34), rgba(var(--azure-deep-rgb), .55));
   padding: calc(var(--fit,1) * .62rem) calc(var(--fit,1) * .82rem);
 }
 .tpl-spec.layout-showcase.panel-compact .eyebrow {
