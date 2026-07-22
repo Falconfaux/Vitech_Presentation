@@ -552,9 +552,11 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 .tpl-prose[data-section="Electrical & Instrumentation"] .content-grid { row-gap: calc(var(--fit,1) * 1.3rem); }
 .tpl-prose[data-section="Electrical & Instrumentation"] p { font-size: calc(var(--fit,1) * 1.72rem); line-height: calc(var(--fit,1) * 1.52); margin-bottom: 0; }
 .tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide { margin-top: 0; padding: calc(var(--fit,1) * 1.8rem) calc(var(--fit,1) * 2.1rem); }
-.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide h3 { font-size: .95rem; margin-bottom: calc(var(--fit,1) * 1rem); }
+.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide h3 { font-size: 1.1rem; margin-bottom: calc(var(--fit,1) * 1rem); }
 .tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide ul { columns: 2; column-gap: 3rem; }
-.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide li { font-size: calc(var(--fit,1) * 1.28rem); line-height: calc(var(--fit,1) * 1.4); margin-bottom: calc(var(--fit,1) * .68rem); }
+.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide li { font-size: calc(var(--fit,1) * 1.42rem); line-height: calc(var(--fit,1) * 1.4); margin-bottom: calc(var(--fit,1) * .68rem); }
+/* s98: keep the title on one line — the generic 20ch cap forces an early wrap. */
+#s98 .slide-title { max-width: none; }
 
 /* ---------------------------------------------------------------------- */
 /* Template: visual (org chart / layout / location map — image forward)   */
@@ -964,6 +966,9 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s20 table.spec-table th:nth-child(2), #s20 table.spec-table td:nth-child(2) { width: 36%; }
 #s20 table.spec-table th:nth-child(3), #s20 table.spec-table td:nth-child(3) { width: 13%; }
 #s20 table.spec-table th:nth-child(4), #s20 table.spec-table td:nth-child(4) { width: 13%; }
+/* VHEPL/VEPL/VFPL columns are much wider than their short checkmark content
+   needs — center it instead of leaving it stranded at the left edge. */
+#s20 table.spec-table th:nth-child(n+2), #s20 table.spec-table td:nth-child(n+2) { text-align: center; }
 /* the Plate Bending M/C row's line-broken cell (3 lines) adds row height —
    tighten line-height/padding on this table only so it doesn't overflow */
 #s20 table.spec-table td { line-height: 1.28; padding-top: calc(var(--fit,1) * var(--fit,1) * .7rem); padding-bottom: calc(var(--fit,1) * var(--fit,1) * .7rem); }
@@ -1302,6 +1307,12 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   font-size: calc(var(--fit,1) * clamp(1.4rem, 2.2vw, 2rem));
   max-width: none; margin: 0;
 }
+/* description-box title/body color scheme: title reads in the deck's accent
+   blue, body values in dark gray-black — scoped to showcase description
+   boxes only (not table/divider/prose titles or the one prose slide that
+   reuses .spec-row in a different, non-glass-panel context). */
+.tpl-spec.layout-showcase .showcase-panel .slide-title { color: var(--azure-bright); }
+.tpl-spec.layout-showcase .spec-row .v { color: var(--ink); }
 .tpl-spec.layout-showcase .client-badge { margin-top: 0; flex-shrink: 0; }
 .tpl-spec.layout-showcase .spec-list {
   display: flex; flex-wrap: wrap; gap: calc(var(--fit,1) * .4rem) calc(var(--fit,1) * 2.4rem);
@@ -1356,6 +1367,7 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    ::before. box-sizing:border-box keeps the azure border inside the canvas;
    the inset box-shadow paints the white ring just inside it. */
 #s28 .showcase-canvas::before, #s29 .showcase-canvas::before, #s33 .showcase-canvas::before,
+#s34 .showcase-canvas::before,
 #s35 .showcase-canvas::before, #s38 .showcase-canvas::before, #s40 .showcase-canvas::before,
 #s43 .showcase-canvas::before, #s44 .showcase-canvas::before, #s47 .showcase-canvas::before,
 #s51 .showcase-canvas::before, #s52 .showcase-canvas::before, #s53 .showcase-canvas::before,
@@ -1440,10 +1452,21 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   display: inline;             /* "MATERIAL · value" reads inline; keeps the
                                   existing .k::after "·" separator */
 }
-/* s57 (9-Vessel program) has one huge multi-dimension "Sizes" value that would
+/* s59 (9-Vessel program) has one huge multi-dimension "Sizes" value that would
    strand the other column empty; keep its wide card single-column so the long
-   value wraps across the full width and the card stays balanced and short. */
-#s58 .spec-list { columns: 1; }
+   value wraps across the full width and the card stays balanced and short.
+   (id was previously s57/s58 before the deck-wide slide renumber — corrected
+   here so this rule targets the actual 9-Vessel program slide again.) */
+#s59 .spec-list { columns: 1; }
+/* s59: the narrow n3 middle cell was cropped hard by the shared photo-fill
+   cover rule — show the whole internal-component photo uncropped instead. */
+#s59 .showcase-cell:nth-child(2) { background: var(--azure-deep); }
+#s59 .showcase-cell:nth-child(2) .media-full { object-fit: contain; }
+/* s59: "Sizes" reflows from 9 stacked lines into a 3×3 grid with a vertical
+   rule between entries, so the box reads three-per-row instead of towering. */
+#s59 .size-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .3rem 1rem; white-space: normal; }
+#s59 .size-grid span { border-right: 1px solid rgba(255,255,255,.25); padding-right: .8rem; }
+#s59 .size-grid span:nth-child(3n) { border-right: none; padding-right: 0; }
 /* panel-tl: dock the compact panel to the TOP-left so a tall vessel below it
    stays fully visible (used on the cladded column slides) */
 .tpl-spec.layout-showcase.panel-compact.panel-tl .slide-inner { justify-content: flex-start; }
@@ -1466,6 +1489,12 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    though nothing floats over it there — let that photo grow down to fill it. */
 #s69 .showcase-cell:last-child .media-full,
 #s71 .showcase-cell:last-child .media-full { padding: calc(var(--pad) * .55) calc(var(--pad) * .12) calc(var(--fit,1) * 1rem); }
+/* s50: the narrow second (internal-component) cell was cropped hard by the
+   shared photo-fill cover rule — show the whole photo uncropped instead. */
+#s50 .showcase-cell:last-child { background: var(--azure-deep); }
+#s50 .showcase-cell:last-child .media-full { object-fit: contain; }
+/* s56: nudge the (non-photo-fill, contain-mode) image down within its frame. */
+#s56 .showcase-canvas .media-full { padding-top: calc(var(--pad) * 1.15); }
 /* panel-right: push the compact panel to the RIGHT so the subject on the left
    of the frame reads clearly. The base showcase slide-inner only reserves
    half of --pad at the bottom (no +64px chrome allowance like the default
