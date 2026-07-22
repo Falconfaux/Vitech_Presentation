@@ -1496,8 +1496,40 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    shared photo-fill cover rule — show the whole photo uncropped instead. */
 #s50 .showcase-cell:last-child { background: var(--azure-deep); }
 #s50 .showcase-cell:last-child .media-full { object-fit: contain; }
-/* s56: nudge the (non-photo-fill, contain-mode) image down within its frame. */
-#s56 .showcase-canvas .media-full { padding-top: calc(var(--pad) * 1.15); }
+/* s67: both prill-tower photos were cropped hard by the shared photo-fill
+   cover rule — show them uncropped instead. */
+#s67 .showcase-cell { background: var(--azure-deep); }
+#s67 .showcase-cell .media-full { object-fit: contain; }
+/* s68: the single full-bleed photo was cropped hard by the shared photo-fill
+   cover rule — show it uncropped instead. */
+#s68 .showcase-canvas { background: var(--azure-deep); }
+#s68 .showcase-canvas .media-full { object-fit: contain; }
+/* s110: only the first (stall) photo needs to show uncropped; the second
+   (CHEMTECH) photo keeps the full-bleed crop. */
+#s110 .showcase-cell:first-child { background: var(--azure-deep); }
+#s110 .showcase-cell:first-child .media-full { object-fit: contain; }
+/* s56 & s57: panel docks top (panel-tl), so the base rule's 9rem bottom
+   reserve — meant for a bottom-docked panel — is vestigial here. Free it up
+   so the (contain-mode, never-cropped) image grows and its centered
+   position shifts down toward the bottom edge. */
+#s56 .showcase-canvas .media-full,
+#s57 .showcase-canvas .media-full {
+  padding-top: calc(var(--pad) * 1.15);
+  padding-bottom: calc(var(--fit,1) * 1rem);
+}
+/* s56 & s57: the larger/lower-shifted photo now shows busier machinery
+   detail directly behind the top-right panel — darken the glass a bit more
+   than the deck default so the spec text stays legible over it. */
+#s56 .showcase-panel, #s57 .showcase-panel {
+  background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .72), rgba(var(--azure-deep-rgb), .88));
+}
+/* s60: stack the photo in a band above the spec panel instead of floating
+   the (translucent) panel over the photo — confine the canvas to the upper
+   portion of the frame and dock an opaque panel in the reserved band below
+   it, so the two never overlap. Also trim the panel's own padding/spacing
+   (on top of the existing panel-wide 2-column flow) to keep the band short. */
+#s60 .showcase-canvas { bottom: calc(var(--fit,1) * 12.5rem); }
+#s60 .showcase-panel { background: var(--azure-deep); }
 /* panel-right: push the compact panel to the RIGHT so the subject on the left
    of the frame reads clearly. The base showcase slide-inner only reserves
    half of --pad at the bottom (no +64px chrome allowance like the default
