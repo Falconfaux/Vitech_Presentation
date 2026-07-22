@@ -30,6 +30,11 @@ async function main() {
     const page = await browser.newPage({ viewport });
     await page.goto(INDEX);
     await page.waitForFunction(() => document.body.classList.contains("ready"));
+    // main.js re-runs its fit pass once web fonts finish swapping in (a
+    // fallback-font measurement taken too early can under- or over-shrink
+    // slides that sit close to the fit threshold) — wait for that same
+    // signal so this check measures the settled layout, not a race.
+    await page.evaluate(() => document.fonts && document.fonts.ready);
     await page.waitForTimeout(150);
 
     const results = await page.$$eval(".slide-inner", (nodes) =>

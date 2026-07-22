@@ -239,6 +239,14 @@
   fitAllSlides();
   document.body.classList.add("ready");
 
+  // fitAllSlides() above runs before web fonts are guaranteed to have
+  // swapped in, so it can measure fallback-font metrics on slides whose
+  // text is close to the fit threshold — re-run once fonts actually settle
+  // so every slide's --fit reflects real glyph metrics, not a race.
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(fitAllSlides);
+  }
+
   window.addEventListener("resize", debounce(fitAllSlides, 150));
 
   window.addEventListener("hashchange", function () {
