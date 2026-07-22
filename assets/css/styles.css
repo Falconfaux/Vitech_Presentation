@@ -940,6 +940,12 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    row above it (td has no reserved second line) — keep the status column to
    one line. */
 #s8 table.spec-table td:nth-child(2) { white-space: nowrap; }
+/* s8's right-hand table has only 2 data rows vs. the left's 11 — the shared
+   stretch-to-match rule above (meant for paired tables with similar row
+   counts) balloons its rows with dead space instead. Size it naturally and
+   top-align it with its taller sibling instead. */
+#s8 .table-grid-2col .table-wrap { align-self: start; }
+#s8 .table-grid-2col .table-wrap table.spec-table { height: auto; }
 
 /* Slides 16 & 23: table content has notably more empty space below it than
    its peers, so give the cells larger type than the shared .tpl-table rules.
