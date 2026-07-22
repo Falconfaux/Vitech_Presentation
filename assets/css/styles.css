@@ -946,6 +946,13 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s16 table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .82rem) calc(var(--fit,1) * 1.15rem); line-height: calc(var(--fit,1) * var(--fit,1) * 1.48); }
 #s16 .table-note { font-size: calc(var(--fit,1) * 1.15rem); }
 
+/* Slide 21: a single table with just one narrow-content check-column set
+   (VHEPL/VEPL/VFPL) stretches to fill the full row width on very wide/large
+   displays, leaving those columns stranded with big gaps. Cap the box width
+   and center it instead of letting it fill the slide. */
+#s21 .table-wrap { max-width: min(78%, 980px); margin-left: auto; margin-right: auto; }
+#s21 table.spec-table th:nth-child(n+2), #s21 table.spec-table td:nth-child(n+2) { text-align: center; }
+
 #s23 table.spec-table { font-size: calc(var(--fit,1) * 1.32rem); table-layout: fixed; }
 #s23 table.spec-table th { font-size: calc(var(--fit,1) * 1.02rem); padding: calc(var(--fit,1) * var(--fit,1) * 1.1rem) calc(var(--fit,1) * 1.35rem); }
 #s23 table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * 1.05rem) calc(var(--fit,1) * 1.35rem); }
