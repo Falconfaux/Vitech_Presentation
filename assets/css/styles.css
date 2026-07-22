@@ -1589,6 +1589,13 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s27 .showcase-canvas .media-full {
   padding: calc(var(--pad) * .2) calc(var(--pad) * .15) calc(var(--fit,1) * 2.2rem);
 }
+/* s7: the plan-layout drawing is taller/more square than the deck's usual
+   wide photos, so the shared showcase-photos padding (sized for landscape
+   shots) leaves it small under object-fit:contain — trim the reserve so the
+   drawing scales up closer to the frame. */
+#s7 .showcase-canvas .media-full {
+  padding: calc(var(--fit,1) * 2rem) calc(var(--pad) * .05) calc(var(--fit,1) * .7rem);
+}
 
 /* photo-fill: showcase variant without the blurred backdrop — each photo
    fills its cell edge-to-edge (object-fit: cover). Column widths are set
