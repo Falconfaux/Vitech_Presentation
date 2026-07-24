@@ -719,7 +719,7 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 /* Template: location map (hand-built schematic, replaces the scanned img) */
 /* ---------------------------------------------------------------------- */
 
-.tpl-locationmap .slide-inner { justify-content: flex-start; padding-top: max(var(--chrome-top), clamp(2.4rem, 5.5vh, 3.4rem)); }
+.tpl-locationmap .slide-inner { justify-content: flex-start; padding-top: max(var(--chrome-top), clamp(2.4rem, 5.5vh, 3.4rem)); padding-bottom: var(--pad); }
 /* compact title so the map itself gets the slide's height */
 .tpl-locationmap .slide-title { font-size: calc(var(--fit,1) * clamp(1.4rem, 2vw, 1.9rem)); max-width: none; margin-bottom: .2rem; }
 .tpl-locationmap .slide-sub { margin-top: .2rem; }
@@ -1614,13 +1614,35 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s29 .showcase-canvas .media-full {
   padding: calc(var(--pad) * .2) calc(var(--pad) * .15) calc(var(--fit,1) * 2.2rem);
 }
-/* s7: the plan-layout drawing is taller/more square than the deck's usual
-   wide photos, so the shared showcase-photos padding (sized for landscape
-   shots) leaves it small under object-fit:contain — trim the reserve so the
-   drawing scales up closer to the frame. */
+/* s7: the plan-layout drawing shares the frame with the bay & yard area
+   schedule tables — the canvas gives up its right ~38% to a docked table
+   panel (mirrors panel-side's split), and the drawing keeps object-fit:
+   contain so it's never cropped. */
+#s7 .showcase-canvas { right: 38%; }
 #s7 .showcase-canvas .media-full {
-  padding: calc(var(--fit,1) * 2rem) calc(var(--pad) * .05) calc(var(--fit,1) * .7rem);
+  padding: calc(var(--fit,1) * 6.4rem) calc(var(--pad) * .1) calc(var(--fit,1) * .8rem) calc(var(--pad) * .3);
 }
+#s7 .schedule-panel {
+  position: absolute;
+  top: 50%;
+  right: calc(var(--pad) * .55);
+  transform: translateY(-50%);
+  width: 34%;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--fit,1) * .85rem);
+  padding: calc(var(--fit,1) * .9rem) calc(var(--fit,1) * 1rem);
+}
+#s7 .schedule-panel .table-wrap { margin: 0; }
+#s7 .schedule-panel table.spec-table { font-size: calc(var(--fit,1) * .6rem); }
+#s7 .schedule-panel table.spec-table th {
+  font-size: calc(var(--fit,1) * .56rem);
+  padding: calc(var(--fit,1) * .32rem) calc(var(--fit,1) * .5rem);
+}
+#s7 .schedule-panel table.spec-table td {
+  padding: calc(var(--fit,1) * .24rem) calc(var(--fit,1) * .5rem);
+}
+#s7 .schedule-panel table.spec-table td:nth-child(2) { white-space: nowrap; }
 
 /* photo-fill: showcase variant without the blurred backdrop — each photo
    fills its cell edge-to-edge (object-fit: cover). Column widths are set
