@@ -1548,6 +1548,13 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s62 .showcase-canvas { bottom: calc(var(--fit,1) * 12.5rem); background: var(--azure-deep); }
 #s62 .showcase-canvas .media-full { object-fit: contain; }
 #s62 .showcase-panel { background: var(--azure-deep); }
+/* s54: same fix as s61/s62 above — the hard photo-fill cover crop cut off both
+   ends of the vessel, and the bottom-right-docked panel sat on top of the
+   remaining photo. Show the full uncropped photo letterboxed on azure-deep,
+   and reserve a clear band below it for an opaque panel. */
+#s54 .showcase-canvas { bottom: calc(var(--fit,1) * 14.5rem); background: var(--azure-deep); }
+#s54 .showcase-canvas .media-full { object-fit: contain; }
+#s54 .showcase-panel { background: var(--azure-deep); }
 /* panel-right: push the compact panel to the RIGHT so the subject on the left
    of the frame reads clearly. The base showcase slide-inner only reserves
    half of --pad at the bottom (no +64px chrome allowance like the default
