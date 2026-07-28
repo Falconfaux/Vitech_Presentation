@@ -653,6 +653,10 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 #s12 .siteplan-legend { background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .14), rgba(var(--azure-deep-rgb), .3)); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 #s12 .legend-txt, #s12 .legend-group-header { text-shadow: 0 1px 6px rgba(0,0,0,.9), 0 0 14px rgba(0,0,0,.6); }
 #s12 .legend-num { background: rgba(242,169,59,.32); }
+/* s12: the title bar and plot-area stat sit over open photo too — same
+   transparent treatment as the legends, with text-shadow to stay legible */
+#s12 .siteplan-titlebar, #s12 .siteplan-stat { background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .14), rgba(var(--azure-deep-rgb), .3)); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+#s12 .siteplan-titlebar .eyebrow, #s12 .siteplan-stat, #s12 .siteplan-stat span { text-shadow: 0 1px 6px rgba(0,0,0,.9), 0 0 14px rgba(0,0,0,.6); }
 .tpl-siteplan .siteplan-titlebar .slide-title {
   font-size: calc(var(--fit,1) * clamp(1.4rem, 2.2vw, 1.95rem));
   margin: 0; text-shadow: 0 2px 18px rgba(0,0,0,.55);
@@ -1669,35 +1673,12 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s29 .showcase-canvas .media-full {
   padding: calc(var(--pad) * .2) calc(var(--pad) * .15) calc(var(--fit,1) * 2.2rem);
 }
-/* s7: the plan-layout drawing shares the frame with the bay & yard area
-   schedule tables — the canvas gives up its right ~38% to a docked table
-   panel (mirrors panel-side's split), and the drawing keeps object-fit:
-   contain so it's never cropped. */
-#s7 .showcase-canvas { right: 38%; }
+/* s7: the plan-layout drawing now carries its own baked-in bay & yard area
+   schedule, so it just fills the frame full-bleed like the other
+   showcase-photos slides — object-fit: contain keeps it uncropped. */
 #s7 .showcase-canvas .media-full {
-  padding: calc(var(--fit,1) * 6.4rem) calc(var(--pad) * .1) calc(var(--fit,1) * .8rem) calc(var(--pad) * .3);
+  padding: calc(var(--fit,1) * 5.6rem) calc(var(--pad) * .15) calc(var(--fit,1) * 1rem);
 }
-#s7 .schedule-panel {
-  position: absolute;
-  top: 50%;
-  right: calc(var(--pad) * .55);
-  transform: translateY(-50%);
-  width: 34%;
-  display: flex;
-  flex-direction: column;
-  gap: calc(var(--fit,1) * .85rem);
-  padding: calc(var(--fit,1) * .9rem) calc(var(--fit,1) * 1rem);
-}
-#s7 .schedule-panel .table-wrap { margin: 0; }
-#s7 .schedule-panel table.spec-table { font-size: calc(var(--fit,1) * .6rem); }
-#s7 .schedule-panel table.spec-table th {
-  font-size: calc(var(--fit,1) * .56rem);
-  padding: calc(var(--fit,1) * .32rem) calc(var(--fit,1) * .5rem);
-}
-#s7 .schedule-panel table.spec-table td {
-  padding: calc(var(--fit,1) * .24rem) calc(var(--fit,1) * .5rem);
-}
-#s7 .schedule-panel table.spec-table td:nth-child(2) { white-space: nowrap; }
 
 /* photo-fill: showcase variant without the blurred backdrop — each photo
    fills its cell edge-to-edge (object-fit: cover). Column widths are set
