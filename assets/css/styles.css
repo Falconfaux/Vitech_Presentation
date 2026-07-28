@@ -1576,6 +1576,19 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    (CHEMTECH) photo keeps the full-bleed crop. */
 #s112 .showcase-cell:first-child { background: var(--azure-deep); }
 #s112 .showcase-cell:first-child .media-full { object-fit: contain; }
+/* s30 (PLC pipe-spool bevelling/cutting/setup stations): 3 landscape photos
+   side by side got squeezed into narrow vertical crops by the shared
+   photo-fill cover rule. Stack them full-width instead, one above another,
+   uncropped and letterboxed on azure-deep, so each reads as a full frame. */
+#s30 .showcase-canvas.n3 {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+  background: var(--azure-deep);
+}
+#s30 .showcase-canvas .media-full {
+  object-fit: contain !important;
+  padding: calc(var(--fit,1) * .3rem) calc(var(--pad) * .12) !important;
+}
 /* s57 & s58: panel docks top (panel-tl), so the base rule's 9rem bottom
    reserve — meant for a bottom-docked panel — is vestigial here. Free it up
    so the (contain-mode, never-cropped) image grows and its centered
