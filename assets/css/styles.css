@@ -486,7 +486,7 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 #s2 .side-panel li { font-size: 1.05rem; }
 /* keep every "We specialize in" bullet on one line rather than wrapping */
 #s2 .content-grid { grid-template-columns: 1fr 1.2fr; }
-#s2 .content-grid-right .side-panel:first-child li { font-size: .86rem; white-space: nowrap; }
+#s2 .content-grid-right .side-panel:first-child li { font-size: calc(var(--fit,1) * .98rem); white-space: nowrap; }
 /* Slide 2 is the deck's densest text slide (2 paragraphs + 4-row spec list +
    13-chip group + 7-item side panel). With the larger TV/base type it can
    overflow even at the --fit floor, so tighten its vertical rhythm here; this
@@ -500,13 +500,14 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 /* Right column stacks two matching cards ("We specialize in" + material
    grades); tighten card padding/chip size so both fit without the fit
    engine bottoming out on this already-dense slide. */
-#s2 .content-grid-right { display: flex; flex-direction: column; gap: calc(var(--fit,1) * .8rem); }
-#s2 .content-grid-right .side-panel { padding: calc(var(--fit,1) * .95rem) calc(var(--fit,1) * 1.2rem); }
-#s2 .content-grid-right .side-panel h3 { margin-bottom: calc(var(--fit,1) * .5rem); }
-#s2 .content-grid-right .side-panel ul { gap: calc(var(--fit,1) * .4rem); }
-#s2 .content-grid-right .side-panel li { line-height: calc(var(--fit,1) * 1.22); }
-#s2 .content-grid-right .chip-row { margin-top: calc(var(--fit,1) * .45rem); gap: calc(var(--fit,1) * .4rem); }
-#s2 .content-grid-right .chip { font-size: .78rem; padding: calc(var(--fit,1) * .3rem) calc(var(--fit,1) * .62rem); }
+#s2 .content-grid { align-items: stretch; }
+#s2 .content-grid-right { display: flex; flex-direction: column; gap: calc(var(--fit,1) * 1.3rem); }
+#s2 .content-grid-right .side-panel { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: calc(var(--fit,1) * 1.5rem) calc(var(--fit,1) * 1.7rem); }
+#s2 .content-grid-right .side-panel h3 { margin-bottom: calc(var(--fit,1) * .75rem); }
+#s2 .content-grid-right .side-panel ul { gap: calc(var(--fit,1) * .62rem); }
+#s2 .content-grid-right .side-panel li { line-height: calc(var(--fit,1) * 1.3); font-size: calc(var(--fit,1) * 1rem); }
+#s2 .content-grid-right .chip-row { margin-top: calc(var(--fit,1) * .7rem); gap: calc(var(--fit,1) * .6rem); }
+#s2 .content-grid-right .chip { font-size: .9rem; padding: calc(var(--fit,1) * .42rem) calc(var(--fit,1) * .82rem); }
 /* Slide 3: nudge the centered heading+body down from dead-center, clearing
    the fixed brand-mark/eyebrow row it was overlapping before */
 #s3 .slide-inner.centered { padding-top: max(var(--chrome-top), clamp(2.5rem, 6vh, 4.5rem)); }
@@ -644,6 +645,9 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 }
 /* s6: transparent header, matching the showcase-titlebar treatment used elsewhere */
 #s6 .siteplan-titlebar { background: none; backdrop-filter: none; -webkit-backdrop-filter: none; border-left: none; padding-left: 0; }
+/* s6: the org chart's own top row sat directly behind the title text — give the
+   image more top clearance so the title reads fully above the chart, not over it */
+#s6 .siteplan-canvas .media-full { padding-top: 12rem; }
 /* s12: drop the decorative amber dash before the eyebrow text */
 #s12 .siteplan-titlebar .eyebrow::before { display: none; }
 /* s12: legend cards match the deck's standard transparent glass-card opacity */
@@ -1307,10 +1311,12 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 /* Slides 11-14 only: the larger caption chip now reaches down into the fixed
    menu-toggle button's corner on the first (bottom-left) cell — clear it the
    same way the last cell is kept clear of the nav arrows above */
-#s13 .showcase-cell:first-child .showcase-cap,
 #s14 .showcase-cell:first-child .showcase-cap,
 #s15 .showcase-cell:first-child .showcase-cap,
 #s16 .showcase-cell:first-child .showcase-cap { left: 170px; }
+/* s13: widen the first bay's caption so its longer label fits on one line
+   instead of wrapping to two */
+#s13 .showcase-cell:first-child .showcase-cap { left: 24px; white-space: nowrap; }
 /* Slides 11-14 only: workshop-showcase captions/titles requested larger for TV legibility */
 #s13 .showcase-cap, #s14 .showcase-cap, #s15 .showcase-cap, #s16 .showcase-cap {
   font-size: calc(var(--fit,1) * 1.4rem);
@@ -1408,7 +1414,7 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    already carries the photo-fill top scrim, so the frame goes on the free
    ::before. box-sizing:border-box keeps the azure border inside the canvas;
    the inset box-shadow paints the white ring just inside it. */
-#s30 .showcase-canvas::before, #s31 .showcase-canvas::before, #s35 .showcase-canvas::before,
+#s35 .showcase-canvas::before,
 #s36 .showcase-canvas::before,
 #s37 .showcase-canvas::before, #s40 .showcase-canvas::before, #s42 .showcase-canvas::before,
 #s45 .showcase-canvas::before, #s46 .showcase-canvas::before, #s49 .showcase-canvas::before,
