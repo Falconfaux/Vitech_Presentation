@@ -1607,13 +1607,6 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   padding-top: calc(var(--pad) * 1.15);
   padding-bottom: calc(var(--fit,1) * 1rem);
 }
-/* s59: the larger/lower-shifted photo now shows busier machinery
-   detail directly behind the top-right panel — darken the glass a bit more
-   than the deck default so the spec text stays legible over it. s58 reverted
-   to the deck's standard transparent card per client request. */
-#s59 .showcase-panel {
-  background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .72), rgba(var(--azure-deep-rgb), .88));
-}
 /* s61: let the photo run the full height of the frame (uncropped, letterboxed
    on azure-deep) instead of being confined to a band above the panel. The
    translucent panel now floats over the lower portion of the photo, same as
@@ -1695,35 +1688,15 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s29 .showcase-canvas .media-full {
   padding: calc(var(--pad) * .2) calc(var(--pad) * .15) calc(var(--fit,1) * 2.2rem);
 }
-/* s7: the plan-layout drawing shares the frame with the bay & yard area
-   schedule tables — the canvas gives up its right ~38% to a docked table
-   panel (mirrors panel-side's split), and the drawing keeps object-fit:
-   contain so it's never cropped. */
-#s7 .showcase-canvas { right: 38%; }
+/* s7: the plan-layout drawing now carries its own baked-in bay & yard area
+   schedule, so it just fills the frame full-bleed like the other
+   showcase-photos slides — object-fit: contain keeps it uncropped. Extra
+   top padding (vs. the ~5rem generic showcase-photos reserve) clears the
+   title text, since the drawing's white sheet runs edge-to-edge unlike a
+   photo where the title scrim just fades over image content. */
 #s7 .showcase-canvas .media-full {
-  padding: calc(var(--fit,1) * 6.4rem) calc(var(--pad) * .1) calc(var(--fit,1) * .8rem) calc(var(--pad) * .3);
+  padding: calc(var(--fit,1) * 8.6rem) calc(var(--pad) * .15) calc(var(--fit,1) * 1rem);
 }
-#s7 .schedule-panel {
-  position: absolute;
-  top: 50%;
-  right: calc(var(--pad) * .55);
-  transform: translateY(-50%);
-  width: 34%;
-  display: flex;
-  flex-direction: column;
-  gap: calc(var(--fit,1) * .85rem);
-  padding: calc(var(--fit,1) * .9rem) calc(var(--fit,1) * 1rem);
-}
-#s7 .schedule-panel .table-wrap { margin: 0; }
-#s7 .schedule-panel table.spec-table { font-size: calc(var(--fit,1) * .6rem); }
-#s7 .schedule-panel table.spec-table th {
-  font-size: calc(var(--fit,1) * .56rem);
-  padding: calc(var(--fit,1) * .32rem) calc(var(--fit,1) * .5rem);
-}
-#s7 .schedule-panel table.spec-table td {
-  padding: calc(var(--fit,1) * .24rem) calc(var(--fit,1) * .5rem);
-}
-#s7 .schedule-panel table.spec-table td:nth-child(2) { white-space: nowrap; }
 
 /* photo-fill: showcase variant without the blurred backdrop — each photo
    fills its cell edge-to-edge (object-fit: cover). Column widths are set
@@ -1802,9 +1775,13 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s75 .slide-title { font-size: clamp(1.4rem, 2vw, 1.8rem); }
 #s75 .eyebrow { font-size: .68rem; }
 #s75 .gallery-grid { margin-top: .8rem; }
-/* s103: enlarge the single photo */
+/* s103: enlarge the single photo — shrink the (otherwise 2-line) title down
+   to the s75 treatment so it reclaims ~130px that was going to headline
+   text, not photo. */
 #s103 .gallery-grid { margin-top: .6rem; }
 #s103 .slide-inner { padding-top: max(var(--chrome-top), clamp(1rem, 2.5vh, 2rem)); }
+#s103 .slide-title { font-size: clamp(1.3rem, 1.8vw, 1.6rem); }
+#s103 .eyebrow { font-size: .68rem; }
 
 /* Toolbox Talks — let the photo grow much larger by reclaiming the
    template's default bottom breathing room and tightening the
