@@ -1537,6 +1537,12 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s61 .showcase-panel { align-self: flex-end; }
 #s61 .showcase-cell:last-child .media-full { padding: calc(var(--fit,1) * 21rem) calc(var(--pad) * .3) calc(var(--fit,1) * 1rem) !important; }
 #s61 .showcase-cell:first-child .media-full { padding: calc(var(--fit,1) * 1rem) calc(var(--pad) * .3) !important; }
+/* s60: both photos are object-fit:contain and default-center inside their
+   (differently-sized) padded boxes, so their rendered bottoms landed at
+   different heights even though both boxes share the same 1rem bottom
+   padding. Bottom-align each photo within its box instead of centering it,
+   so both photos' bottom edges land flush with each other. */
+#s61 .showcase-cell .media-full { object-position: center bottom; }
 /* s69 & s71 (Hot/Cold Interpass Heat Exchanger — Site Erection): the caption
    panel docks bottom-left over the first cell only, but the standard n2
    recipe reserves the same 8.9rem caption band on the second cell too, even
@@ -1575,14 +1581,12 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s59 .showcase-panel {
   background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .72), rgba(var(--azure-deep-rgb), .88));
 }
-/* s61: stack the photo in a band above the spec panel instead of floating
-   the (translucent) panel over the photo — confine the canvas to the upper
-   portion of the frame and dock an opaque panel in the reserved band below
-   it, so the two never overlap. Also trim the panel's own padding/spacing
-   (on top of the existing panel-wide 2-column flow) to keep the band short. */
-#s62 .showcase-canvas { bottom: calc(var(--fit,1) * 12.5rem); background: var(--azure-deep); }
+/* s61: let the photo run the full height of the frame (uncropped, letterboxed
+   on azure-deep) instead of being confined to a band above the panel. The
+   translucent panel now floats over the lower portion of the photo, same as
+   the default showcase-panel treatment used elsewhere in the deck. */
+#s62 .showcase-canvas { background: var(--azure-deep); }
 #s62 .showcase-canvas .media-full { object-fit: contain; }
-#s62 .showcase-panel { background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .34), rgba(var(--azure-deep-rgb), .55)); }
 /* s65: show the full photo uncropped */
 #s65 .showcase-canvas { background: var(--azure-deep); }
 #s65 .showcase-canvas .media-full { object-fit: contain; }
