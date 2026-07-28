@@ -646,8 +646,12 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 #s6 .siteplan-canvas .media-full { padding-top: 12rem; }
 /* s12: drop the decorative amber dash before the eyebrow text */
 #s12 .siteplan-titlebar .eyebrow::before { display: none; }
-/* s12: legend cards match the deck's standard transparent glass-card opacity */
-#s12 .siteplan-legend { background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .32), rgba(var(--azure-deep-rgb), .52)); }
+/* s12: legend cards sit over the aerial photo, so they stay noticeably more
+   transparent than the deck's default glass-card opacity — lighter fill,
+   less blur, plus a text-shadow (below) to keep labels legible over the photo */
+#s12 .siteplan-legend { background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .14), rgba(var(--azure-deep-rgb), .3)); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+#s12 .legend-txt, #s12 .legend-group-header { text-shadow: 0 1px 6px rgba(0,0,0,.9), 0 0 14px rgba(0,0,0,.6); }
+#s12 .legend-num { background: rgba(242,169,59,.32); }
 .tpl-siteplan .siteplan-titlebar .slide-title {
   font-size: calc(var(--fit,1) * clamp(1.4rem, 2.2vw, 1.95rem));
   margin: 0; text-shadow: 0 2px 18px rgba(0,0,0,.55);
