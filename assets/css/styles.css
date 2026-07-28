@@ -400,7 +400,8 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
   display: flex; align-items: stretch; flex-wrap: wrap;
   margin-top: calc(var(--fit,1) * 2.4rem);
   background: transparent;
-  border: none;
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 18px;
   box-shadow: none;
 }
 .tpl-cover .cover-statbar .stat { padding: calc(var(--fit,1) * 1.05rem) calc(var(--fit,1) * 1.9rem); }
