@@ -1545,7 +1545,12 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    top-right over the second (last) photo only, so just that cell's photo
    needs to be pushed down clear of it — the first (50%-width) photo keeps
    normal padding. */
-#s61 .showcase-panel { align-self: flex-end; }
+/* keep the card inside the second photo's own frame — it was set to
+   panel-wide's 80% max-width, which (right-aligned via align-self: flex-end)
+   spilled its left edge ~300px across the border into the first photo. 50%
+   of the flex container's content box lands the left edge exactly on the
+   n2 grid's 50/50 seam, so the card now sits only over its own photo. */
+#s61 .showcase-panel { align-self: flex-end; max-width: 50%; }
 #s61 .showcase-cell:last-child .media-full { padding: calc(var(--fit,1) * 21rem) calc(var(--pad) * .3) calc(var(--fit,1) * 1rem) !important; }
 #s61 .showcase-cell:first-child .media-full { padding: calc(var(--fit,1) * 1rem) calc(var(--pad) * .3) !important; }
 /* s60: both photos are object-fit:contain and default-center inside their
@@ -1578,13 +1583,17 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s112 .showcase-cell:first-child .media-full { object-fit: contain; }
 /* s30 (PLC pipe-spool bevelling/cutting/setup stations): 3 landscape photos
    side by side got squeezed into narrow vertical crops by the shared
-   photo-fill cover rule. Stack them full-width instead, one above another,
-   uncropped and letterboxed on azure-deep, so each reads as a full frame. */
+   photo-fill cover rule. Show them uncropped in a 2-up-top + 1-full-width-
+   bottom arrangement (same "widest photo spans the bottom row" idea as the
+   deck's aspect-aware grid3 recipe) — this fills far more of the frame than
+   stacking all 3 as equal full-width rows, since two photos share the top
+   row's width instead of each getting the whole width squeezed to 1/3 height. */
 #s30 .showcase-canvas.n3 {
-  grid-template-columns: 1fr;
-  grid-template-rows: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 2fr 3fr;
   background: var(--azure-deep);
 }
+#s30 .showcase-canvas .showcase-cell:nth-child(3) { grid-column: 1 / 3; }
 #s30 .showcase-canvas .media-full {
   object-fit: contain !important;
   padding: calc(var(--fit,1) * .3rem) calc(var(--pad) * .12) !important;
@@ -1803,6 +1812,13 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s103 .slide-inner { padding-bottom: var(--pad); }
 #s103 .gallery-grid { margin-top: 1rem; }
 #s103 .gallery-caption { margin-top: .5rem; }
+/* s103's single frame is a wide (~3:1) grid cell but the photo itself is
+   ~1.4:1, so object-fit:contain shrank it to the frame's height and left it
+   pillarboxed by blurred fill on both sides. Size the frame to the photo's
+   own aspect ratio and center it instead, so the real photo — not the blur —
+   fills the available space. */
+#s103 .gallery-grid { display: flex; justify-content: center; }
+#s103 .media-frame { width: auto; height: 100%; aspect-ratio: 1920 / 1370; }
 
 /* Client Appreciation Letters (s113-118) &amp; Certifications (s121-128) —
    same reclaim as #s103: shrink the title so it stays a single line and
