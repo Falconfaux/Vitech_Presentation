@@ -1326,6 +1326,15 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s13 .showcase-cap, #s14 .showcase-cap, #s15 .showcase-cap, #s16 .showcase-cap {
   font-size: calc(var(--fit,1) * 1.4rem);
 }
+/* s14: both bay labels are long enough that 1.4rem wraps to two lines in
+   this slide's narrower two-photo split — sized down and tightened just
+   enough to keep both captions on one line down to a 1280x800 viewport */
+#s14 .showcase-cap {
+  font-size: calc(var(--fit,1) * 1rem);
+  padding-left: calc(var(--fit,1) * .4rem);
+  padding-right: calc(var(--fit,1) * .4rem);
+  white-space: nowrap;
+}
 #s13 .slide-title, #s14 .slide-title, #s15 .slide-title, #s16 .slide-title {
   font-size: calc(var(--fit,1) * clamp(1.9rem, 3vw, 2.6rem));
 }
