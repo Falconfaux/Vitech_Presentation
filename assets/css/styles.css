@@ -1607,6 +1607,13 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   padding-top: calc(var(--pad) * 1.15);
   padding-bottom: calc(var(--fit,1) * 1rem);
 }
+/* s59: the larger/lower-shifted photo now shows busier machinery
+   detail directly behind the top-right panel — darken the glass a bit more
+   than the deck default so the spec text stays legible over it. s58 reverted
+   to the deck's standard transparent card per client request. */
+#s59 .showcase-panel {
+  background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .72), rgba(var(--azure-deep-rgb), .88));
+}
 /* s61: let the photo run the full height of the frame (uncropped, letterboxed
    on azure-deep) instead of being confined to a band above the panel. The
    translucent panel now floats over the lower portion of the photo, same as
