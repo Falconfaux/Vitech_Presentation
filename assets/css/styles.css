@@ -368,7 +368,11 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
     linear-gradient(180deg, rgba(var(--azure-deep-rgb),.80) 0%, rgba(var(--azure-deep-rgb),.42) 22%, rgba(var(--azure-deep-rgb),.14) 44%, rgba(var(--azure-deep-rgb),.40) 66%, rgba(var(--azure-deep-rgb),.95) 100%),
     linear-gradient(90deg, rgba(var(--azure-deep-rgb),.55) 0%, rgba(var(--azure-deep-rgb),.18) 42%, rgba(var(--azure-deep-rgb),0) 72%);
 }
-.tpl-cover.active .slide-bg-img { animation: kenburns 20s ease-out forwards; }
+.tpl-cover.active .slide-bg-img { animation: kenburns-wide 20s ease-out forwards; }
+@keyframes kenburns-wide {
+  from { transform: scale(1) translate(0,0); }
+  to   { transform: scale(1.04) translate(-.6%, -.4%); }
+}
 .tpl-cover .cover-logo {
   height: calc(var(--fit,1) * clamp(90px, 11vw, 140px)); width: auto;
   margin-bottom: calc(var(--fit,1) * 1.4rem);
@@ -410,8 +414,8 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 .tpl-cover .cover-statbar .lbl { margin-top: .32rem; font-size: .8rem; letter-spacing: .13em; text-transform: uppercase; color: var(--steel-light); }
 .tpl-cover .cover-meta {
   margin-top: calc(var(--fit,1) * 1.6rem);
-  display: flex; flex-wrap: wrap; align-items: center;
-  gap: calc(var(--fit,1) * .8rem) calc(var(--fit,1) * 1rem);
+  display: flex; flex-direction: column; align-items: flex-start;
+  gap: calc(var(--fit,1) * .5rem);
   font-size: 1.05rem; color: var(--white);
 }
 .tpl-cover .cover-meta b {
@@ -480,6 +484,9 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 #s2 .spec-row .k { font-size: .86rem; }
 #s2 .spec-row { grid-template-columns: 180px 1fr; }
 #s2 .side-panel li { font-size: 1.05rem; }
+/* keep every "We specialize in" bullet on one line rather than wrapping */
+#s2 .content-grid { grid-template-columns: 1fr 1.2fr; }
+#s2 .content-grid-right .side-panel:first-child li { font-size: .86rem; white-space: nowrap; }
 /* Slide 2 is the deck's densest text slide (2 paragraphs + 4-row spec list +
    13-chip group + 7-item side panel). With the larger TV/base type it can
    overflow even at the --fit floor, so tighten its vertical rhythm here; this
@@ -489,7 +496,7 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 #s2 .spec-row { padding: calc(var(--fit,1) * .38rem) 0; }
 #s2 .spec-list { margin-bottom: calc(var(--fit,1) * .85rem); }
 /* No eyebrow on this slide — let the big title sit higher and open the deck cleaner */
-#s2 .slide-inner { padding-top: max(var(--chrome-top), calc(var(--fit,1) * clamp(1.5rem, 4vh, 3rem))); }
+#s2 .slide-inner { padding-top: max(var(--chrome-top), calc(var(--fit,1) * clamp(1.5rem, 4vh, 3rem))); justify-content: center; }
 /* Right column stacks two matching cards ("We specialize in" + material
    grades); tighten card padding/chip size so both fit without the fit
    engine bottoming out on this already-dense slide. */
@@ -502,7 +509,12 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 #s2 .content-grid-right .chip { font-size: .78rem; padding: calc(var(--fit,1) * .3rem) calc(var(--fit,1) * .62rem); }
 /* Slide 3: nudge the centered heading+body down from dead-center, clearing
    the fixed brand-mark/eyebrow row it was overlapping before */
-#s3 .slide-inner.centered { padding-top: clamp(2.5rem, 6vh, 4.5rem); }
+#s3 .slide-inner.centered { padding-top: max(var(--chrome-top), clamp(2.5rem, 6vh, 4.5rem)); }
+/* reclaim the vertical space the chrome-top clearance above now takes, so
+   the slide still fits without overflow */
+#s3 .stat-row { margin: 1.8rem 0; }
+/* enlarge the "Mechanical design standards" side-panel */
+#s3 .content-grid .side-panel { padding: calc(var(--fit,1) * 2.35rem) calc(var(--fit,1) * 2.5rem); }
 .tpl-prose .stat-row { display: flex; flex-wrap: wrap; gap: calc(var(--fit,1) * 1.4rem); margin: calc(var(--fit,1) * 2.2rem) 0; }
 .tpl-prose .spec-list { margin-bottom: calc(var(--fit,1) * 1.6rem); }
 .labeled-chip-group { margin-top: calc(var(--fit,1) * 1.9rem); }
@@ -630,6 +642,12 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
   background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .55), rgba(var(--azure-deep-rgb), .8));
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
 }
+/* s6: transparent header, matching the showcase-titlebar treatment used elsewhere */
+#s6 .siteplan-titlebar { background: none; backdrop-filter: none; -webkit-backdrop-filter: none; border-left: none; padding-left: 0; }
+/* s12: drop the decorative amber dash before the eyebrow text */
+#s12 .siteplan-titlebar .eyebrow::before { display: none; }
+/* s12: legend cards match the deck's standard transparent glass-card opacity */
+#s12 .siteplan-legend { background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .32), rgba(var(--azure-deep-rgb), .52)); }
 .tpl-siteplan .siteplan-titlebar .slide-title {
   font-size: calc(var(--fit,1) * clamp(1.4rem, 2.2vw, 1.95rem));
   margin: 0; text-shadow: 0 2px 18px rgba(0,0,0,.55);
@@ -823,6 +841,9 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
   z-index: 0; transition: transform .5s var(--ease-soft);
 }
 .industry-tile.has-photo:hover .industry-tile-bg { transform: scale(1.07); }
+/* Chemical tile: show the full photo uncropped, per client request */
+.industry-tile.tile-chemical { background: var(--azure-deep); }
+.industry-tile.tile-chemical .industry-tile-bg { object-fit: contain; }
 .industry-tile.has-photo .industry-tile-scrim {
   position: absolute; inset: 0; z-index: 1;
   background: none;
@@ -954,7 +975,7 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s18 table.spec-table { font-size: calc(var(--fit,1) * 1.38rem); }
 #s18 table.spec-table th { font-size: calc(var(--fit,1) * 1.08rem); padding: calc(var(--fit,1) * var(--fit,1) * .88rem) calc(var(--fit,1) * 1.15rem); }
 #s18 table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .82rem) calc(var(--fit,1) * 1.15rem); line-height: calc(var(--fit,1) * var(--fit,1) * 1.48); }
-#s18 .table-note { font-size: calc(var(--fit,1) * 1.15rem); }
+#s18 .table-note { font-size: calc(var(--fit,1) * 1.55rem); font-weight: 600; }
 
 /* Slide 21: a single table with just one narrow-content check-column set
    (VHEPL/VEPL/VFPL) stretches to fill the full row width on very wide/large
@@ -1234,7 +1255,7 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 /* caption chip pinned to a cell's lower edge (used by full-bleed photo slides) */
 .tpl-spec.layout-showcase .showcase-cap {
   position: absolute; left: 12px; right: 12px; bottom: 12px; z-index: 2;
-  padding: calc(var(--fit,1) * .7rem) calc(var(--fit,1) * .95rem);
+  padding: calc(var(--fit,1) * .5rem) calc(var(--fit,1) * .95rem);
   border-radius: 10px; text-align: center;
   font-size: calc(var(--fit,1) * 1rem); font-weight: 600; line-height: 1.35; color: #eef1f8;
   background: rgba(var(--azure-deep-rgb), .72);
@@ -1244,9 +1265,15 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 /* per-image caption chips on panel-compact spec slides (the 2-image slides
    that also carry a bottom-left spec panel): keep the bottom-corner captions
    clear of the fixed ☰ menu button (bottom-left) and nav arrows (bottom-right)
-   so neither piece of chrome ever lands on top of the caption text. */
-.tpl-spec.layout-showcase.panel-compact .showcase-cell:first-child .showcase-cap { left: 185px; }
-.tpl-spec.layout-showcase.panel-compact .showcase-cell:last-child .showcase-cap { right: 285px; }
+   so neither piece of chrome ever lands on top of the caption text. Stretched
+   closer to the image's full width (and shorter vertically) so captions read
+   on one line instead of wrapping. */
+.tpl-spec.layout-showcase.panel-compact .showcase-cell:first-child .showcase-cap { left: 160px; }
+.tpl-spec.layout-showcase.panel-compact .showcase-cell:last-child .showcase-cap { right: 170px; }
+/* s27: captions stretched to the image's full width so each reads on one line */
+#s27 .showcase-cap { font-size: calc(var(--fit,1) * .92rem); white-space: nowrap; }
+#s27 .showcase-cell:first-child .showcase-cap { left: 20px; }
+#s27 .showcase-cell:last-child .showcase-cap { right: 20px; }
 /* showcase-photos: full-bleed photo slides (no spec panel) — title overlays
    the top on a scrim, captions sit on the photos, coverage is maximised. */
 .tpl-spec.layout-showcase.showcase-photos .showcase-canvas::after {
@@ -1416,6 +1443,11 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .34), rgba(var(--azure-deep-rgb), .55));
   padding: calc(var(--fit,1) * .62rem) calc(var(--fit,1) * .82rem);
 }
+/* s33: widen the spec card so the automated-system value doesn't wrap */
+#s33 .showcase-panel { max-width: min(78%, 900px); }
+/* s40: show both photos uncropped */
+#s40 .showcase-cell { background: var(--azure-deep); }
+#s40 .showcase-cell .media-full { object-fit: contain; }
 .tpl-spec.layout-showcase.panel-compact .eyebrow {
   font-size: calc(var(--fit,1) * .66rem); margin-bottom: calc(var(--fit,1) * .3rem);
 }
@@ -1498,11 +1530,13 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s86 .showcase-cell:last-child .media-full,
 #s87 .showcase-cell:last-child .media-full { padding: calc(var(--fit,1) * 1rem) calc(var(--pad) * .3); }
 /* s60 (9-Vessel program): panel-wide + a 3x3 size-grid makes this panel-tl
-   card taller/wider than the standard chrome allowance, and it spans over
-   the first two of the three photo cells. Push all three photos down clear
-   of it by the same amount so they read as one aligned row underneath,
-   instead of two dodging the card and one sitting higher than the rest. */
-#s61 .showcase-cell .media-full { padding: calc(var(--fit,1) * 21rem) calc(var(--pad) * .3) calc(var(--fit,1) * 1rem) !important; }
+   card taller/wider than the standard chrome allowance. The card now docks
+   top-right over the second (last) photo only, so just that cell's photo
+   needs to be pushed down clear of it — the first (50%-width) photo keeps
+   normal padding. */
+#s61 .showcase-panel { align-self: flex-end; }
+#s61 .showcase-cell:last-child .media-full { padding: calc(var(--fit,1) * 21rem) calc(var(--pad) * .3) calc(var(--fit,1) * 1rem) !important; }
+#s61 .showcase-cell:first-child .media-full { padding: calc(var(--fit,1) * 1rem) calc(var(--pad) * .3) !important; }
 /* s69 & s71 (Hot/Cold Interpass Heat Exchanger — Site Erection): the caption
    panel docks bottom-left over the first cell only, but the standard n2
    recipe reserves the same 8.9rem caption band on the second cell too, even
@@ -1534,10 +1568,11 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   padding-top: calc(var(--pad) * 1.15);
   padding-bottom: calc(var(--fit,1) * 1rem);
 }
-/* s57 & s58: the larger/lower-shifted photo now shows busier machinery
+/* s59: the larger/lower-shifted photo now shows busier machinery
    detail directly behind the top-right panel — darken the glass a bit more
-   than the deck default so the spec text stays legible over it. */
-#s58 .showcase-panel, #s59 .showcase-panel {
+   than the deck default so the spec text stays legible over it. s58 reverted
+   to the deck's standard transparent card per client request. */
+#s59 .showcase-panel {
   background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .72), rgba(var(--azure-deep-rgb), .88));
 }
 /* s61: stack the photo in a band above the spec panel instead of floating
@@ -1547,7 +1582,16 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    (on top of the existing panel-wide 2-column flow) to keep the band short. */
 #s62 .showcase-canvas { bottom: calc(var(--fit,1) * 12.5rem); background: var(--azure-deep); }
 #s62 .showcase-canvas .media-full { object-fit: contain; }
-#s62 .showcase-panel { background: var(--azure-deep); }
+#s62 .showcase-panel { background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .34), rgba(var(--azure-deep-rgb), .55)); }
+/* s65: show the full photo uncropped */
+#s65 .showcase-canvas { background: var(--azure-deep); }
+#s65 .showcase-canvas .media-full { object-fit: contain; }
+/* s68: show the second (right) photo uncropped */
+#s68 .showcase-cell:last-child { background: var(--azure-deep); }
+#s68 .showcase-cell:last-child .media-full { object-fit: contain; }
+/* s72: reduce zoom, show the full photo */
+#s72 .showcase-canvas { background: var(--azure-deep); }
+#s72 .showcase-canvas .media-full { object-fit: contain; }
 /* s54: same fix as s61/s62 above — the hard photo-fill cover crop cut off both
    ends of the vessel, and the bottom-right-docked panel sat on top of the
    remaining photo. Show the full uncropped photo letterboxed on azure-deep,
@@ -1717,6 +1761,13 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 }
 .tpl-gallery .gallery-grid .media-frame:hover { transform: translateY(-4px); border-color: var(--azure-bright); }
 .tpl-gallery .gallery-caption { text-align: center; font-size: .8rem; color: var(--steel-light); margin-top: 1rem; }
+/* s75: smaller title, bigger photos */
+#s75 .slide-title { font-size: clamp(1.4rem, 2vw, 1.8rem); }
+#s75 .eyebrow { font-size: .68rem; }
+#s75 .gallery-grid { margin-top: .8rem; }
+/* s103: enlarge the single photo */
+#s103 .gallery-grid { margin-top: .6rem; }
+#s103 .slide-inner { padding-top: max(var(--chrome-top), clamp(1rem, 2.5vh, 2rem)); }
 
 /* Toolbox Talks — let the photo grow much larger by reclaiming the
    template's default bottom breathing room and tightening the
