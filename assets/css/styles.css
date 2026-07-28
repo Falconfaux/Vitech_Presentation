@@ -483,7 +483,7 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 #s2 .side-panel li { font-size: 1.05rem; }
 /* keep every "We specialize in" bullet on one line rather than wrapping */
 #s2 .content-grid { grid-template-columns: 1fr 1.2fr; }
-#s2 .content-grid-right .side-panel:first-child li { font-size: calc(var(--fit,1) * .98rem); white-space: nowrap; }
+#s2 .content-grid-right .side-panel:first-child li { font-size: calc(var(--fit,1) * 1.18rem); white-space: nowrap; }
 /* Slide 2 is the deck's densest text slide (2 paragraphs + 4-row spec list +
    13-chip group + 7-item side panel). With the larger TV/base type it can
    overflow even at the --fit floor, so tighten its vertical rhythm here; this
