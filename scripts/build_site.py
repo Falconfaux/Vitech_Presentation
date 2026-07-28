@@ -1041,7 +1041,7 @@ cover("Cover",
         ("1992", "Established"),
         ("33+", "Years of Experience"),
         ("3", "Manufacturing Units"),
-        ("ISO · ASME", "Certified & Approved"),
+        ("ISO · ASME · PDIL · IBR · PESO", "Certified & Approved"),
       ])
 
 # ---- 2. Company Introduction -------------------------------------------
