@@ -1441,7 +1441,7 @@ spec("Oil, Gas, Lithium & Aerospace", "Aerospace", "Exhaust Collector — U Stam
       ("Qty / Weight", "1 No. / 5 tons")],
      93, layout="showcase", fill=True, panel_pos="bc")
 
-spec("Oil, Gas, Lithium & Aerospace", "Paper & Pulp", "Evaporator — Effect 7", "APL, India",
+spec("Paper & Pulp", "Paper & Pulp", "Evaporator — Effect 7", "APL, India",
      [("Material", "SA 240 Gr. 304 & SA 516 Gr. 70; tubesheets SA 240 Gr. 304L; tubes SA 249 TP 304L"),
       ("Size", "Ø 3.7/4.4 mtr × 20.2 mtr L"),
       ("Tubes", "50.8mm OD × 1.2mm min. thk × 11.5 mtr L — qty 2,199 Nos."),
