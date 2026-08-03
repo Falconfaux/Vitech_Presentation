@@ -1568,6 +1568,11 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    padding. Bottom-align each photo within its box instead of centering it,
    so both photos' bottom edges land flush with each other. */
 #s61 .showcase-cell .media-full { object-position: center bottom; }
+/* s61 (left photo only, client request): recenter it vertically instead of
+   bottom-aligning (the tall top padding on the right photo doesn't apply
+   here, so bottom-align was leaving a large empty band above it) and scale
+   it up slightly so it reads bigger in its frame. */
+#s61 .showcase-cell:first-child .media-full { object-position: center center; transform: scale(1.18); }
 /* s69 & s71 (Hot/Cold Interpass Heat Exchanger — Site Erection): the caption
    panel docks bottom-left over the first cell only, but the standard n2
    recipe reserves the same 8.9rem caption band on the second cell too, even
