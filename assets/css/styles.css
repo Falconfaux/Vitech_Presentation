@@ -559,13 +559,13 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 /* E&I Capability: larger type, full-width intro + 2-column list so both
    halves are filled rather than leaving a blank right column. Targeted by
    section (not #sNN) so slide renumbering never detaches these rules. */
-.tpl-prose[data-section="Electrical & Instrumentation"] .content-grid { row-gap: calc(var(--fit,1) * .45rem); }
-.tpl-prose[data-section="Electrical & Instrumentation"] p { font-size: calc(var(--fit,1) * 1.12rem); line-height: calc(var(--fit,1) * 1.38); margin-bottom: 0; }
-.tpl-prose[data-section="Electrical & Instrumentation"] .slide-title { margin-bottom: calc(var(--fit,1) * .35rem); }
-.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide { margin-top: 0; padding: calc(var(--fit,1) * .8rem) calc(var(--fit,1) * 1.8rem); }
-.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide h3 { font-size: .82rem; margin-bottom: calc(var(--fit,1) * .45rem); }
-.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide ul { columns: 2; column-gap: 3rem; }
-.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide li { font-size: calc(var(--fit,1) * 1rem); line-height: calc(var(--fit,1) * 1.24); margin-bottom: calc(var(--fit,1) * .16rem); }
+.tpl-prose[data-section="Electrical & Instrumentation"] .content-grid { row-gap: calc(var(--fit,1) * 1rem); }
+.tpl-prose[data-section="Electrical & Instrumentation"] p { font-size: calc(var(--fit,1) * 1.3rem); line-height: calc(var(--fit,1) * 1.56); margin-bottom: calc(var(--fit,1) * .6rem); }
+.tpl-prose[data-section="Electrical & Instrumentation"] .slide-title { margin-bottom: calc(var(--fit,1) * .6rem); }
+.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide { margin-top: calc(var(--fit,1) * .7rem); padding: calc(var(--fit,1) * 1.9rem) calc(var(--fit,1) * 2.2rem); }
+.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide h3 { font-size: .92rem; margin-bottom: calc(var(--fit,1) * 1rem); }
+.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide ul { columns: 2; column-gap: 3.5rem; }
+.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide li { font-size: calc(var(--fit,1) * 1.18rem); line-height: calc(var(--fit,1) * 1.5); margin-bottom: calc(var(--fit,1) * .62rem); }
 /* s99: keep the title on one line — the generic 20ch cap forces an early wrap. */
 #s100 .slide-title { max-width: none; }
 /* s102 (HSE Policy): tips into --fit shrink at the tallest tested viewport
