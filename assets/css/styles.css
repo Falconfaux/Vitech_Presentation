@@ -1801,8 +1801,24 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   color: var(--amber); font-size: calc(var(--fit,1) * .84rem); font-weight: 600;
 }
 .tpl-spec .spec-extra-table { margin-top: calc(var(--fit,1) * 1.4rem); margin-bottom: 0; }
-.tpl-spec .spec-extra-table table.spec-table { font-size: .82rem; }
+.tpl-spec .spec-extra-table table.spec-table { font-size: .82rem; table-layout: fixed; }
 .tpl-spec .spec-extra-table table.spec-table td { padding: calc(var(--fit,1) * .55rem) calc(var(--fit,1) * .85rem); }
+/* Fixed layout so the long slash-joined Material tokens wrap inside their
+   column instead of forcing the table wider than the panel (which pushed the
+   Process/Material/Layers columns past the right edge on #s28). Only the body
+   cells break mid-token; headers stay on one line. */
+.tpl-spec .spec-extra-table table.spec-table td { overflow-wrap: anywhere; word-break: break-word; }
+.tpl-spec .spec-extra-table table.spec-table th { white-space: nowrap; }
+.tpl-spec .spec-extra-table table.spec-table th:nth-child(1),
+.tpl-spec .spec-extra-table table.spec-table td:nth-child(1) { width: 8%; }
+.tpl-spec .spec-extra-table table.spec-table th:nth-child(2),
+.tpl-spec .spec-extra-table table.spec-table td:nth-child(2) { width: 33%; }
+.tpl-spec .spec-extra-table table.spec-table th:nth-child(3),
+.tpl-spec .spec-extra-table table.spec-table td:nth-child(3) { width: 20%; }
+.tpl-spec .spec-extra-table table.spec-table th:nth-child(4),
+.tpl-spec .spec-extra-table table.spec-table td:nth-child(4) { width: 27%; }
+.tpl-spec .spec-extra-table table.spec-table th:nth-child(5),
+.tpl-spec .spec-extra-table table.spec-table td:nth-child(5) { width: 12%; }
 
 /* ---------------------------------------------------------------------- */
 /* Template: gallery wall (letters / certifications / exhibitions)        */
