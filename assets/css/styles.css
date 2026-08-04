@@ -79,7 +79,12 @@ html {
    lifts the whole rem scale for the distant-viewer TV, where even a "1080p"
    canvas needs noticeably larger absolute type. At 1920×1080 the root resolves
    to ~26px (~25% above the base); it caps at 38px on 4K. Padding/gap grow with
-   it so the larger type keeps breathing room. */
+   it so the larger type keeps breathing room.
+   NB: a deck-wide bump of this cap for 4K was trialled and reverted — the
+   showcase panels are width:fit-content with a fixed-px label column, so larger
+   type made their values wrap word-by-word instead of widening the panel. A
+   proper 4K rescale needs the panel layout reworked first; done per-slide/per
+   overlay instead (see the siteplan legend's vw-anchored sizing). */
 @media (min-width: 1900px) {
   html { font-size: clamp(22px, 0.85vw + 0.95vh, 38px); }
   :root {
@@ -1801,24 +1806,37 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
   color: var(--amber); font-size: calc(var(--fit,1) * .84rem); font-weight: 600;
 }
 .tpl-spec .spec-extra-table { margin-top: calc(var(--fit,1) * 1.4rem); margin-bottom: 0; }
-.tpl-spec .spec-extra-table table.spec-table { font-size: .82rem; table-layout: fixed; }
-.tpl-spec .spec-extra-table table.spec-table td { padding: calc(var(--fit,1) * .55rem) calc(var(--fit,1) * .85rem); }
 /* Fixed layout so the long slash-joined Material tokens wrap inside their
    column instead of forcing the table wider than the panel (which pushed the
-   Process/Material/Layers columns past the right edge on #s28). Only the body
-   cells break mid-token; headers stay on one line. */
-.tpl-spec .spec-extra-table table.spec-table td { overflow-wrap: anywhere; word-break: break-word; }
-.tpl-spec .spec-extra-table table.spec-table th { white-space: nowrap; }
+   Process/Material/Layers columns past the right edge on #s28). The font size
+   is capped in px so this dense 5-column table stays legible without ballooning
+   on large 4K TVs (where the deck's base font can reach ~50px) — at that size
+   44px headers no longer fit their columns and "LAYERS" clipped off the edge. */
+.tpl-spec .spec-extra-table table.spec-table { font-size: min(calc(var(--fit,1) * .82rem), 22px); table-layout: fixed; }
+.tpl-spec .spec-extra-table table.spec-table td {
+  padding: calc(var(--fit,1) * .55rem) min(calc(var(--fit,1) * .85rem), 18px);
+  font-size: min(calc(var(--fit,1) * .86rem), 22px);
+}
+.tpl-spec .spec-extra-table table.spec-table th {
+  white-space: nowrap;
+  font-size: min(calc(var(--fit,1) * .8rem), 19px); letter-spacing: .03em;
+  padding: calc(var(--fit,1) * .6rem) min(calc(var(--fit,1) * .85rem), 18px);
+}
+/* Only the Material cell breaks its long slash-joined token, and only at the
+   <wbr> points after each slash (so "Hastelloy" never splits mid-word);
+   break-word is the last-resort fallback if a segment ever overflows. Every
+   other column stays intact so "01" never splits to "0"/"1". */
+.tpl-spec .spec-extra-table table.spec-table td:nth-child(4) { overflow-wrap: break-word; }
 .tpl-spec .spec-extra-table table.spec-table th:nth-child(1),
-.tpl-spec .spec-extra-table table.spec-table td:nth-child(1) { width: 8%; }
+.tpl-spec .spec-extra-table table.spec-table td:nth-child(1) { width: 7%; }
 .tpl-spec .spec-extra-table table.spec-table th:nth-child(2),
-.tpl-spec .spec-extra-table table.spec-table td:nth-child(2) { width: 33%; }
+.tpl-spec .spec-extra-table table.spec-table td:nth-child(2) { width: 31%; }
 .tpl-spec .spec-extra-table table.spec-table th:nth-child(3),
-.tpl-spec .spec-extra-table table.spec-table td:nth-child(3) { width: 20%; }
+.tpl-spec .spec-extra-table table.spec-table td:nth-child(3) { width: 18%; }
 .tpl-spec .spec-extra-table table.spec-table th:nth-child(4),
-.tpl-spec .spec-extra-table table.spec-table td:nth-child(4) { width: 27%; }
+.tpl-spec .spec-extra-table table.spec-table td:nth-child(4) { width: 29%; }
 .tpl-spec .spec-extra-table table.spec-table th:nth-child(5),
-.tpl-spec .spec-extra-table table.spec-table td:nth-child(5) { width: 12%; }
+.tpl-spec .spec-extra-table table.spec-table td:nth-child(5) { width: 15%; }
 
 /* ---------------------------------------------------------------------- */
 /* Template: gallery wall (letters / certifications / exhibitions)        */
