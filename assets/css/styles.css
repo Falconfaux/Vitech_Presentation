@@ -475,7 +475,7 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 .tpl-prose .spec-row .k { font-size: .82rem; }
 .tpl-prose .spec-row .v { font-size: calc(var(--fit,1) * 1.04rem); }
 /* Slide 2 only: larger type requested for the company-intro slide specifically */
-#s2 .slide-title { font-size: clamp(2.3rem, 4.4vw, 3.95rem); }
+#s2 .slide-title { font-size: clamp(2.3rem, 4.4vw, 3.95rem); margin-bottom: calc(var(--fit,1) * 1.6rem); }
 #s2 p { font-size: calc(var(--fit,1) * 1.4rem); line-height: calc(var(--fit,1) * 1.5); }
 #s2 .spec-row, #s2 .spec-row .v { font-size: calc(var(--fit,1) * 1.1rem); }
 #s2 .spec-row .k { font-size: .86rem; }
