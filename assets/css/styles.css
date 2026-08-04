@@ -479,7 +479,7 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 #s2 p { font-size: calc(var(--fit,1) * 1.4rem); line-height: calc(var(--fit,1) * 1.5); }
 #s2 .spec-row, #s2 .spec-row .v { font-size: calc(var(--fit,1) * 1.1rem); }
 #s2 .spec-row .k { font-size: .86rem; }
-#s2 .spec-row { grid-template-columns: 180px 1fr; }
+#s2 .spec-row { grid-template-columns: 232px 1fr; gap: 1.15rem; }
 #s2 .side-panel li { font-size: 1.05rem; }
 /* keep every "We specialize in" bullet on one line rather than wrapping */
 #s2 .content-grid { grid-template-columns: 1fr 1.2fr; }
@@ -559,14 +559,21 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 /* E&I Capability: larger type, full-width intro + 2-column list so both
    halves are filled rather than leaving a blank right column. Targeted by
    section (not #sNN) so slide renumbering never detaches these rules. */
-.tpl-prose[data-section="Electrical & Instrumentation"] .content-grid { row-gap: calc(var(--fit,1) * 1.3rem); }
-.tpl-prose[data-section="Electrical & Instrumentation"] p { font-size: calc(var(--fit,1) * 1.72rem); line-height: calc(var(--fit,1) * 1.52); margin-bottom: 0; }
-.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide { margin-top: 0; padding: calc(var(--fit,1) * 1.8rem) calc(var(--fit,1) * 2.1rem); }
-.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide h3 { font-size: 1.1rem; margin-bottom: calc(var(--fit,1) * 1rem); }
+.tpl-prose[data-section="Electrical & Instrumentation"] .content-grid { row-gap: calc(var(--fit,1) * .45rem); }
+.tpl-prose[data-section="Electrical & Instrumentation"] p { font-size: calc(var(--fit,1) * 1.12rem); line-height: calc(var(--fit,1) * 1.38); margin-bottom: 0; }
+.tpl-prose[data-section="Electrical & Instrumentation"] .slide-title { margin-bottom: calc(var(--fit,1) * .35rem); }
+.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide { margin-top: 0; padding: calc(var(--fit,1) * .8rem) calc(var(--fit,1) * 1.8rem); }
+.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide h3 { font-size: .82rem; margin-bottom: calc(var(--fit,1) * .45rem); }
 .tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide ul { columns: 2; column-gap: 3rem; }
-.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide li { font-size: calc(var(--fit,1) * 1.42rem); line-height: calc(var(--fit,1) * 1.4); margin-bottom: calc(var(--fit,1) * .68rem); }
+.tpl-prose[data-section="Electrical & Instrumentation"] .side-panel.wide li { font-size: calc(var(--fit,1) * 1rem); line-height: calc(var(--fit,1) * 1.24); margin-bottom: calc(var(--fit,1) * .16rem); }
 /* s99: keep the title on one line — the generic 20ch cap forces an early wrap. */
 #s100 .slide-title { max-width: none; }
+/* s102 (HSE Policy): tips into --fit shrink at the tallest tested viewport
+   only; tighten paragraph rhythm slightly so it settles unscaled there too. */
+#s102 p { margin-bottom: calc(var(--fit,1) * .5rem); line-height: calc(var(--fit,1) * 1.32); }
+#s102 .content-grid { row-gap: calc(var(--fit,1) * 1rem); }
+#s102 .slide-title { margin-bottom: calc(var(--fit,1) * .55rem); }
+#s102 .chip-row { margin-top: calc(var(--fit,1) * .75rem); }
 
 /* ---------------------------------------------------------------------- */
 /* Template: visual (org chart / layout / location map — image forward)   */
@@ -1032,6 +1039,24 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    stacked tables — the 3rd wraps alone to its own row, leaving a gap next
    to it. Give this slide its own 3-column row instead. */
 #s110 .table-grid-2col { grid-template-columns: repeat(3, 1fr); }
+
+/* Slides 104/105/106/107 ("Ongoing Jobs" tables) were tipping into the
+   --fit auto-shrink on some viewports, rendering their text visibly
+   smaller than every surrounding slide. Reclaim vertical space (bottom
+   padding, title width, top gap, row padding/line-height) — never the
+   font-size — so they settle at the deck's standard unscaled size. */
+#s107 .slide-inner, #s108 .slide-inner, #s109 .slide-inner, #s110 .slide-inner {
+  justify-content: flex-start; padding-bottom: var(--pad);
+  padding-top: max(var(--chrome-top), calc(var(--fit,1) * clamp(1.5rem, 3.5vh, 2.4rem)));
+}
+#s107 .slide-title, #s108 .slide-title, #s109 .slide-title, #s110 .slide-title { max-width: none; margin-bottom: calc(var(--fit,1) * .2rem); }
+#s107 .table-wrap, #s108 .table-wrap, #s109 .table-wrap, #s110 .table-wrap { margin-top: calc(var(--fit,1) * .9rem); margin-bottom: 0; }
+#s107 table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .3rem) calc(var(--fit,1) * 1.1rem); line-height: calc(var(--fit,1) * 1.22); }
+#s107 table.spec-table th { padding: calc(var(--fit,1) * var(--fit,1) * .5rem) calc(var(--fit,1) * 1.1rem); }
+#s108 table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .48rem) calc(var(--fit,1) * 1.1rem); }
+#s108 table.spec-table th { padding: calc(var(--fit,1) * var(--fit,1) * .6rem) calc(var(--fit,1) * 1.1rem); }
+#s109 table.spec-table td, #s110 table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .42rem) calc(var(--fit,1) * .95rem); }
+#s109 table.spec-table th, #s110 table.spec-table th { padding: calc(var(--fit,1) * var(--fit,1) * .5rem) calc(var(--fit,1) * .95rem); }
 
 /* ---------------------------------------------------------------------- */
 /* Template: water (rainwater harvesting + wastewater recycling)           */
