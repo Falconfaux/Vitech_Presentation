@@ -702,7 +702,10 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
   /* pushed down from the top chrome so the columns sit against the map body
      (which letterboxes lower on taller viewports) rather than up in the scrim */
   top: calc(var(--fit,1) * 11rem);
-  width: 11.75rem;
+  /* Width tracks viewport width (not the capped rem base) so the columns keep
+     the same share of a big boardroom TV as they do on a laptop — see the
+     font-size clamps below for the same rationale. */
+  width: clamp(11.75rem, 15.5vw, 23rem);
   grid-template-columns: 1fr;
   display: grid; gap: calc(var(--fit,1) * .6rem);
   max-height: calc(100% - var(--fit,1) * 12rem);
@@ -718,9 +721,18 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 /* the side columns have far more room per point than the old 5-across grid
    — use it for legibility instead of packing tighter */
 .tpl-siteplan .siteplan-legend.side .legend-col { gap: calc(var(--fit,1) * .24rem); }
-.tpl-siteplan .siteplan-legend.side .legend-group-header { font-size: calc(var(--fit,1) * .72rem); }
-.tpl-siteplan .siteplan-legend.side .legend-txt { font-size: calc(var(--fit,1) * .82rem); }
-.tpl-siteplan .siteplan-legend.side .legend-num { width: calc(var(--fit,1) * 20px); height: calc(var(--fit,1) * 20px); font-size: calc(var(--fit,1) * .66rem); }
+/* The deck's rem base is deliberately capped (see the html font-size clamp), so
+   plain rem sizing stops growing on a native-4K boardroom TV and the legend
+   shrinks to a tiny fraction of the screen while the map fills it. Anchor the
+   side-legend type to viewport width instead: identical on a laptop (the vw
+   term matches the old rem there), but it keeps scaling up on big displays. */
+.tpl-siteplan .siteplan-legend.side .legend-group-header { font-size: calc(var(--fit,1) * clamp(.72rem, .92vw, 1.7rem)); }
+.tpl-siteplan .siteplan-legend.side .legend-txt { font-size: calc(var(--fit,1) * clamp(.82rem, 1.12vw, 2.1rem)); }
+.tpl-siteplan .siteplan-legend.side .legend-num {
+  width: calc(var(--fit,1) * clamp(20px, 1.35vw, 44px));
+  height: calc(var(--fit,1) * clamp(20px, 1.35vw, 44px));
+  font-size: calc(var(--fit,1) * clamp(.66rem, .74vw, 1.4rem));
+}
 /* per-point stagger reveal: each point fades/rises in on its own inline
    transition-delay (set at build time so the whole legend — regardless of
    how many points it has — finishes appearing within ~3 seconds). */
