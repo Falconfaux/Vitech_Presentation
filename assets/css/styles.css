@@ -2047,13 +2047,16 @@ img[data-src] { background: linear-gradient(120deg, rgba(255,255,255,.04), rgba(
    hand it more vertical room — reclaim the bottom padding and tighten the caption
    so the frame grows downward. No transform: a scaled centered image grows up
    into the top-left title and buries it. */
-#s103 .slide-inner { padding-top: var(--chrome-top); padding-bottom: calc(var(--pad) * .25); }
+#s103 .slide-inner { padding-top: var(--chrome-top); padding-bottom: calc(var(--pad) * .45); }
 #s103 .gallery-grid { margin-top: .45rem; }
 #s103 .gallery-caption { margin-top: .35rem; font-size: .74rem; }
 
-/* s110 (Slide 107): center the header and keep the title on one line. */
+/* s110 (Slide 107): center the header AND keep it on one line at every size.
+   A bare white-space:nowrap on the default title size overflows horizontally
+   below 4K, so size the title to the viewport width (vw) — it always fits one
+   line from laptop up to the 75" 4K, scaling up on the big screen. */
 #s110 .eyebrow, #s110 .slide-title, #s110 .slide-sub { text-align: center; }
-#s110 .slide-title { white-space: nowrap; }
+#s110 .slide-title { white-space: nowrap; font-size: clamp(1.4rem, 3.3vw, 3.4rem); }
 
 /* s129 (Slide 126): name each certificate above its image. */
 #s129 .media-frame { position: relative; }
