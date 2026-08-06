@@ -79,12 +79,7 @@ html {
    lifts the whole rem scale for the distant-viewer TV, where even a "1080p"
    canvas needs noticeably larger absolute type. At 1920×1080 the root resolves
    to ~26px (~25% above the base); it caps at 38px on 4K. Padding/gap grow with
-   it so the larger type keeps breathing room.
-   NB: a deck-wide bump of this cap for 4K was trialled and reverted — the
-   showcase panels are width:fit-content with a fixed-px label column, so larger
-   type made their values wrap word-by-word instead of widening the panel. A
-   proper 4K rescale needs the panel layout reworked first; done per-slide/per
-   overlay instead (see the siteplan legend's vw-anchored sizing). */
+   it so the larger type keeps breathing room. */
 @media (min-width: 1900px) {
   html { font-size: clamp(22px, 0.85vw + 0.95vh, 38px); }
   :root {
@@ -980,14 +975,14 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 .tpl-table .slide-sub { font-size: calc(var(--fit,1) * 1.1rem); }
 
 .tpl-table.dense .table-wrap { margin-top: calc(var(--fit,1) * var(--fit,1) * .9rem); margin-bottom: 0; }
-.tpl-table.dense table.spec-table { font-size: calc(var(--fit,1) * .94rem); }
+.tpl-table.dense table.spec-table { font-size: calc(var(--fit,1) * 1.14rem); }
 .tpl-table.dense table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .55rem) calc(var(--fit,1) * .9rem); line-height: calc(var(--fit,1) * var(--fit,1) * 1.38); }
 .tpl-table.dense table.spec-table th { padding: calc(var(--fit,1) * var(--fit,1) * .65rem) calc(var(--fit,1) * .9rem); font-size: .82rem; }
 .tpl-table.dense .table-note { font-size: .85rem; }
 /* 2-column dense table slides (e.g. Weld Overlay / Blasting / PWHT): larger
    type (client) and equal-height cards — the taller table sets the row height
    and the shorter one stretches its rows to match, so both cards bottom-align. */
-.tpl-table.dense .table-grid-2col table.spec-table { font-size: calc(var(--fit,1) * 1.08rem); }
+.tpl-table.dense .table-grid-2col table.spec-table { font-size: calc(var(--fit,1) * 1.14rem); }
 .tpl-table.dense .table-grid-2col table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .64rem) calc(var(--fit,1) * .95rem); }
 .tpl-table.dense .table-grid-2col table.spec-table th { font-size: .9rem; }
 /* s8: "New (Future)" wraps at the column's fit-content width and overlaps the
@@ -1005,7 +1000,7 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    its peers, so give the cells larger type than the shared .tpl-table rules.
    16 stays below 23's bump since it carries two dense tables (more rows). */
 #s18 .slide-title { font-size: clamp(1.7rem, 2.6vw, 2.3rem); max-width: 34ch; }
-#s18 table.spec-table { font-size: calc(var(--fit,1) * 1.38rem); }
+#s18 table.spec-table { font-size: calc(var(--fit,1) * 1.14rem); }
 #s18 table.spec-table th { font-size: calc(var(--fit,1) * 1.08rem); padding: calc(var(--fit,1) * var(--fit,1) * .88rem) calc(var(--fit,1) * 1.15rem); }
 #s18 table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .82rem) calc(var(--fit,1) * 1.15rem); line-height: calc(var(--fit,1) * var(--fit,1) * 1.48); }
 #s18 .table-note { font-size: calc(var(--fit,1) * 1.55rem); font-weight: 600; }
@@ -1017,7 +1012,7 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s23 .table-wrap { max-width: min(78%, 980px); margin-left: auto; margin-right: auto; }
 #s23 table.spec-table th:nth-child(n+2), #s23 table.spec-table td:nth-child(n+2) { text-align: center; }
 
-#s25 table.spec-table { font-size: calc(var(--fit,1) * 1.32rem); table-layout: fixed; }
+#s25 table.spec-table { font-size: calc(var(--fit,1) * 1.14rem); table-layout: fixed; }
 #s25 table.spec-table th { font-size: calc(var(--fit,1) * 1.02rem); padding: calc(var(--fit,1) * var(--fit,1) * 1.1rem) calc(var(--fit,1) * 1.35rem); }
 #s25 table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * 1.05rem) calc(var(--fit,1) * 1.35rem); }
 /* Two independent tables on this slide must share identical column
@@ -1573,7 +1568,7 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 /* s60: "Sizes" reflows from 9 stacked lines into a 3×3 grid with a vertical
    rule between entries, so the box reads three-per-row instead of towering. */
 #s61 .size-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .3rem 1rem; white-space: normal; }
-#s61 .size-grid span { border-right: 1px solid rgba(255,255,255,.25); padding-right: .8rem; }
+#s61 .size-grid span { border-right: 1px solid rgba(255,255,255,.25); padding-right: .8rem; white-space: nowrap; }
 #s61 .size-grid span:nth-child(3n) { border-right: none; padding-right: 0; }
 /* panel-tl: dock the compact panel to the TOP-left so a tall vessel below it
    stays fully visible (used on the cladded column slides) */
@@ -2024,3 +2019,48 @@ body.ready #deck { animation: appFadeIn .6s var(--ease-soft); }
 
 /* lazy image placeholder */
 img[data-src] { background: linear-gradient(120deg, rgba(255,255,255,.04), rgba(255,255,255,.09), rgba(255,255,255,.04)); }
+
+/* ---------------------------------------------------------------------- */
+/* 75" review round — per-slide layout fixes                               */
+/* ---------------------------------------------------------------------- */
+
+/* s62 (Slide 58): dropped panel-wide (see index.html) so the 4 spec rows read
+   as one clean label/value column instead of two far-apart columns. Base width
+   handles it — no per-slide override needed. */
+
+/* s84 (Slide 82): dropped panel-wide (see index.html) so the spec reads as a
+   clean label/value grid, top-left; keep the box from over-widening. */
+#s84 .showcase-panel { max-width: min(60%, 900px); }
+
+/* s99 (Slide 81): the "spaced out" look was the wide label→value gutter, not the
+   box width. Give the value column room (so it stops wrapping word-by-word) and
+   tighten the label→value gap; stays docked bottom-left. */
+#s99 .showcase-panel { max-width: min(42%, 1000px); }
+#s99 .spec-list { column-gap: .55rem; }
+
+/* s88 (Slide 86): unzoom the tall Crystallizer — show the full vessel instead
+   of the hard center crop the cover rule applied. */
+#s88 .showcase-canvas .media-full { object-fit: contain; background: var(--azure-deep); }
+
+/* s103 (Slide 100): enlarge the single photo. It's height-bound in a wide row
+   (matched frame aspect keeps it uncropped), so the clean way to grow it is to
+   hand it more vertical room — reclaim the bottom padding and tighten the caption
+   so the frame grows downward. No transform: a scaled centered image grows up
+   into the top-left title and buries it. */
+#s103 .slide-inner { padding-top: var(--chrome-top); padding-bottom: calc(var(--pad) * .25); }
+#s103 .gallery-grid { margin-top: .45rem; }
+#s103 .gallery-caption { margin-top: .35rem; font-size: .74rem; }
+
+/* s110 (Slide 107): center the header and keep the title on one line. */
+#s110 .eyebrow, #s110 .slide-title, #s110 .slide-sub { text-align: center; }
+#s110 .slide-title { white-space: nowrap; }
+
+/* s129 (Slide 126): name each certificate above its image. */
+#s129 .media-frame { position: relative; }
+#s129 .cert-name {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 2;
+  text-align: center; font-size: calc(var(--fit,1) * .8rem); font-weight: 700;
+  letter-spacing: .03em; line-height: 1.25; padding: calc(var(--fit,1) * .45rem) .7rem;
+  color: #eef1f8; border-radius: 12px 12px 0 0;
+  background: linear-gradient(180deg, rgba(6,10,26,.9) 0%, rgba(6,10,26,.7) 60%, rgba(6,10,26,0) 100%);
+}
