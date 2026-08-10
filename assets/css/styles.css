@@ -1920,9 +1920,17 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 .tpl-gallery[data-section="Certifications"] .slide-inner {
   padding-bottom: var(--pad);
 }
+/* Keep every gallery title on a single line (see reference for slide 111).
+   The default .slide-title max-width:20ch forced "Client Appreciation Letters"
+   and the longer Certification titles to wrap — drop that cap and no-wrap, then
+   anchor the size to the viewport so even the longest title
+   ("ISO — QMS, EMS & OHSAS Certifications (1/2)") fits one line without
+   overflowing on smaller screens. */
 .tpl-gallery[data-section="Client Appreciation"] .slide-title,
 .tpl-gallery[data-section="Certifications"] .slide-title {
-  font-size: clamp(1.7rem, 3vw, 2.6rem);
+  font-size: clamp(1.4rem, 2.8vw, 2.9rem);
+  max-width: none;
+  white-space: nowrap;
 }
 .tpl-gallery[data-section="Client Appreciation"] .gallery-grid,
 .tpl-gallery[data-section="Certifications"] .gallery-grid {
