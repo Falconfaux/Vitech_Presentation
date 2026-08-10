@@ -996,25 +996,18 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s8 .table-grid-2col .table-wrap { align-self: start; }
 #s8 .table-grid-2col .table-wrap table.spec-table { height: auto; }
 
-/* Slides 16 & 23: table content has notably more empty space below it than
-   its peers, so give the cells larger type than the shared .tpl-table rules.
-   16 stays below 23's bump since it carries two dense tables (more rows). */
-#s18 .slide-title { font-size: clamp(1.7rem, 2.6vw, 2.3rem); max-width: 34ch; }
-#s18 table.spec-table { font-size: calc(var(--fit,1) * 1.14rem); }
-#s18 table.spec-table th { font-size: calc(var(--fit,1) * 1.08rem); padding: calc(var(--fit,1) * var(--fit,1) * .88rem) calc(var(--fit,1) * 1.15rem); }
-#s18 table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .82rem) calc(var(--fit,1) * 1.15rem); line-height: calc(var(--fit,1) * var(--fit,1) * 1.48); }
-#s18 .table-note { font-size: calc(var(--fit,1) * 1.55rem); font-weight: 600; }
+/* Slide 16 (dense: two tables + callout): keep a compact title and a smaller
+   callout note so the shared "match Slide 105" sizing below can give the cells
+   full deck-standard type instead of forcing --fit to shrink them. */
+#s18 .slide-title { font-size: clamp(1.7rem, 2.6vw, 2.3rem); }
+#s18 .table-note { font-size: calc(var(--fit,1) * 1.05rem); font-weight: 600; }
 
-/* Slide 21: a single table with just one narrow-content check-column set
-   (VHEPL/VEPL/VFPL) stretches to fill the full row width on very wide/large
-   displays, leaving those columns stranded with big gaps. Cap the box width
-   and center it instead of letting it fill the slide. */
-#s23 .table-wrap { max-width: min(78%, 980px); margin-left: auto; margin-right: auto; }
+/* Slide 21: full-width table box to match Slide 105 — keep the check-columns
+   (VHEPL/VEPL/VFPL) centered so they don't strand at the left of the wide
+   cells now that the box fills the slide instead of being capped narrow. */
 #s23 table.spec-table th:nth-child(n+2), #s23 table.spec-table td:nth-child(n+2) { text-align: center; }
 
-#s25 table.spec-table { font-size: calc(var(--fit,1) * 1.14rem); table-layout: fixed; }
-#s25 table.spec-table th { font-size: calc(var(--fit,1) * 1.02rem); padding: calc(var(--fit,1) * var(--fit,1) * 1.1rem) calc(var(--fit,1) * 1.35rem); }
-#s25 table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * 1.05rem) calc(var(--fit,1) * 1.35rem); }
+#s25 table.spec-table { table-layout: fixed; }
 /* Two independent tables on this slide must share identical column
    widths so their VHEPL/VEPL/VFPL boundaries line up (table-layout:auto
    would size each table's columns from its own content only). */
@@ -1080,6 +1073,31 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s108 table.spec-table th { padding: calc(var(--fit,1) * var(--fit,1) * .6rem) calc(var(--fit,1) * 1.1rem); }
 #s109 table.spec-table td, #s110 table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .42rem) calc(var(--fit,1) * .95rem); }
 #s109 table.spec-table th, #s110 table.spec-table th { padding: calc(var(--fit,1) * var(--fit,1) * .5rem) calc(var(--fit,1) * .95rem); }
+
+/* Slides 15/16/20/21/22/23: match Slide 105's (#s108) table sizing. These
+   Workshop tables were tipping hard into the --fit auto-shrink (0.56–0.80),
+   rendering small with a gap below, while #s108 sits near full size (0.96).
+   Same "reclaim vertical space, never the font-size" treatment as #s107–110:
+   full-width single-line titles, a tight top gap + title/table margins, and
+   #s108's row padding — so they settle at the deck's standard unscaled size
+   (td 1.14rem / th .92rem from the shared .tpl-table rules). */
+#s17 .slide-inner, #s18 .slide-inner, #s22 .slide-inner,
+#s23 .slide-inner, #s24 .slide-inner, #s25 .slide-inner {
+  justify-content: flex-start; padding-bottom: var(--pad);
+  padding-top: max(var(--chrome-top), calc(var(--fit,1) * clamp(1.5rem, 3.5vh, 2.4rem)));
+}
+#s17 .slide-title, #s18 .slide-title, #s22 .slide-title,
+#s23 .slide-title, #s24 .slide-title, #s25 .slide-title { max-width: none; margin-bottom: calc(var(--fit,1) * .2rem); }
+#s17 .table-wrap, #s18 .table-wrap, #s22 .table-wrap,
+#s23 .table-wrap, #s24 .table-wrap, #s25 .table-wrap { margin-top: calc(var(--fit,1) * .9rem); margin-bottom: 0; }
+#s17 table.spec-table td, #s18 table.spec-table td, #s22 table.spec-table td,
+#s23 table.spec-table td, #s24 table.spec-table td, #s25 table.spec-table td {
+  padding: calc(var(--fit,1) * var(--fit,1) * .48rem) calc(var(--fit,1) * 1.1rem);
+}
+#s17 table.spec-table th, #s18 table.spec-table th, #s22 table.spec-table th,
+#s23 table.spec-table th, #s24 table.spec-table th, #s25 table.spec-table th {
+  padding: calc(var(--fit,1) * var(--fit,1) * .6rem) calc(var(--fit,1) * 1.1rem);
+}
 
 /* ---------------------------------------------------------------------- */
 /* Template: water (rainwater harvesting + wastewater recycling)           */
