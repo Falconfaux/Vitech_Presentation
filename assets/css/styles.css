@@ -1051,6 +1051,17 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    stacked tables — the 3rd wraps alone to its own row, leaving a gap next
    to it. Give this slide its own 3-column row instead. */
 #s110 .table-grid-2col { grid-template-columns: repeat(3, 1fr); }
+/* Slide 107 (s110): the 3 vessel tables have unequal content heights (the
+   right "Vent Condenser" table wraps to more lines), so the shared
+   stretch-to-fill rule ballooned the shorter left/middle tables' rows with
+   dead space to match it — leaving their rows misaligned. Size each table
+   naturally and top-align, same fix as s8. */
+#s110 .table-grid-2col .table-wrap { align-self: start; }
+#s110 .table-grid-2col .table-wrap table.spec-table { height: auto; }
+/* ...and reserve a common header-bar height so the three tables' first data
+   rows still line up when a shorter title wraps to fewer lines (e.g. the
+   2-line "ZLD Vapor Duct Pipe" vs. the 3-line siblings at ≤1080p). */
+#s110 table.spec-table thead th { height: calc(var(--fit,1) * 3.4rem); vertical-align: top; }
 
 /* Slides 104/105/106/107 ("Ongoing Jobs" tables) were tipping into the
    --fit auto-shrink on some viewports, rendering their text visibly
@@ -1673,6 +1684,12 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 /* s72: reduce zoom, show the full photo */
 #s72 .showcase-canvas { background: var(--azure-deep); }
 #s72 .showcase-canvas .media-full { object-fit: contain; }
+/* s57 (Slide 53 — Distillation Column & Dephlegmator): the wide panoramic
+   photo (2.1:1) was cropped left/right by the shared photo-fill cover rule.
+   Unzoom it to object-fit: contain so the whole image is visible, over its own
+   blurred fill. */
+#s57 .showcase-canvas { background: var(--azure-deep); }
+#s57 .showcase-canvas .media-full { object-fit: contain; }
 /* s54: same fix as s61/s62 above — the hard photo-fill cover crop cut off both
    ends of the vessel, and the bottom-right-docked panel sat on top of the
    remaining photo. Show the full uncropped photo letterboxed on azure-deep,
