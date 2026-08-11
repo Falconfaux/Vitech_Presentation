@@ -1289,7 +1289,14 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    photo uncropped over its own blurred fill — the single-photo recipe, tiled. */
 .tpl-spec.layout-showcase .showcase-canvas.n2,
 .tpl-spec.layout-showcase .showcase-canvas.n3,
-.tpl-spec.layout-showcase .showcase-canvas.n4 { display: grid; gap: 10px; background: #fff; }
+.tpl-spec.layout-showcase .showcase-canvas.n4 { display: grid; gap: 10px; }
+/* the white gutter fill shows only on the framed (bordered) multi-photo slides;
+   every other multi-photo slide keeps a transparent gap (a subtle dark hairline)
+   so it reads as unframed. Keep this id list in sync with the ::after list below. */
+#s27 .showcase-canvas, #s34 .showcase-canvas, #s40 .showcase-canvas,
+#s61 .showcase-canvas, #s69 .showcase-canvas, #s79 .showcase-canvas,
+#s80 .showcase-canvas, #s86 .showcase-canvas, #s87 .showcase-canvas,
+#s91 .showcase-canvas, #s92 .showcase-canvas, #s95 .showcase-canvas { background: #fff; }
 .tpl-spec.layout-showcase .showcase-canvas.n1 { display: grid; grid-template-columns: 1fr; grid-template-rows: 1fr; }
 .tpl-spec.layout-showcase .showcase-canvas.n2 { grid-template-columns: 1fr 1fr; }
 .tpl-spec.layout-showcase .showcase-canvas.n3 { grid-template-columns: 1fr 1fr 1fr; }
@@ -1301,9 +1308,13 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    inset:0), so an inset outline paints *under* the image and never shows — the
    ::after sits above the image on all four edges and stays visible. */
 .tpl-spec.layout-showcase .showcase-cell { position: relative; overflow: hidden; min-width: 0; min-height: 0; }
-.tpl-spec.layout-showcase .showcase-canvas.n2 .showcase-cell::after,
-.tpl-spec.layout-showcase .showcase-canvas.n3 .showcase-cell::after,
-.tpl-spec.layout-showcase .showcase-canvas.n4 .showcase-cell::after { content: ""; position: absolute; inset: 0; border: 6px solid var(--azure); pointer-events: none; z-index: 2; }
+/* per-photo azure + white-inner frame — applied to ONLY the listed multi-photo
+   slides that should carry a border (per client review). Listed single-photo
+   slides are framed via .showcase-canvas::before further down. */
+#s27 .showcase-cell::after, #s34 .showcase-cell::after, #s40 .showcase-cell::after,
+#s61 .showcase-cell::after, #s69 .showcase-cell::after, #s79 .showcase-cell::after,
+#s80 .showcase-cell::after, #s86 .showcase-cell::after, #s87 .showcase-cell::after,
+#s91 .showcase-cell::after, #s92 .showcase-cell::after, #s95 .showcase-cell::after { content: ""; position: absolute; inset: 0; border: 6px solid var(--azure); box-shadow: inset 0 0 0 3px var(--white); pointer-events: none; z-index: 2; }
 .tpl-spec.layout-showcase .showcase-cell .media-full {
   padding: calc(var(--pad) * .55) calc(var(--pad) * .12) calc(var(--fit,1) * 8.9rem);
 }
@@ -1499,26 +1510,15 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    already carries the photo-fill top scrim, so the frame goes on the free
    ::before. box-sizing:border-box keeps the azure border inside the canvas;
    the inset box-shadow paints the white ring just inside it. */
-#s35 .showcase-canvas::before,
-#s36 .showcase-canvas::before,
-#s37 .showcase-canvas::before, #s40 .showcase-canvas::before, #s42 .showcase-canvas::before,
-#s45 .showcase-canvas::before, #s46 .showcase-canvas::before, #s49 .showcase-canvas::before,
-#s53 .showcase-canvas::before, #s54 .showcase-canvas::before, #s55 .showcase-canvas::before,
-#s56 .showcase-canvas::before, #s57 .showcase-canvas::before, #s58 .showcase-canvas::before,
-#s59 .showcase-canvas::before, #s61 .showcase-canvas::before, #s64 .showcase-canvas::before,
-#s66 .showcase-canvas::before, #s67 .showcase-canvas::before, #s69 .showcase-canvas::before, #s71 .showcase-canvas::before,
-#s81 .showcase-canvas::before, #s87 .showcase-canvas::before, #s88 .showcase-canvas::before,
-#s92 .showcase-canvas::before {
+#s43 .showcase-canvas::before, #s46 .showcase-canvas::before,
+#s56 .showcase-canvas::before, #s58 .showcase-canvas::before,
+#s83 .showcase-canvas::before, #s88 .showcase-canvas::before {
   content: ""; position: absolute; inset: 0; z-index: 4; pointer-events: none;
   border: 6px solid var(--azure);
   box-shadow: inset 0 0 0 3px var(--white);
 }
-/* the 5 listed multi-photo slides already have per-cell azure borders + a white
-   grid gap; add the matching white inner ring to each photo. */
-#s82 .showcase-cell::after, #s84 .showcase-cell::after, #s89 .showcase-cell::after,
-#s93 .showcase-cell::after, #s96 .showcase-cell::after {
-  box-shadow: inset 0 0 0 3px var(--white);
-}
+/* (white-inner-ring add-on removed: those slides are no longer in the bordered
+   set — the listed multi-photo slides already carry azure + white via ::after) */
 .tpl-spec.layout-showcase.panel-compact .slide-inner {
   align-items: flex-start;
   padding-left: calc(var(--pad) * .6); padding-right: calc(var(--pad) * .6);
