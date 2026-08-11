@@ -817,7 +817,12 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 .lm-plot-vitech { fill: rgba(20,64,224,.22); stroke: var(--azure-bright); stroke-width: 2.5; }
 .lm-plot-label { font-size: 15px; font-weight: 800; fill: #eef1f8; }
 .lm-plot-label-sm { font-size: 12px; font-weight: 800; fill: #eef1f8; }
-.lm-route { fill: none; stroke: var(--azure-bright); stroke-width: 3; stroke-dasharray: 2 7; stroke-linecap: round; }
+.lm-route {
+  fill: none; stroke: var(--azure-bright); stroke-width: 3;
+  stroke-dasharray: 10 12; stroke-linecap: round; stroke-linejoin: round;
+  animation: ws-flow 1.6s linear infinite; /* same marching flow as the water diagram */
+}
+@media (prefers-reduced-motion: reduce) { .lm-route { animation: none; } }
 
 .lm-rail { stroke: rgba(255,255,255,.45); stroke-width: 3; }
 .lm-rail-tick { stroke: rgba(255,255,255,.45); stroke-width: 2; }
