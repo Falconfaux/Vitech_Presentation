@@ -5,6 +5,7 @@
   var total = slides.length;
   var current = 0;
   var deck = document.getElementById("deck");
+  var stage = document.querySelector(".stage");
   var progress = document.getElementById("progress");
   var counterNow = document.getElementById("counter-now");
   var counterTotal = document.getElementById("counter-total");
@@ -126,6 +127,12 @@
   }
   menuToggle.addEventListener("click", function () { toggleSections(); });
   panelClose.addEventListener("click", function () { toggleSections(false); });
+
+  // prev/next corner arrows
+  var btnPrev = document.getElementById("btn-prev");
+  var btnNext = document.getElementById("btn-next");
+  if (btnPrev) btnPrev.addEventListener("click", function () { prev(); });
+  if (btnNext) btnNext.addEventListener("click", function () { next(); });
   sectionsPanel.addEventListener("click", function (e) {
     if (e.target === sectionsPanel) toggleSections(false);
   });
@@ -149,6 +156,18 @@
   document.querySelectorAll(".spec-media-grid img, .spec-hero img, .gallery-grid img, .visual-frame img, .site-plan-map img").forEach(function (img) {
     img.addEventListener("click", function () {
       openLightbox(img.getAttribute("data-src") || img.src);
+    });
+  });
+  // industry tiles (slides 4 & 5): the photo sits behind a scrim + label, so
+  // wire the click on the whole tile and enlarge its background image. Stop
+  // propagation so the deck's edge click-to-advance doesn't also fire.
+  document.querySelectorAll(".industry-tile.has-photo").forEach(function (tile) {
+    var bg = tile.querySelector(".industry-tile-bg");
+    if (!bg) return;
+    tile.style.cursor = "zoom-in";
+    tile.addEventListener("click", function (e) {
+      e.stopPropagation();
+      openLightbox(bg.getAttribute("data-src") || bg.src);
     });
   });
   lightbox.addEventListener("click", function (e) {
@@ -229,12 +248,27 @@
     };
   }
 
+  // ---------------------------------------------------------------------
+  // Fixed-canvas fit: the whole deck lives on a constant 1920x1080 .stage
+  // (see styles.css). Scale it uniformly to fit the viewport and center it,
+  // so every device renders the *same* layout — only the scale factor
+  // changes — with black letterbox bars on any non-16:9 screen. This is what
+  // makes the deck look identical on a laptop, a PC, a 4K TV, or a phone.
+  // ---------------------------------------------------------------------
+  var STAGE_W = 1920, STAGE_H = 1080;
+  function scaleStage() {
+    if (!stage) return;
+    var scale = Math.min(window.innerWidth / STAGE_W, window.innerHeight / STAGE_H);
+    stage.style.transform = "translate(-50%, -50%) scale(" + scale + ")";
+  }
+
   // init
   var startIndex = 0;
   if (location.hash) {
     var n = parseInt(location.hash.replace("#", ""), 10);
     if (!isNaN(n)) startIndex = clamp(n - 1);
   }
+  scaleStage();
   goTo(startIndex, false);
   fitAllSlides();
   document.body.classList.add("ready");
@@ -247,6 +281,11 @@
     document.fonts.ready.then(fitAllSlides);
   }
 
+  // Rescale the stage immediately on any viewport change; --fit is now measured
+  // against the constant 1080px-tall stage so it no longer changes with the
+  // window, but re-run it debounced as a safety net.
+  window.addEventListener("resize", scaleStage);
+  window.addEventListener("orientationchange", scaleStage);
   window.addEventListener("resize", debounce(fitAllSlides, 150));
 
   window.addEventListener("hashchange", function () {

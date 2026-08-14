@@ -1981,6 +1981,8 @@ PAGE = '''<!doctype html>
 <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
+<div class="stage-viewport">
+<div class="stage">
 <div id="progress"></div>
 <div id="deck">
 {slides}
@@ -1998,6 +2000,8 @@ PAGE = '''<!doctype html>
   </div>
   <div class="hint">Use ← → or space to navigate · click edges · swipe on touch</div>
 </div>
+</div><!-- .stage -->
+</div><!-- .stage-viewport -->
 
 <div id="sections-panel">
   <button class="panel-close" id="panel-close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
