@@ -1162,9 +1162,9 @@ site_plan("Company Overview", "Structure · Quality Manual Annex-D2, Rev. 4", "O
 # bay tables & dimensions stay readable; the two site photos share the next.
 photo_showcase("Company Overview", "Facilities", "Company Layout & Plot Overview",
     [(IMG(6, 1), None)])
-photo_showcase("Company Overview", "Facilities", "Vitech Heavy Equipments (Shahpur) - Top Front view",
+photo_showcase("Company Overview", "Facilities", "Vitech Heavy Equipments (Shahapur) - Top Front view",
     [(IMG(7, 1), None)], fill=True)
-photo_showcase("Company Overview", "Facilities", "Vitech Heavy Equipments (Shahpur) - Top Rear view",
+photo_showcase("Company Overview", "Facilities", "Vitech Heavy Equipments (Shahapur) - Top Rear view",
     [(IMG(8, 1), None)], fill=True)
 
 # ---- 9. Company Layout (annotated site plan + legend) --------------------
