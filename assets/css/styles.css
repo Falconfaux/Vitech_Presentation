@@ -91,12 +91,13 @@ h1, h2, h3, p, ul, ol { margin: 0; }
 /* Deck shell                                                              */
 /* ---------------------------------------------------------------------- */
 
-/* Fixed-canvas stage: the whole deck (slides + nav chrome) is laid out on a
-   constant 1920×1080 surface and scaled uniformly by main.js to fit any
-   viewport, letterboxed on non-16:9 screens. This is what guarantees the deck
-   looks *identical* on a laptop, a PC, a 4K TV, or a phone — only the scale
-   factor changes. .stage is a size container so every fluid cqw/cqh below
-   resolves against this constant surface, not the browser window. */
+/* Fill-the-screen stage: the whole deck (slides + nav chrome) is laid out on a
+   surface with a fixed 1920px design width. main.js scales it so the width fills
+   the viewport edge-to-edge and sets its height to fill the viewport height at
+   that same scale — so the deck covers the whole display with NO letterbox bars
+   on any screen or aspect ratio, while the horizontal layout and every type size
+   stay identical across devices. .stage is a size container so cqw units below
+   resolve against the constant 1920px width, not the browser window. */
 .stage-viewport {
   position: fixed; inset: 0; overflow: hidden;
   background: var(--black);

@@ -249,16 +249,19 @@
   }
 
   // ---------------------------------------------------------------------
-  // Fixed-canvas fit: the whole deck lives on a constant 1920x1080 .stage
-  // (see styles.css). Scale it uniformly to fit the viewport and center it,
-  // so every device renders the *same* layout — only the scale factor
-  // changes — with black letterbox bars on any non-16:9 screen. This is what
-  // makes the deck look identical on a laptop, a PC, a 4K TV, or a phone.
+  // Fill-the-screen fit. The .stage keeps a fixed 1920px design *width*, so
+  // the horizontal layout and every type size are identical on every device.
+  // We scale it so that width fills the viewport edge-to-edge, then set its
+  // *height* to whatever fills the viewport height at that same scale — so the
+  // slide covers the whole display with NO letterbox bars on any screen size
+  // or aspect ratio. Content stays vertically centered, gaining or losing only
+  // vertical breathing room as the screen gets taller or shorter.
   // ---------------------------------------------------------------------
-  var STAGE_W = 1920, STAGE_H = 1080;
+  var STAGE_W = 1920;
   function scaleStage() {
     if (!stage) return;
-    var scale = Math.min(window.innerWidth / STAGE_W, window.innerHeight / STAGE_H);
+    var scale = window.innerWidth / STAGE_W;
+    stage.style.height = (window.innerHeight / scale) + "px";
     stage.style.transform = "translate(-50%, -50%) scale(" + scale + ")";
   }
 
