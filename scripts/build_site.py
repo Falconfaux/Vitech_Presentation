@@ -1918,7 +1918,7 @@ for _eyebrow, _title, _keys, _caption in _CERT_GROUPS:
         _imgs.extend(IMGS(_k))
     _pairs = [_imgs[i:i + 2] for i in range(0, len(_imgs), 2)]
     for _pi, _pair in enumerate(_pairs):
-        _t = _title if len(_pairs) == 1 else "{0} ({1}/{2})".format(_title, _pi + 1, len(_pairs))
+        _t = _title
         gallery("Certifications", _eyebrow, _t, None,
                 caption=_caption if _pi == 0 else None, files=_pair)
 

@@ -18,29 +18,70 @@
 
   function clamp(n) { return Math.max(0, Math.min(total - 1, n)); }
 
-  function lazyLoadNear(index) {
-    for (var d = -1; d <= 2; d++) {
-      var s = slides[index + d];
-      if (!s) continue;
-      var imgs = s.querySelectorAll("img[data-src]");
-      imgs.forEach(function (img) {
-        img.src = img.getAttribute("data-src");
-        img.removeAttribute("data-src");
-      });
-      var vids = s.querySelectorAll("video[data-src]");
-      vids.forEach(function (v) {
-        v.src = v.getAttribute("data-src");
-        v.removeAttribute("data-src");
-        v.load();
-      });
+  // Sliding-window media management. iOS Safari kills a tab that exceeds its
+  // per-tab memory ceiling, and decoded image/video memory is far larger than
+  // file size. So we keep the real src only on slides near the current one and
+  // blank the rest — the original URL always lives on data-src so media can be
+  // re-loaded on return. LOAD_RADIUS is the window we load; UNLOAD_RADIUS is a
+  // wider band we keep loaded, so a boundary swipe back-and-forth doesn't thrash.
+  var LOAD_AHEAD = 2, LOAD_BACK = 1;
+  var UNLOAD_AHEAD = 3, UNLOAD_BACK = 2;
+
+  function loadMediaEl(el) {
+    var src = el.getAttribute("data-src");
+    if (!src || el.getAttribute("src") === src) return; // already loaded
+    if (el.tagName === "VIDEO") {
+      el.src = src;
+      el.load();
+    } else {
+      el.decoding = "async";
+      el.src = src;
     }
   }
 
-  // play the active slide's video(s) from the start; pause every other slide's
-  function syncVideos(index) {
+  function unloadMediaEl(el) {
+    if (!el.getAttribute("data-src")) return; // nothing to restore from → leave it
+    if (!el.getAttribute("src")) return;      // already blanked
+    if (el.tagName === "VIDEO") {
+      try { el.pause(); } catch (e) {}
+      el.removeAttribute("src");
+      el.load(); // flush buffered/decoded frames
+    } else {
+      el.removeAttribute("src");
+      el.removeAttribute("srcset");
+    }
+  }
+
+  function eachMedia(slide, fn) {
+    slide.querySelectorAll("img[data-src], video[data-src]").forEach(fn);
+  }
+
+  function lazyLoadNear(index) {
+    for (var d = -LOAD_BACK; d <= LOAD_AHEAD; d++) {
+      var s = slides[index + d];
+      if (s) eachMedia(s, loadMediaEl);
+    }
+  }
+
+  // Release media on slides outside the keep-window so decoded bitmaps and video
+  // buffers can be reclaimed. Slide 0 (the cover) is never unloaded.
+  function unloadFar(index) {
     slides.forEach(function (s, i) {
+      if (i === 0) return;
+      if (i >= index - UNLOAD_BACK && i <= index + UNLOAD_AHEAD) return;
+      eachMedia(s, unloadMediaEl);
+    });
+  }
+
+  // play the active slide's video(s) from the start; pause the immediate
+  // neighbours' (anything further out is unloaded by unloadFar).
+  function syncVideos(index) {
+    for (var d = -UNLOAD_BACK; d <= UNLOAD_AHEAD; d++) {
+      var s = slides[index + d];
+      if (!s) continue;
+      var active = (index + d === index);
       s.querySelectorAll("video").forEach(function (v) {
-        if (i === index) {
+        if (active) {
           try { v.currentTime = 0; } catch (e) {}
           var p = v.play();
           if (p && p.catch) p.catch(function () {});
@@ -48,7 +89,7 @@
           v.pause();
         }
       });
-    });
+    }
   }
 
   function goTo(index, pushHash) {
@@ -67,6 +108,7 @@
     progress.style.width = ((index + 1) / total * 100) + "%";
     if (counterSection) counterSection.textContent = slides[index].getAttribute("data-section") || "";
     lazyLoadNear(index);
+    unloadFar(index);
     syncVideos(index);
     if (pushHash !== false) {
       history.replaceState(null, "", "#" + (index + 1));
