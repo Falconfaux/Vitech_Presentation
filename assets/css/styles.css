@@ -1748,6 +1748,12 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 /* s68: show the second (right) photo uncropped */
 #s68 .showcase-cell:last-child { background: var(--azure-deep); }
 #s68 .showcase-cell:last-child .media-full { object-fit: contain; }
+/* s74 (Converter): the right cell holds a horizontal (landscape) erection video
+   in a tall half-width cell. Override the photo-fill cover crop to contain so the
+   whole frame shows, letterboxed over a blurred fill of itself (media-blur video)
+   — the same aspect-mismatch treatment used on the contain-fitted showcase cells. */
+#s74 .showcase-cell:last-child .media-full { object-fit: contain !important; }
+#s74 .showcase-cell:last-child .media-blur { display: block; }
 /* s72: reduce zoom, show the full photo */
 #s72 .showcase-canvas { background: var(--azure-deep); }
 #s72 .showcase-canvas .media-full { object-fit: contain; }
