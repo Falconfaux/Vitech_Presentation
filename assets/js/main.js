@@ -63,6 +63,21 @@
     }
   }
 
+  // Render window. iOS Safari enforces a hard GPU backing-store / memory ceiling
+  // (far lower than desktop) and allocates buffers for every slide's background
+  // image, scrim and backdrop-filter / blur chrome — even hidden ones. Keeping
+  // all ~130 slides renderable overruns it and WebKit kills the tab on any nav.
+  // We give the `render` class only to slides in a tiny window around the current
+  // one; CSS then applies `content-visibility: hidden` to the rest so the engine
+  // fully skips them (no layout, paint, compositing or filter buffers). Radius 1
+  // keeps the outgoing slide renderable so the cross-fade still works.
+  var RENDER_RADIUS = 1;
+  function setRenderWindow(index) {
+    slides.forEach(function (s, i) {
+      s.classList.toggle("render", Math.abs(i - index) <= RENDER_RADIUS);
+    });
+  }
+
   // Release media on slides outside the keep-window so decoded bitmaps and video
   // buffers can be reclaimed. Slide 0 (the cover) is never unloaded.
   function unloadFar(index) {
@@ -107,6 +122,7 @@
     counterNow.textContent = index + 1;
     progress.style.width = ((index + 1) / total * 100) + "%";
     if (counterSection) counterSection.textContent = slides[index].getAttribute("data-section") || "";
+    setRenderWindow(index);
     lazyLoadNear(index);
     unloadFar(index);
     syncVideos(index);
@@ -275,10 +291,18 @@
   }
 
   function fitAllSlides() {
+    // Auto-fit measures every slide's overflow, which needs real layout. When
+    // render-windowing is on, off-window slides are `content-visibility: hidden`
+    // and report no layout, so lift windowing for the measurement pass, then
+    // restore it. Measurement is layout-only (no paint/compositing) and the
+    // slides stay hidden + image-unloaded, so this costs iOS nothing to render.
+    var wasWindowed = document.body.classList.contains("windowed");
+    if (wasWindowed) document.body.classList.remove("windowed");
     slides.forEach(function (s) {
       var inner = s.querySelector(".slide-inner");
       if (inner) fitSlide(inner);
     });
+    if (wasWindowed) document.body.classList.add("windowed");
   }
 
   function debounce(fn, wait) {
@@ -317,6 +341,11 @@
   goTo(startIndex, false);
   fitAllSlides();
   document.body.classList.add("ready");
+  // Now that every slide has been measured/fitted while fully renderable, turn on
+  // render-windowing: only the active slide (± one) stays rendered, capping iOS
+  // Safari's GPU/memory to a few slides instead of all ~130 (see setRenderWindow).
+  setRenderWindow(current);
+  document.body.classList.add("windowed");
 
   // fitAllSlides() above runs before web fonts are guaranteed to have
   // swapped in, so it can measure fallback-font metrics on slides whose

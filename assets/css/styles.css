@@ -140,6 +140,16 @@ h1, h2, h3, p, ul, ol { margin: 0; }
 .slide.prev {
   z-index: 2;
 }
+/* Render-windowing (main.js adds `.render` to the active slide ± one, and
+   `body.windowed` once initial fitting is done). iOS Safari enforces a hard
+   GPU backing-store / memory ceiling and allocates buffers for every slide's
+   background image, scrim and backdrop-filter chrome — even while hidden —
+   so keeping all ~130 slides live overruns it and WebKit kills the tab on any
+   navigation. `content-visibility: hidden` makes the engine fully skip every
+   off-window slide (no layout, paint, compositing or filter buffers). */
+body.windowed .slide:not(.render) {
+  content-visibility: hidden;
+}
 .slide-inner {
   position: relative;
   z-index: 2;
@@ -1224,7 +1234,7 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 .media-frame .media-blur {
   position: absolute; inset: 0; width: 100%; height: 100%;
   object-fit: cover; transform: scale(1.12);
-  filter: blur(30px) brightness(.45) saturate(.85);
+  filter: blur(18px) brightness(.45) saturate(.85);
 }
 .media-frame .media-full {
   position: absolute; inset: 0; width: 100%; height: 100%;
@@ -1303,7 +1313,7 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 .tpl-spec.layout-showcase .showcase-canvas .media-blur {
   position: absolute; inset: 0; width: 100%; height: 100%;
   object-fit: cover; transform: scale(1.12);
-  filter: blur(30px) brightness(.4) saturate(.85);
+  filter: blur(18px) brightness(.4) saturate(.85);
 }
 .tpl-spec.layout-showcase .showcase-canvas .media-full {
   position: absolute; inset: 0; width: 100%; height: 100%;
