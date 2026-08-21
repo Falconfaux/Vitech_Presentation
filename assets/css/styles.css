@@ -2170,3 +2170,45 @@ img[data-src] { background: linear-gradient(120deg, rgba(255,255,255,.04), rgba(
   line-height: 1.4; font-size: calc(var(--fit,1) * clamp(1rem, 1.55cqw, 1.55rem));
 }
 .growth-txt strong { color: #fff; font-weight: 700; }
+
+/* ---------------------------------------------------------------------- */
+/* iOS Safari hardening (scoped to html.ios, set by main.js).              */
+/* iOS WebKit has a much lower renderer/GPU-memory ceiling than desktop    */
+/* and crashes ("A problem repeatedly occurred") when a slide switch       */
+/* repaints too many heavy composited layers at once. Desktop/Android/TV   */
+/* are untouched — this block only strips the GPU-hostile effects on iOS.  */
+/* ---------------------------------------------------------------------- */
+
+/* 1. Kill backdrop-filter everywhere. It's the worst offender: the fixed
+      chrome (menu/arrows) re-snapshots its blurred backdrop over the scaled
+      full-screen stage on every frame of a transition. */
+html.ios *,
+html.ios *::before,
+html.ios *::after {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+/* Restore legibility on the chrome/panels that leaned on the blur for contrast. */
+html.ios .menu-toggle,
+html.ios .nav-btn { background: rgba(10, 14, 30, .82); }
+html.ios #sections-panel { background: rgba(5, 8, 20, .94); }
+html.ios .slide-sub.sub-dark {
+  background: linear-gradient(180deg, rgba(var(--azure-deep-rgb), .78), rgba(var(--azure-deep-rgb), .9));
+}
+
+/* 2. No kenburns: the animated transform on a full-screen background image is a
+      long-running large GPU layer. Keep a subtle static zoom instead. */
+html.ios .slide-bg-img {
+  animation: none !important;
+  transform: scale(1.06) !important;
+}
+
+/* 3. Drop the blurred photo/video fill copies (also skipped in JS so they never
+      decode); uncropped `object-fit: contain` media sits on a solid dark fill. */
+html.ios .media-blur { display: none !important; }
+html.ios .media-frame,
+html.ios .tpl-spec.layout-showcase .showcase-canvas { background: var(--azure-deep); }
+
+/* 4. Hard cut instead of a cross-fade so two full-screen backgrounds never
+      composite simultaneously during a switch. */
+html.ios .slide { transition: none !important; }

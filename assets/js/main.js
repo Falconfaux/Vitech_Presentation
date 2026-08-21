@@ -16,6 +16,18 @@
 
   counterTotal.textContent = total;
 
+  // iOS Safari has a much lower renderer/GPU-memory ceiling than desktop and
+  // crashes ("A problem repeatedly occurred") when a slide switch repaints too
+  // many large composited layers at once — chiefly backdrop-filter chrome over
+  // the scaled stage, kenburns-animated full-screen backgrounds, and duplicate
+  // blurred media. Tagging <html> lets CSS strip exactly those effects on iOS
+  // only, leaving every other device's approved design untouched. Covers iPhone/
+  // iPod/iPad plus iPadOS 13+, which reports a desktop (Macintosh) UA with touch.
+  var ua = navigator.userAgent || "";
+  var isIOS = /iPhone|iPod|iPad/.test(ua) ||
+              (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  if (isIOS) document.documentElement.classList.add("ios");
+
   function clamp(n) { return Math.max(0, Math.min(total - 1, n)); }
 
   // Sliding-window media management. iOS Safari kills a tab that exceeds its
@@ -28,6 +40,9 @@
   var UNLOAD_AHEAD = 3, UNLOAD_BACK = 2;
 
   function loadMediaEl(el) {
+    // On iOS the blurred fill copies are hidden (CSS) and only add a second
+    // full-size decode/video decoder, so never load them there.
+    if (isIOS && el.classList.contains("media-blur")) return;
     var src = el.getAttribute("data-src");
     if (!src || el.getAttribute("src") === src) return; // already loaded
     if (el.tagName === "VIDEO") {
@@ -96,6 +111,9 @@
       if (!s) continue;
       var active = (index + d === index);
       s.querySelectorAll("video").forEach(function (v) {
+        // on iOS the blurred duplicate video is hidden and never loaded — don't
+        // spin up a second decoder for it.
+        if (isIOS && v.classList.contains("media-blur")) return;
         if (active) {
           try { v.currentTime = 0; } catch (e) {}
           var p = v.play();
