@@ -1039,6 +1039,19 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 }
 .table-grid-2col .table-wrap { margin-top: calc(var(--fit,1) * 1.1rem); margin-bottom: 0; align-self: start; }
 
+/* Three-up variant (s110d/s110e): three tables in a single even row instead of
+   stacking/half-width-plus-centered, so all three read at the same scale and
+   line up on a shared grid — also reclaims the vertical space a stacked or
+   2+1 layout would cost, keeping --fit closer to 1. */
+.table-grid-3col {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 1.2rem; align-content: start;
+}
+.table-grid-3col .table-wrap {
+  margin-top: calc(var(--fit,1) * 1.1rem); margin-bottom: 0;
+  align-self: stretch; display: flex; flex-direction: column;
+}
+.table-grid-3col .table-wrap table.spec-table { height: 100%; }
+
 /* text-only slides: generous type so the tables own the slide (the --fit
    auto-shrinker still protects the densest ones) */
 .tpl-table .slide-inner { justify-content: center; padding-top: max(var(--chrome-top), calc(var(--fit,1) * clamp(2rem, 5cqh, 3.5rem))); }
@@ -1059,11 +1072,16 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 .tpl-table.dense .table-grid-2col table.spec-table { font-size: calc(var(--fit,1) * 1.14rem); }
 .tpl-table.dense .table-grid-2col table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .64rem) calc(var(--fit,1) * .95rem); }
 .tpl-table.dense .table-grid-2col table.spec-table th { font-size: .9rem; }
+/* 3-column dense table slides (s110d/s110e): same equal-height-card treatment
+   as the 2-col variant above, for three tables in a single even row. */
+.tpl-table.dense .table-grid-3col table.spec-table { font-size: calc(var(--fit,1) * 1.14rem); }
+.tpl-table.dense .table-grid-3col table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .64rem) calc(var(--fit,1) * .95rem); }
+.tpl-table.dense .table-grid-3col table.spec-table th { font-size: .9rem; }
 /* s110e (Coromandel / MAP): client wants noticeably larger type on this slide —
    bump the grid tables well above the dense default; --fit still shrinks to fit. */
-#s110e.tpl-table.dense .table-grid-2col table.spec-table { font-size: calc(var(--fit,1) * 1.5rem); }
-#s110e.tpl-table.dense .table-grid-2col table.spec-table th { font-size: calc(var(--fit,1) * 1.15rem); }
-#s110e.tpl-table.dense .table-grid-2col table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .72rem) calc(var(--fit,1) * 1.05rem); }
+#s110e.tpl-table.dense .table-grid-3col table.spec-table { font-size: calc(var(--fit,1) * 1.5rem); }
+#s110e.tpl-table.dense .table-grid-3col table.spec-table th { font-size: calc(var(--fit,1) * 1.15rem); }
+#s110e.tpl-table.dense .table-grid-3col table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .72rem) calc(var(--fit,1) * 1.05rem); }
 /* s137 growth statement: client wants larger body type — bump the text but
    tighten the card padding/gap so the bigger type still fits without --fit
    dropping to its overflow floor. */
@@ -1136,20 +1154,25 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    padding, title width, top gap, row padding/line-height) — never the
    font-size — so they settle at the deck's standard unscaled size. */
 #s107 .slide-inner, #s108 .slide-inner, #s109 .slide-inner, #s110 .slide-inner,
-#s110a .slide-inner, #s110b .slide-inner, #s110c .slide-inner, #s110d .slide-inner, #s110e .slide-inner, #s110f .slide-inner {
+#s110a .slide-inner, #s110b .slide-inner, #s110c .slide-inner, #s110c2 .slide-inner, #s110c3 .slide-inner,
+#s110d .slide-inner, #s110e .slide-inner, #s110f .slide-inner {
   justify-content: flex-start; padding-bottom: var(--pad);
   padding-top: max(var(--chrome-top), calc(var(--fit,1) * clamp(1.5rem, 3.5cqh, 2.4rem)));
 }
 #s107 .slide-title, #s108 .slide-title, #s109 .slide-title, #s110 .slide-title,
-#s110a .slide-title, #s110b .slide-title, #s110c .slide-title, #s110d .slide-title, #s110e .slide-title, #s110f .slide-title { max-width: none; margin-bottom: calc(var(--fit,1) * .2rem); }
+#s110a .slide-title, #s110b .slide-title, #s110c .slide-title, #s110c2 .slide-title, #s110c3 .slide-title,
+#s110d .slide-title, #s110e .slide-title, #s110f .slide-title { max-width: none; margin-bottom: calc(var(--fit,1) * .2rem); }
 #s107 .table-wrap, #s108 .table-wrap, #s109 .table-wrap, #s110 .table-wrap,
-#s110a .table-wrap, #s110b .table-wrap, #s110c .table-wrap, #s110d .table-wrap, #s110e .table-wrap, #s110f .table-wrap { margin-top: calc(var(--fit,1) * .9rem); margin-bottom: 0; }
+#s110a .table-wrap, #s110b .table-wrap, #s110c .table-wrap, #s110c2 .table-wrap, #s110c3 .table-wrap,
+#s110d .table-wrap, #s110e .table-wrap, #s110f .table-wrap { margin-top: calc(var(--fit,1) * .9rem); margin-bottom: 0; }
 #s107 table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .3rem) calc(var(--fit,1) * 1.1rem); line-height: calc(var(--fit,1) * 1.22); }
 #s107 table.spec-table th { padding: calc(var(--fit,1) * var(--fit,1) * .5rem) calc(var(--fit,1) * 1.1rem); }
 #s108 table.spec-table td,
-#s110a table.spec-table td, #s110b table.spec-table td, #s110d table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .48rem) calc(var(--fit,1) * 1.1rem); }
+#s110a table.spec-table td, #s110b table.spec-table td, #s110c2 table.spec-table td, #s110c3 table.spec-table td,
+#s110d table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .48rem) calc(var(--fit,1) * 1.1rem); }
 #s108 table.spec-table th,
-#s110a table.spec-table th, #s110b table.spec-table th, #s110d table.spec-table th { padding: calc(var(--fit,1) * var(--fit,1) * .6rem) calc(var(--fit,1) * 1.1rem); }
+#s110a table.spec-table th, #s110b table.spec-table th, #s110c2 table.spec-table th, #s110c3 table.spec-table th,
+#s110d table.spec-table th { padding: calc(var(--fit,1) * var(--fit,1) * .6rem) calc(var(--fit,1) * 1.1rem); }
 #s109 table.spec-table td, #s110 table.spec-table td,
 #s110c table.spec-table td, #s110e table.spec-table td, #s110f table.spec-table td { padding: calc(var(--fit,1) * var(--fit,1) * .42rem) calc(var(--fit,1) * .95rem); }
 #s109 table.spec-table th, #s110 table.spec-table th,
@@ -1171,17 +1194,14 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s110c3 table.spec-table col:first-child, #s110d table.spec-table col:first-child,
 #s110e table.spec-table col:first-child, #s110f table.spec-table col:first-child { width: 22%; }
 #s110 table.spec-table td, #s110c table.spec-table td, #s110e table.spec-table td, #s110f table.spec-table td { line-height: calc(var(--fit,1) * 1.32); }
-/* Slide 113 (Coromandel): three tables as 2-up (Vessels/Tanks) + 1 below
-   (Heat Exchangers). The bottom table spans the grid but stays half-width and
-   centered so it reads at the same scale as the two above it. Its top margin
-   is dropped since the row gap already separates it from the pair above. */
-#s110e .table-grid-2col .table-wrap.hx-span {
-  grid-column: 1 / -1; align-self: start;
-  max-width: calc(50% - .6rem); justify-self: center; margin-top: 0;
-}
-/* Half-width tables need a wider label column than the 22% shared with the
-   full-width ongoing-jobs slides, so "Total Qty / weight" stays on one line. */
-#s110e .table-grid-2col table.spec-table col:first-child { width: 30%; }
+/* Slide 115 (Coromandel) and Slide 114 (Reactors): three tables in a single
+   even row (table-grid-3col) instead of stacked/2+1, so all three read at the
+   same scale and their edges line up on a shared grid. Third-width cards need
+   a wider label column than the 22% shared with the full-width/stacked
+   ongoing-jobs slides, so "Total Qty / Weight" stays on as few lines as the
+   narrower column allows. */
+#s110d .table-grid-3col table.spec-table col:first-child,
+#s110e .table-grid-3col table.spec-table col:first-child { width: 34%; }
 
 /* Slides 15/16/20/21/22/23: match Slide 105's (#s108) table sizing. These
    Workshop tables were tipping hard into the --fit auto-shrink (0.56–0.80),
