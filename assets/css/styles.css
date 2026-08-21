@@ -1151,10 +1151,12 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    fit²) line-height so wrapped size strings don't collapse into each other under
    auto-fit. */
 #s110 table.spec-table, #s110a table.spec-table, #s110b table.spec-table, #s110c table.spec-table,
+#s110c2 table.spec-table, #s110c3 table.spec-table,
 #s110d table.spec-table, #s110e table.spec-table, #s110f table.spec-table { table-layout: fixed; }
 #s110 table.spec-table col:first-child,
 #s110a table.spec-table col:first-child, #s110b table.spec-table col:first-child,
-#s110c table.spec-table col:first-child, #s110d table.spec-table col:first-child,
+#s110c table.spec-table col:first-child, #s110c2 table.spec-table col:first-child,
+#s110c3 table.spec-table col:first-child, #s110d table.spec-table col:first-child,
 #s110e table.spec-table col:first-child, #s110f table.spec-table col:first-child { width: 22%; }
 #s110 table.spec-table td, #s110c table.spec-table td, #s110e table.spec-table td, #s110f table.spec-table td { line-height: calc(var(--fit,1) * 1.32); }
 /* Slide 113 (Coromandel): three tables as 2-up (Vessels/Tanks) + 1 below
@@ -1785,6 +1787,15 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s30 .showcase-canvas .media-full {
   object-fit: contain !important;
   padding: calc(var(--fit,1) * .3rem) calc(var(--pad) * .12) !important;
+}
+/* The new CNC band-saw photo (top-right cell) is a 4:3 landscape in a wide,
+   short cell — contain shrinks it and leaves dead azure bars on either side.
+   Fill the cell with cover: the full machine width (panel → worker → the
+   ITM-650LMGA label) is kept, and only the empty ceiling/floor get trimmed. */
+#s30 .showcase-canvas .showcase-cell:nth-child(2) .media-full {
+  object-fit: cover !important;
+  object-position: center 45%;
+  padding: 0 !important;
 }
 /* s57 & s58: panel docks top (panel-tl), so the base rule's 9rem bottom
    reserve — meant for a bottom-docked panel — is vestigial here. Free it up
