@@ -1129,6 +1129,17 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s110c table.spec-table col:first-child, #s110d table.spec-table col:first-child,
 #s110e table.spec-table col:first-child, #s110f table.spec-table col:first-child { width: 22%; }
 #s110 table.spec-table td, #s110c table.spec-table td, #s110e table.spec-table td, #s110f table.spec-table td { line-height: calc(var(--fit,1) * 1.32); }
+/* Slide 113 (Coromandel): three tables as 2-up (Vessels/Tanks) + 1 below
+   (Heat Exchangers). The bottom table spans the grid but stays half-width and
+   centered so it reads at the same scale as the two above it. Its top margin
+   is dropped since the row gap already separates it from the pair above. */
+#s110e .table-grid-2col .table-wrap.hx-span {
+  grid-column: 1 / -1; align-self: start;
+  max-width: calc(50% - .6rem); justify-self: center; margin-top: 0;
+}
+/* Half-width tables need a wider label column than the 22% shared with the
+   full-width ongoing-jobs slides, so "Total Qty / weight" stays on one line. */
+#s110e .table-grid-2col table.spec-table col:first-child { width: 30%; }
 
 /* Slides 15/16/20/21/22/23: match Slide 105's (#s108) table sizing. These
    Workshop tables were tipping hard into the --fit auto-shrink (0.56–0.80),
