@@ -25,6 +25,7 @@ from pptx.util import Emu
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BUILD = os.path.join(ROOT, "MOBILE", "build")
 SLIDES_DIR = os.path.join(BUILD, "slides")
+OVERLAYS_DIR = os.path.join(BUILD, "overlays")
 POSTERS_DIR = os.path.join(BUILD, "posters")
 OVERLAYS = os.path.join(BUILD, "video_overlays.json")
 OUT_PPTX = os.path.join(ROOT, "MOBILE", "Vitech-Group-Presentation.pptx")
@@ -97,11 +98,21 @@ def main():
             )
             movie_count += 1
 
-        # Re-stamp text panels / titlebars that overlap the video, on top of it.
+        # Re-stamp opaque text panels (cards) that overlap the video, on top.
         for j, c in enumerate(ov.get("chrome", [])):
             x, y, w, h = clamp_rect(c["x"], c["y"], c["w"], c["h"])
             strip = crop(jpg, (x, y, w, h), os.path.join(POSTERS_DIR, "chrome-%03d-%d.jpg" % (n, j)))
             slide.shapes.add_picture(strip, emu(x), emu(y), width=emu(w), height=emu(h))
+
+        # Lay transparent titlebar PNGs (bare heading text) over the movie so the
+        # live video plays behind them -- no frozen rectangle (slides 8/9/10).
+        for t in ov.get("titlebars", []):
+            png = os.path.join(OVERLAYS_DIR, t["file"])
+            if not os.path.exists(png):
+                print("  ! missing titlebar %s" % png, file=sys.stderr)
+                continue
+            x, y, w, h = clamp_rect(t["x"], t["y"], t["w"], t["h"])
+            slide.shapes.add_picture(png, emu(x), emu(y), width=emu(w), height=emu(h))
 
     os.makedirs(os.path.dirname(OUT_PPTX), exist_ok=True)
     prs.save(OUT_PPTX)

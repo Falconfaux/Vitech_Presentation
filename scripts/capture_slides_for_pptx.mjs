@@ -33,6 +33,7 @@ async function main() {
   const args = process.argv.slice(2);
   const OUT = path.resolve(ROOT, argFor(args, "--out") || "MOBILE/build");
   const SLIDES_DIR = path.join(OUT, "slides");
+  const OVERLAYS_DIR = path.join(OUT, "overlays");
   const ONLY = (argFor(args, "--only") || "")
     .split(",")
     .map((s) => s.trim())
@@ -40,6 +41,7 @@ async function main() {
     .map(Number);
 
   fs.mkdirSync(SLIDES_DIR, { recursive: true });
+  fs.mkdirSync(OVERLAYS_DIR, { recursive: true });
 
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: VIEWPORT, deviceScaleFactor: 1 });
@@ -191,27 +193,35 @@ async function main() {
         };
       });
 
-      // Text overlays that render ON TOP of the video (titlebar / panel). The
-      // builder re-stamps these (cropped from the JPEG) above the movie so the
-      // text stays visible when the video plays.
-      const chrome = Array.from(
-        active.querySelectorAll(".slide-inner .showcase-titlebar, .slide-inner .showcase-panel")
-      )
-        .filter((el) => {
-          const cr = el.getBoundingClientRect();
-          return cr.width > 2 && cr.height > 2;
-        })
-        .map((el) => {
-          const cr = el.getBoundingClientRect();
-          return {
-            x: Math.max(0, Math.round(cr.left)),
-            y: Math.max(0, Math.round(cr.top)),
-            w: Math.round(cr.width),
-            h: Math.round(cr.height),
-          };
-        });
+      // Text overlays that render ON TOP of the video. Two kinds, handled
+      // differently by the builder:
+      //   * panels  (.showcase-panel)   have their own card background, so a
+      //     flat JPEG crop re-stamped above the movie looks right.
+      //   * titlebars (.showcase-titlebar) are bare white text + shadow over a
+      //     full-bleed video — a JPEG crop would freeze a rectangle of video
+      //     behind the text. These are captured separately as TRANSPARENT PNGs
+      //     (text only) so the live video plays behind them.
+      const rectsOf = (sel) =>
+        Array.from(active.querySelectorAll(sel))
+          .filter((el) => {
+            const cr = el.getBoundingClientRect();
+            return cr.width > 2 && cr.height > 2;
+          })
+          .map((el) => {
+            const cr = el.getBoundingClientRect();
+            return {
+              x: Math.max(0, Math.round(cr.left)),
+              y: Math.max(0, Math.round(cr.top)),
+              w: Math.round(cr.width),
+              h: Math.round(cr.height),
+            };
+          });
 
-      return { videos, chrome };
+      return {
+        videos,
+        panels: rectsOf(".slide-inner .showcase-panel"),
+        titlebars: rectsOf(".slide-inner .showcase-titlebar"),
+      };
     });
 
     // Small extra settle so the seeked frame is fully painted before capture.
@@ -225,11 +235,44 @@ async function main() {
     });
 
     if (rects.videos.length) {
-      // Only keep chrome rects that actually intersect a video rect.
+      // Only keep overlays that actually intersect a video rect.
       const intersects = (c, v) =>
         c.x < v.x + v.w && c.x + c.w > v.x && c.y < v.y + v.h && c.y + c.h > v.y;
-      const chrome = rects.chrome.filter((c) => rects.videos.some((v) => intersects(c, v)));
-      overlays[n] = { file: fname, videos: rects.videos, chrome };
+      const overVideo = (c) => rects.videos.some((v) => intersects(c, v));
+      const panels = rects.panels.filter(overVideo); // JPEG re-stamp (opaque cards)
+
+      // Titlebars over a full-bleed video -> capture each as a TRANSPARENT PNG
+      // (text + shadow only) so the live video plays behind, not a frozen box.
+      const titlebars = [];
+      if (rects.titlebars.some(overVideo)) {
+        await page.evaluate(() => {
+          const s = document.createElement("style");
+          s.id = "__tbclear";
+          s.textContent =
+            "html,body,.stage,.stage-viewport,#deck,.slide,.slide-inner{background:transparent !important;}" +
+            ".slide.active .showcase-canvas{visibility:hidden !important;}";
+          document.head.appendChild(s);
+        });
+        const handles = await page.$$(".slide.active .slide-inner .showcase-titlebar");
+        for (let i = 0; i < handles.length; i++) {
+          const box = await handles[i].boundingBox();
+          if (!box) continue;
+          const r = { x: box.x, y: box.y, w: box.width, h: box.height };
+          if (!overVideo({ x: r.x, y: r.y, w: r.w, h: r.h })) continue;
+          const rel = `titlebar-${String(n).padStart(3, "0")}-${i}.png`;
+          await handles[i].screenshot({ path: path.join(OVERLAYS_DIR, rel), omitBackground: true });
+          titlebars.push({
+            file: rel,
+            x: Math.max(0, Math.round(r.x)),
+            y: Math.max(0, Math.round(r.y)),
+            w: Math.round(r.w),
+            h: Math.round(r.h),
+          });
+        }
+        await page.evaluate(() => document.getElementById("__tbclear")?.remove());
+      }
+
+      overlays[n] = { file: fname, videos: rects.videos, chrome: panels, titlebars };
     }
   }
 
