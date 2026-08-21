@@ -442,17 +442,45 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 .tpl-cover .cover-statbar .num { font-size: calc(var(--fit,1) * 1.85rem); font-weight: 700; letter-spacing: -.01em; color: var(--white); }
 .tpl-cover .cover-statbar .stat:last-child .num { color: var(--amber); }
 .tpl-cover .cover-statbar .lbl { margin-top: .32rem; font-size: .8rem; letter-spacing: .13em; text-transform: uppercase; color: var(--steel-light); }
+/* Three-entity contact block — a card per company instead of a flat text list.
+   Each card: abbreviation badge, full name in the Archivo display face, and a
+   map-pinned location. No backdrop-filter (kept off for iOS stability). */
 .tpl-cover .cover-meta {
-  margin-top: calc(var(--fit,1) * 1.6rem);
+  margin-top: calc(var(--fit,1) * 1.7rem);
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: calc(var(--fit,1) * .9rem);
+  align-items: stretch; width: 100%;
+}
+.tpl-cover .cm-card {
   display: flex; flex-direction: column; align-items: flex-start;
   gap: calc(var(--fit,1) * .5rem);
-  font-size: 1.05rem; color: var(--white);
+  padding: calc(var(--fit,1) * 1.05rem) calc(var(--fit,1) * 1.25rem);
+  border-radius: 14px;
+  background: linear-gradient(158deg, rgba(var(--azure-bright-rgb),.14) 0%, rgba(var(--azure-deep-rgb),.34) 100%);
+  border: 1px solid rgba(255,255,255,.14);
+  border-left: 3px solid var(--amber);
+  box-shadow: 0 8px 26px rgba(0,0,0,.30);
 }
-.tpl-cover .cover-meta b {
-  font-family: var(--font-head); color: var(--azure-bright); font-weight: 700;
-  letter-spacing: .01em; font-size: calc(var(--fit,1) * 1.12rem); margin-right: .4rem;
+.tpl-cover .cm-abbr {
+  font-family: var(--font-head); font-weight: 700;
+  font-size: calc(var(--fit,1) * .74rem); letter-spacing: .14em;
+  color: var(--azure-deep); background: var(--amber);
+  padding: .2em .62em; border-radius: 6px; line-height: 1;
 }
-.tpl-cover .cover-meta .sep { width: 4px; height: 4px; border-radius: 50%; background: var(--amber); opacity: .8; }
+.tpl-cover .cm-name {
+  font-family: var(--font-head); color: var(--white); font-weight: 700;
+  letter-spacing: -.005em; line-height: 1.12;
+  font-size: calc(var(--fit,1) * 1.18rem);
+}
+.tpl-cover .cm-loc {
+  display: flex; align-items: flex-start; gap: .4em;
+  color: var(--steel-light); font-size: calc(var(--fit,1) * .92rem);
+  line-height: 1.35; margin-top: auto;
+}
+.tpl-cover .cm-loc svg {
+  width: calc(var(--fit,1) * 1.02rem); height: calc(var(--fit,1) * 1.02rem);
+  flex: none; margin-top: .08em; fill: var(--azure-bright);
+}
 .scroll-cue {
   position: absolute; bottom: 58px; left: 50%; transform: translateX(-50%);
   font-size: .72rem; color: var(--steel-light); letter-spacing: .15em; text-transform: uppercase;
