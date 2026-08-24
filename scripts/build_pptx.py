@@ -4,16 +4,27 @@ Assemble MOBILE/Vitech-Group-Presentation.pptx from the slide images captured by
 scripts/capture_slides_for_pptx.mjs.
 
 Each web slide becomes one landscape 16:9 PowerPoint slide holding a single
-full-bleed picture (pixel-identical to the web deck). On the 7 slides that carry
-a foreground video, the original .mp4 is embedded in place — positioned over the
-exact on-screen rectangle of the video (object-fit:contain aware) — with a poster
-frame cropped from the slide image so it blends seamlessly. Any text panel /
-titlebar that sits on top of that video is re-stamped above the movie so it stays
-readable while the video plays.
+full-bleed picture (pixel-identical to the web deck). The captured JPEG for a
+video slide already has a real video frame AND the title baked in, so a plain
+picture reproduces it exactly.
+
+DEFAULT = static deck (no embedded video). This is what mobile users need: the
+iOS Files/attachment preview (Quick Look) cannot play embedded video and
+mis-renders slides that stack a movie + poster + text overlay (heading "melts"/
+doubles, some frames go blank white). Making every slide a single picture makes
+the 7 former-video slides identical in structure to the normal slides that
+already render perfectly everywhere, and shrinks the file ~278 MB -> ~45 MB.
+
+Pass --with-video to instead embed the original .mp4s in place (heavier file,
+tap-to-play in the Microsoft PowerPoint app). Even then we do NOT add the
+transparent-titlebar overlay that caused the Quick Look doubling; the title
+stays baked into the poster.
 
 Prereqs: python-pptx, Pillow. Run after the capture step:
-    python3 scripts/build_pptx.py
+    python3 scripts/build_pptx.py                 # static, phone-friendly (default)
+    python3 scripts/build_pptx.py --with-video    # embed videos (PowerPoint-app file)
 """
+import argparse
 import json
 import os
 import sys
@@ -57,12 +68,23 @@ def crop(slide_jpg, rect, out_path):
 
 
 def main():
+    ap = argparse.ArgumentParser(description="Build the mobile Vitech PPTX.")
+    ap.add_argument(
+        "--with-video", action="store_true",
+        help="Embed the .mp4 videos in place (heavier file, tap-to-play in the PowerPoint "
+             "app). Default is a static still-image deck that renders cleanly everywhere "
+             "including the iOS Files preview.",
+    )
+    ap.add_argument("--out", default=OUT_PPTX, help="Output .pptx path.")
+    args = ap.parse_args()
+
     with open(OVERLAYS) as f:
         data = json.load(f)
-    overlays = data["overlays"]
-    order = data["slides"]  # capture order == DOM/display order 1..N
+    order = data["slides"]           # capture order == DOM/display order 1..N
+    overlays = data.get("overlays", {})
 
-    os.makedirs(POSTERS_DIR, exist_ok=True)
+    if args.with_video:
+        os.makedirs(POSTERS_DIR, exist_ok=True)
 
     prs = Presentation()
     prs.slide_width = Emu(SLIDE_W_EMU)   # 13.333in  -> horizontal / landscape
@@ -77,14 +99,20 @@ def main():
             continue
 
         slide = prs.slides.add_slide(blank)
-        # Full-bleed slide image (bottom layer).
+        # Full-bleed slide image. In static mode this IS the slide (the captured JPEG
+        # already holds the video frame + title), so every slide is one clean picture.
         slide.shapes.add_picture(jpg, Emu(0), Emu(0), width=Emu(SLIDE_W_EMU), height=Emu(SLIDE_H_EMU))
+
+        if not args.with_video:
+            continue
 
         ov = overlays.get(str(n))
         if not ov:
             continue
 
-        # Embed each foreground video over its exact on-screen rectangle.
+        # --with-video only: embed each foreground video over its exact rectangle,
+        # with a single poster cropped from the slide image (no transparent-titlebar
+        # overlay -- that 3rd layer is what iOS Quick Look doubled/smeared).
         for i, v in enumerate(ov["videos"]):
             x, y, w, h = clamp_rect(v["x"], v["y"], v["w"], v["h"])
             movie_path = os.path.join(ROOT, v["file"])
@@ -104,21 +132,14 @@ def main():
             strip = crop(jpg, (x, y, w, h), os.path.join(POSTERS_DIR, "chrome-%03d-%d.jpg" % (n, j)))
             slide.shapes.add_picture(strip, emu(x), emu(y), width=emu(w), height=emu(h))
 
-        # Lay transparent titlebar PNGs (bare heading text) over the movie so the
-        # live video plays behind them -- no frozen rectangle (slides 8/9/10).
-        for t in ov.get("titlebars", []):
-            png = os.path.join(OVERLAYS_DIR, t["file"])
-            if not os.path.exists(png):
-                print("  ! missing titlebar %s" % png, file=sys.stderr)
-                continue
-            x, y, w, h = clamp_rect(t["x"], t["y"], t["w"], t["h"])
-            slide.shapes.add_picture(png, emu(x), emu(y), width=emu(w), height=emu(h))
+    out = os.path.abspath(args.out)
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    prs.save(out)
 
-    os.makedirs(os.path.dirname(OUT_PPTX), exist_ok=True)
-    prs.save(OUT_PPTX)
-
-    size_mb = os.path.getsize(OUT_PPTX) / (1024 * 1024)
-    print("Wrote %s" % OUT_PPTX)
+    size_mb = os.path.getsize(out) / (1024 * 1024)
+    mode = "with embedded video" if args.with_video else "static (still frames, phone-friendly)"
+    print("Wrote %s" % out)
+    print("  mode: %s" % mode)
     print("  slides: %d   embedded videos: %d   size: %.1f MB" % (len(prs.slides._sldIdLst), movie_count, size_mb))
 
 
