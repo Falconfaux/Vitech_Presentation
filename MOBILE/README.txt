@@ -1,25 +1,27 @@
 VITECH GROUP OF COMPANIES — PRESENTATION (MOBILE / OFFLINE POWERPOINT)
 =====================================================================
 
-FILE:  Vitech-Group-Presentation.pptx   (140 slides, ~45 MB, all photos
-       included; every slide is a crisp still image)
+FILES (140 slides, all photos included; every slide is a crisp still image):
+   • Vitech-Group-Presentation.pdf    (~47 MB)  <- easiest on a phone
+   • Vitech-Group-Presentation.pptx   (~45 MB)
 
-This is a faithful copy of our web-app presentation, packaged as a single
-PowerPoint file so it can be downloaded and viewed on ANY phone or tablet —
-no internet needed once downloaded, and no special app required.
+Both are a faithful copy of our web-app presentation, downloadable and viewable
+on ANY phone or tablet — no internet needed once downloaded.
 
 
 HOW TO OPEN IT ON A PHONE
 -------------------------
-1. Download / save the file "Vitech-Group-Presentation.pptx" to your phone
-   (from WhatsApp, email, Google Drive, etc.).
+1. Download / save either file to your phone (from WhatsApp, email, Google
+   Drive, etc.).
 
-2. Just tap it. It opens cleanly in the iPhone/Android file preview, or in the
-   free "Microsoft PowerPoint" app, Apple Keynote, Google Slides — anything.
+2. Just tap it:
+   • The PDF opens instantly in any phone — no app to install. Best if you
+     just want to view the presentation. Recommended.
+   • The PPTX opens in the free "Microsoft PowerPoint" app, Apple Keynote,
+     Google Slides, or the built-in file preview.
 
 3. Turn your phone sideways (landscape) for the biggest view, and swipe
-   left / right to move through the slides. For a full-screen show, open it in
-   the PowerPoint app and tap Slide Show.
+   left / right to move through the slides.
 
 
 ABOUT THE VIDEO SLIDES
@@ -35,8 +37,9 @@ NOTES
 -----
 • Horizontal (landscape, 16:9) — matches the web deck exactly.
 • View-only visual copy; the text is not meant to be edited here.
-• To re-generate this file after the web deck changes:
+• To re-generate these files after the web deck changes:
       node scripts/capture_slides_for_pptx.mjs
-      python3 scripts/build_pptx.py                 (static, phone-friendly)
+      python3 scripts/build_pdf.py                  (the PDF)
+      python3 scripts/build_pptx.py                 (static PPTX, phone-friendly)
       python3 scripts/build_pptx.py --with-video    (optional: embed the videos
                                                      for PowerPoint-app viewing)
