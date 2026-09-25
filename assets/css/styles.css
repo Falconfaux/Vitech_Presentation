@@ -80,6 +80,16 @@ html, body {
   font-family: var(--font);
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
+  /* Without this the UA paints its default WHITE canvas behind the page and
+     around the fullscreen backdrop — which is what showed as white bars above
+     and below the slide on a client laptop in full screen. */
+  color-scheme: dark;
+}
+/* Fullscreen paints its own backdrop *behind* the element; on some browsers
+   that backdrop defaults to white and shows wherever the element doesn't
+   cover it exactly. Force it dark for whatever gets fullscreened. */
+:fullscreen, ::backdrop, :-webkit-full-screen {
+  background: var(--black);
 }
 img { max-width: 100%; display: block; image-rendering: -webkit-optimize-contrast; }
 a { color: inherit; }
@@ -284,10 +294,13 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
 #sections-panel.open { opacity: 1; visibility: visible; transition: opacity .35s var(--ease-soft); }
 .sections-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1rem;
-  max-width: 1200px;
-  max-height: 84vh;
+  /* 5 columns × 3 rows fits all 15 sections on screen with no scrolling, so a
+     presenter can jump anywhere in one glance. auto-fit keeps it sensible if
+     the section count ever changes or the window is narrow. */
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: .8rem;
+  max-width: 1320px;
+  max-height: 88vh;
   overflow-y: auto;
   padding: .5rem;
 }
@@ -295,7 +308,7 @@ body.on-cover .brand-mark { opacity: 0; pointer-events: none; }
   background: rgba(255,255,255,.05);
   border: 1px solid var(--azure-border);
   border-radius: 14px;
-  padding: 1.1rem 1.2rem;
+  padding: .85rem 1rem;
   cursor: pointer;
   transition: background .2s, border-color .2s, transform .2s;
   text-align: left;

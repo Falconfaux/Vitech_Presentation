@@ -212,13 +212,42 @@
   sectionsPanel.addEventListener("click", function (e) {
     if (e.target === sectionsPanel) toggleSections(false);
   });
-  document.querySelectorAll(".section-card").forEach(function (card) {
-    card.addEventListener("click", function () {
-      var idx = parseInt(card.getAttribute("data-index"), 10);
-      goTo(idx);
-      toggleSections(false);
+  // Build the jump menu from the slides themselves. It used to be hardcoded
+  // data-index values in index.html, which silently drifted out of sync every
+  // time a slide was added or removed (and dropped a section entirely), so the
+  // cards jumped to the wrong slide. Deriving it here means it can never drift.
+  var grid = sectionsPanel && sectionsPanel.querySelector(".sections-grid");
+  if (grid) {
+    var sects = [];
+    slides.forEach(function (s, i) {
+      var name = s.getAttribute("data-section") || "";
+      if (!name || name === "Cover") return;
+      var last = sects[sects.length - 1];
+      // Same section reached again after an interruption → keep counting it as
+      // one entry rather than listing it twice.
+      var found = null;
+      for (var k = 0; k < sects.length; k++) if (sects[k].name === name) { found = sects[k]; break; }
+      if (found && last && last.name === name) { found.count++; return; }
+      if (found) { found.count++; return; }
+      sects.push({ name: name, index: i, count: 1 });
     });
-  });
+    grid.innerHTML = "";
+    sects.forEach(function (sec, n) {
+      var card = document.createElement("div");
+      card.className = "section-card";
+      card.setAttribute("data-index", sec.index);
+      var num = String(n + 2);
+      card.innerHTML = '<div class="n">' + (num.length < 2 ? "0" + num : num) + "</div>" +
+        '<div class="t"></div><div class="c">' + sec.count +
+        (sec.count === 1 ? " slide" : " slides") + "</div>";
+      card.querySelector(".t").textContent = sec.name; // textContent → no HTML injection
+      card.addEventListener("click", function () {
+        goTo(sec.index);
+        toggleSections(false);
+      });
+      grid.appendChild(card);
+    });
+  }
 
   // lightbox
   function openLightbox(src) {
@@ -344,7 +373,9 @@
   var STAGE_W = 1920;
   function scaleStage() {
     if (!stage) return;
-    var scale = window.innerWidth / STAGE_W;
+    // Scale up by a hair so fractional device-pixel-ratio rounding can never
+    // leave a sub-pixel seam of background showing at an edge in full screen.
+    var scale = (window.innerWidth / STAGE_W) * 1.0005;
     stage.style.height = (window.innerHeight / scale) + "px";
     stage.style.transform = "translate(-50%, -50%) scale(" + scale + ")";
   }
@@ -378,6 +409,13 @@
   // window, but re-run it debounced as a safety net.
   window.addEventListener("resize", scaleStage);
   window.addEventListener("orientationchange", scaleStage);
+  // Entering/leaving full screen doesn't reliably fire resize in every browser,
+  // and the viewport is sometimes still the old size on the event tick — so
+  // rescale on the event and again on the next frame.
+  document.addEventListener("fullscreenchange", function () {
+    scaleStage();
+    requestAnimationFrame(scaleStage);
+  });
   window.addEventListener("resize", debounce(fitAllSlides, 150));
 
   window.addEventListener("hashchange", function () {
