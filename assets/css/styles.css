@@ -1115,6 +1115,21 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
 #s8 .table-grid-2col .table-wrap { align-self: start; }
 #s8 .table-grid-2col .table-wrap table.spec-table { height: auto; }
 
+/* s110g (Aquatech tanks/vessels): the two tables have 8 and 5 rows, so the
+   default stretch blew the shorter table's rows up to ~2x height and the two
+   cards no longer read on a shared baseline. Opt out like #s8 above, and let
+   the job-no / qty columns shrink to their content so "VHE-150 A & B" and
+   "VHE-150 P, Q & R" stop wrapping onto a second line. */
+#s110g .table-grid-2col .table-wrap { align-self: start; }
+#s110g .table-grid-2col .table-wrap table.spec-table { height: auto; }
+#s110g table.spec-table th:first-child,
+#s110g table.spec-table td:first-child { white-space: nowrap; width: 1%; }
+#s110g table.spec-table th:last-child,
+#s110g table.spec-table td:last-child {
+  white-space: nowrap; width: 1%; text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
 /* Slide 16 (dense: two tables + callout): keep a compact title and a smaller
    callout note so the shared "match Slide 105" sizing below can give the cells
    full deck-standard type instead of forcing --fit to shrink them. */
@@ -1225,7 +1240,7 @@ td.cell-list { padding-top: calc(var(--fit,1) * .5rem); padding-bottom: calc(var
    metrics. Use a plain flex div with a real, guaranteed CSS height instead
    (vertically centers 1–3 lines identically), decoupled from table layout
    entirely. */
-#s110d .table-grid-3col .card-title {
+.table-grid-3col .card-title {
   display: flex; align-items: center;
   height: calc(var(--fit,1) * 6.2rem);
   min-height: 0; flex-shrink: 0; overflow: hidden;
